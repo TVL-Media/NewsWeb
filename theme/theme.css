@@ -1,0 +1,180 @@
+/*
+  NextGenNews — website theme (Tailwind CSS v4)
+  Copy to: resources/css/theme.css and import it from resources/css/app.css:
+      @import "tailwindcss";
+      @import "./theme.css";
+*/
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@500;600;700&display=swap");
+
+@theme {
+  /* Brand */
+  --color-brand: #D7141E;          /* primary red: buttons, active tabs, badges, rings */
+  --color-brand-dark: #A50E16;     /* red text on tint backgrounds, hover */
+  --color-brand-deep: #8E0E16;     /* player gradient middle, icon on white circle */
+  --color-brand-glow: #C7202B;     /* player gradient centre */
+  --color-brand-night: #3A0508;    /* player gradient edge */
+  --color-brand-tint: #FFF0F0;     /* active nav pill, listen button, why-it-matters box */
+  --color-brand-tint-2: #FFF4F4;   /* "In this briefing" card */
+  --color-brand-soft: #F9C9CC;     /* poll result bar (winning option) */
+  --color-brand-wave: #FF6B74;     /* waveform bars (use at 55% opacity) */
+  --color-brand-pink-text: #F4C6C9;/* secondary text on red/maroon */
+
+  /* Neutrals */
+  --color-ink: #111111;            /* headlines, body text, dark cards (quiz, live strip) */
+  --color-ink-2: #3A3A3A;          /* secondary body text */
+  --color-muted: #5A5A5A;          /* sub-lines */
+  --color-muted-2: #6B6B6B;        /* meta: time, source */
+  --color-line: #EDEDED;           /* card borders, dividers */
+  --color-line-2: #E2E2E2;         /* input and outline-button borders */
+  --color-chip: #F2F2F3;           /* inactive chips, search field */
+  --color-page: #F7F7F8;           /* page background (web) */
+  --color-surface: #FFFFFF;        /* cards */
+  --color-dark-card: #2A2A2A;      /* icon tile inside dark cards */
+  --color-quiz-yellow: #FFC93C;    /* quiz icon on dark card */
+
+  /* Status */
+  --color-success: #1A8F3C;
+  --color-success-tint: #EAF7EE;
+  --color-success-text: #136C2E;
+
+  /* Type */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hindi: "Noto Sans Devanagari", "Inter", sans-serif;
+
+  /* Radii */
+  --radius-input: 14px;
+  --radius-card: 22px;
+  --radius-card-lg: 26px;
+  --radius-hero: 28px;
+
+  /* Shadows */
+  --shadow-card: 0 6px 18px rgba(0, 0, 0, 0.05);
+  --shadow-hero: 0 14px 34px rgba(0, 0, 0, 0.14);
+  --shadow-cta: 0 8px 20px rgba(215, 20, 30, 0.28);
+  --shadow-float: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+/* Hindi text anywhere: add lang="hi" or class="font-hindi" */
+:lang(hi) { font-family: var(--font-hindi); }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-page);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--color-brand); }
+a:hover { color: var(--color-brand-dark); }
+
+@layer components {
+  /* ---------- Buttons ---------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-bold whitespace-nowrap transition;
+    min-height: 44px;
+  }
+  .btn-primary {            /* red pill / big CTA */
+    @apply btn bg-brand text-white rounded-full px-5 hover:bg-brand-dark;
+  }
+  .btn-primary-lg {         /* Send OTP, Verify, Continue */
+    @apply btn bg-brand text-white text-[17px] w-full h-14 hover:bg-brand-dark;
+    border-radius: 16px;
+    box-shadow: var(--shadow-cta);
+  }
+  .btn-outline {            /* Follow +, Create poll */
+    @apply btn rounded-full px-4 text-[13px] border-[1.5px] border-brand text-brand bg-white hover:bg-brand-tint;
+    min-height: 34px;
+  }
+  .btn-ghost {              /* Read in हिंदी, Share, Edit */
+    @apply btn rounded-full px-4 text-[13.5px] border-[1.5px] border-line-2 bg-white text-ink hover:bg-chip;
+  }
+  .btn-tint {               /* Listen · 2 min */
+    @apply btn rounded-full px-4 text-[13.5px] bg-brand-tint text-brand-dark;
+  }
+  .btn-icon {               /* round icon buttons on photos */
+    @apply inline-flex items-center justify-center rounded-full bg-white/95 text-ink;
+    width: 42px; height: 42px;
+  }
+
+  /* ---------- Chips and tabs ---------- */
+  .chip        { @apply inline-flex items-center h-8 px-3.5 rounded-full text-[13px] font-bold bg-chip text-ink-2 whitespace-nowrap; }
+  .chip-active { @apply chip bg-ink text-white; }
+  .chip-red    { @apply chip bg-brand text-white; }
+
+  .nav-link        { @apply inline-flex items-center h-[38px] px-3.5 rounded-full text-sm font-semibold text-ink-2 no-underline; }
+  .nav-link-active { @apply nav-link bg-brand-tint text-brand font-bold; }
+
+  .seg       { @apply inline-flex gap-1 p-1 rounded-full bg-chip; }                  /* Key Points / Explain Simply / Full Story */
+  .seg-item  { @apply h-10 px-5 rounded-full text-sm font-semibold text-ink-2; }
+  .seg-item-active { @apply seg-item bg-brand text-white font-bold; }
+
+  .tab-underline        { @apply h-[42px] inline-flex items-center justify-center text-[13px] font-semibold text-muted; }
+  .tab-underline-active { @apply tab-underline font-extrabold text-brand border-b-[3px] border-brand; }
+
+  /* ---------- Cards ---------- */
+  .card    { @apply bg-white overflow-hidden; border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
+  .card-dark { @apply bg-ink text-white; border-radius: var(--radius-card); }      /* quiz, live score strip */
+  .hero-card { @apply relative overflow-hidden block; border-radius: var(--radius-hero); box-shadow: var(--shadow-hero); }
+
+  /* dark fade over photos so white text is readable */
+  .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.05) 30%, rgba(0,0,0,.85) 100%); }
+
+  .tag  { @apply text-[11.5px] font-extrabold tracking-wide text-brand-dark uppercase; }   /* CRICKET, EXPLAINER */
+  .meta { @apply text-[12.5px] text-muted-2; }
+
+  .photo-pill {             /* "● Cricket" on top of photos */
+    @apply inline-flex items-center gap-1.5 h-[26px] px-2.5 rounded-full text-xs font-bold text-white;
+    background: rgba(17,17,17,.6);
+  }
+  .photo-pill::before { content: ""; width: 7px; height: 7px; border-radius: 9999px; background: #FF3B3B; }
+
+  /* ---------- Story circles ---------- */
+  .story-ring { @apply rounded-full p-[3px] border-[2.5px] border-brand; width: 64px; height: 64px; }
+  .story-ring img { @apply w-full h-full rounded-full object-cover; }
+
+  /* ---------- Numbered badge (Trending, Morning 5 list) ---------- */
+  .num-badge { @apply inline-flex items-center justify-center w-6 h-6 rounded-[7px] bg-brand text-white text-xs font-extrabold shrink-0; }
+
+  /* ---------- Key points ---------- */
+  .check-dot { @apply inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand text-white shrink-0 mt-0.5; }
+
+  /* ---------- Why it matters ---------- */
+  .why-box { @apply flex gap-3 rounded-[18px] bg-brand-tint p-4; }
+  .why-box h4 { @apply text-[15px] font-extrabold text-brand-dark; }
+
+  /* ---------- Morning 5 player ---------- */
+  .player-bg {
+    background: radial-gradient(120% 80% at 50% 25%, var(--color-brand-glow) 0%, var(--color-brand-deep) 50%, var(--color-brand-night) 100%);
+    color: #fff;
+  }
+  .logo-tile {              /* tilted white-to-pink tile with red N */
+    @apply inline-flex items-center justify-center;
+    background: linear-gradient(145deg, #FFFFFF 0%, #FFE1E3 55%, #F5A9AE 100%);
+    border-radius: 30px;
+    transform: rotate(-8deg);
+    box-shadow: 0 20px 40px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.8);
+  }
+  .wave-bar { width: 3px; border-radius: 2px; background: rgb(255 107 116 / .55); }
+  .player-play { @apply inline-flex items-center justify-center rounded-full bg-white text-brand-deep; width: 74px; height: 74px; box-shadow: var(--shadow-float); }
+  .briefing-list { @apply rounded-[22px] bg-brand-tint-2 text-ink p-4; }
+  .briefing-list a { @apply flex items-center gap-3 py-2.5 border-t border-[#F3DADC] text-ink no-underline; }
+
+  /* ---------- Polls ---------- */
+  .poll-option { @apply w-full text-left h-11 px-3.5 rounded-[14px] border-[1.5px] border-line-2 bg-white text-sm font-semibold text-ink; }
+  .poll-result { @apply relative h-[42px] rounded-[14px] bg-[#F4F4F4] overflow-hidden; }
+  .poll-result > .bar { @apply absolute inset-y-0 left-0 bg-brand-soft; }
+  .poll-result > .row { @apply relative h-full flex items-center justify-between px-3.5 text-sm font-bold; }
+
+  /* ---------- Inputs ---------- */
+  .input { @apply w-full h-[54px] px-4 rounded-[14px] border-[1.5px] border-line-2 text-base text-ink bg-white outline-none focus:border-ink; }
+
+  /* ---------- Bottom sheet (guest login) ---------- */
+  .sheet { @apply fixed inset-x-0 bottom-0 bg-white px-6 pt-3 pb-8; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.2); }
+  .sheet-handle { @apply mx-auto mb-4 h-[5px] w-11 rounded-full bg-[#DADADA]; }
+
+  /* ---------- Mobile bottom nav (mobile web only) ---------- */
+  .bottom-nav { @apply fixed inset-x-0 bottom-0 grid grid-cols-4 h-[66px] px-2.5 py-1.5 bg-white border-t border-line md:hidden; }
+  .bottom-nav a { @apply flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-[#4A4A4A] no-underline; }
+  .bottom-nav a.active { @apply mx-1.5 rounded-[14px] bg-brand-tint text-brand font-bold; }
+}

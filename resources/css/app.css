@@ -1,0 +1,49 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
+@source '../../app/**/*.php';
+
+/* App-level additions (the theme file stays as close to the original as possible). */
+@layer base {
+  [x-cloak] { display: none !important; }
+
+  :focus-visible { outline: 3px solid var(--color-brand); outline-offset: 2px; }
+
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  /* Account › Text size: scales story reading text (key points, explainers, full story, For You cards). */
+  html[data-text-size="small"] .reading-text { font-size: 15px !important; }
+  html[data-text-size="large"] .reading-text { font-size: 19.5px !important; line-height: 1.6 !important; }
+
+  /*
+    Account › Dark mode. The theme ships no dark palette, so this inverts the light theme and
+    re-inverts photos and media; hue-rotate keeps the brand red red.
+  */
+  html[data-theme="dark"] { filter: invert(0.92) hue-rotate(180deg); background: #fff; }
+  html[data-theme="dark"] img,
+  html[data-theme="dark"] video,
+  html[data-theme="dark"] .player-bg,
+  html[data-theme="dark"] .hero-card { filter: invert(1) hue-rotate(180deg); }
+  html[data-theme="dark"] .hero-card img { filter: none; }
+
+  /* Quiz end screen: streak +1 pop */
+  @keyframes ngn-pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    60% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

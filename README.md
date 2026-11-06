@@ -1,0 +1,234 @@
+# NextGenNews (website, phase 1)
+
+Inshorts-style Indian news site: 60-word cards with depth, Hindi and English, audio, Morning 5, daily quiz, streaks, polls and followable pages. Laravel 13 · PHP 8.3 · MySQL 8 · Blade + Tailwind v4 + Alpine · Livewire 3 · Filament 3.
+
+**Status:** Milestones 1 (setup) and 2 (reading) are done. See [Milestones](#milestones).
+
+## ⚠️ Replace before launch
+
+- **Grievance officer** (`resources/views/static/grievance.blade.php`): the name, email (`grievance@nextgennews.in`), phone and Lucknow address are **placeholders**. IT Rules 2021 require real details.
+- **About** (`static/about.blade.php`): uses `hello@nextgennews.in` as a general contact address. It is made up.
+- **Privacy / Terms** (`static/privacy.blade.php`, `static/terms.blade.php`): check these against the real setup before publishing:
+  - data held outside India by GA4 and Sentry;
+  - the "for example, 180 days" log retention;
+  - account deletion from settings (built in Milestone 3);
+  - courts at Lucknow;
+  - users must be 18+ or have verifiable parental consent.
+
+  Have a lawyer review both pages.
+- **Demo photos** in `storage/app/demo/` are placeholders. The demo stories are fictional.
+
+## Run it locally (Windows)
+
+Prerequisites: PHP 8.3 (with `pdo_mysql`, `intl`, `gd`, `zip`, `fileinfo`, `mbstring`, `openssl`, `curl`, `sodium`, `pdo_sqlite`), Composer, Node 20+, MySQL 8.
+
+```powershell
+# 1. Start MySQL (this machine uses a user-level data dir, not a Windows service)
+Start-Process "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe" -ArgumentList "--defaults-file=`"$env:LOCALAPPDATA\nextgennews-mysql\my.ini`"" -WindowStyle Hidden
+
+# 2. First time only
+composer install --ignore-platform-req=ext-pcntl --ignore-platform-req=ext-posix
+npm install
+copy .env.example .env      # then set CACHE_STORE=database and QUEUE_CONNECTION=database if you have no Redis
+php artisan key:generate
+php artisan storage:link
+
+# 3. Database + demo content (safe to re-run; it rebuilds everything)
+php artisan migrate:fresh --seed
+
+# 4. Run
+npm run build               # or: npm run dev (hot reload)
+php artisan serve           # http://127.0.0.1:8000
+```
+
+Checks: `php artisan test` (Pest, in-memory SQLite) and `npm run build`.
+
+> Composer: on Windows, a `.bat` wrapper eats `^` in version constraints. Use `php path\to\composer.phar require "vendor/pkg:^1.0"` when adding packages.
+
+### Demo accounts
+
+| Who | Login |
+|---|---|
+| Reader "Riya Sharma" (Lucknow, 12-day streak) | phone `9876543210`, OTP **`123456`**. This is the development OTP from `OTP_DEV_CODE` in `.env`; it is ignored when `APP_ENV=production`. With `OTP_DEV_CODE` empty, the OTP is written to `storage/logs/laravel.log` (look for `[OTP]`). No real SMS is sent until `SMS_DRIVER=msg91` is set. Any other 10-digit number starting 6–9 creates a new account and goes through onboarding. |
+| Newsroom admin / chief / editor | `admin@` / `chief@` / `editor@nextgennews.test`, password `password` (Filament `/admin` arrives in Milestone 5) |
+
+### Local vs production
+
+| | Local (this machine) | Production |
+|---|---|---|
+| Cache + queues | `database` (no Redis on Windows) | `redis` + Horizon |
+| Media | `public` disk (`MEDIA_DISK=public`) | `s3` disk, `AWS_URL` = CloudFront |
+| TTS / SMS / AI | `TTS_DRIVER=fake`, `SMS_DRIVER=log`, empty `ANTHROPIC_API_KEY` | `google`, `msg91`, real key |
+
+Horizon needs the `pcntl`/`posix` extensions, which don't exist on Windows. That's why Composer runs with `--ignore-platform-req` locally; Horizon runs on the Linux server.
+
+## Project map
+
+- `resources/css/theme.css`: the supplied theme (see "Theme changes" below); `app.css` imports Tailwind and the theme.
+- `resources/views/components/`: `x-logo`, `x-icon` (Lucide), `x-story-card`, `x-hero-card`, `x-poll-card`, `x-login-sheet`, plus layout parts (`layouts/app`, `site-header`, `app-banner`, `category-chips`, `site-footer`, `bottom-nav`, `lang-toggle`).
+- `resources/js/app.js`: Alpine (from Livewire's bundle), `$store.auth` (guest gate + remembered action), the login sheet, and the `ngnFetch` helper.
+- `database/migrations/`: all tables from the brief. `database/seeders/`: demo content (`data/stories_*.php` holds the 30 bilingual stories).
+- `storage/app/demo/`: demo photos (Picsum/Unsplash placeholders). Replace any file with a real photo of the same name and re-seed.
+
+## Decisions and notes
+
+Where the brief was silent, I picked the simplest option:
+
+**Theme changes** (`resources/css/theme.css`, same class names and values):
+- Tailwind v4 can't `@apply` a custom class (`@apply btn`), so base classes are grouped selectors (`.btn, .btn-primary, …`) followed by each variant.
+- The global `body`, `a` and `:lang(hi)` rules moved into `@layer base`. Unlayered rules beat every Tailwind utility in v4, so `text-white` on a link would have stayed red.
+- The Google Fonts `@import` was moved to `<link>` tags in the layout, because browsers ignore an `@import` that ends up mid-file after bundling.
+- `.font-hindi` was added next to `:lang(hi)`, as the brief mentions both.
+
+**Data model additions** (fields the screens need but the brief didn't list):
+- `stories.slug`: for `/story/{slug}`.
+- `stories.city_id`, `importance` (Morning 5 and the hero), `correction_label`, and `likes_count`/`comments_count`/`shares_count` counters.
+- `users.onboarded_at`: drives "onboarding once after first login".
+- `categories.image_path`: photo tiles on Explore and onboarding.
+- `pages.name_hi`, `pinned_label`/`pinned_text`/`pinned_story_id` (the black RESULT strip) and `upcoming` (JSON for the "Upcoming" tiles).
+- `briefings.chapter_offsets`: per-story timestamps for the player highlight.
+- `streaks.freezes_month`: monthly freeze reset.
+- `reading_events.read_on`: the IST day.
+- `comments.parent_id` (Reply) and `likes` as polymorphic (story and comment likes).
+- `poll_options.votes_count`.
+- `quiz_questions.sort_order`, `quiz_attempts.answers`.
+
+**Other:**
+- Readers sign in with phone + OTP only, so `users` has no email or password. Newsroom staff are a separate `admins` table and `admin` guard.
+- Guests on login-only pages are redirected to `/?login=1`, which opens the login sheet.
+- The `{user city}` chip shows only for signed-in users with a city; guests have no city.
+- The bell is shown but does nothing (as specified). The "Get the Android app" links use `ANDROID_APP_URL` (defaults to the Play Store home).
+- Quiz questions and polls are single-language (the tables have no language column).
+- The Hindi UI chrome is translated through `lang/hi.json`, and story text comes from `story_versions`.
+- `blade-ui-kit/blade-icons` (a Filament dependency) registers its own `<x-icon>`; it is turned off in `config/blade-icons.php` so our Lucide `<x-icon>` wins.
+- Laravel 13's cache won't unserialize objects by default, so cached data is stored as plain arrays.
+- The demo stories, people, companies, films and figures are fictional. Real institutions and places appear for realism.
+
+**Milestone 2 (reading):**
+- **Listen audio:** `App\Contracts\TextToSpeech` has two implementations. `FakeTts` writes a quiet tone WAV whose length matches the reading time (about 150 words a minute). `GoogleTts` uses Google Cloud TTS (en-IN/hi-IN, MP3). The audio reads the headline plus the 60-word card. The seeder generates audio for every story version.
+- **Home story circles:** signed-in readers see 24-hour stories from pages they follow, opened in the full-screen viewer. Guests see the top categories (as specified). The red "5" circle opens `/briefing`.
+- **Morning 5 and quiz cards:** they link to `/briefing` and `/quiz`, which are built in Milestone 4. Guests see "5 stories · 5 min" in place of "n of 5 read today".
+- **Hero:** the most important story of the last 24 hours. **Trending:** the last 3 days, ranked by likes + 2×shares + 3×comments + importance.
+- **Load more:** a button, not infinite scroll. It fetches `/?page=N&fragment=1`.
+- **Story page:**
+  - Both language versions are in the page, so "Read in हिंदी" switches every block without reloading.
+  - Breadcrumb: Home › desk (from the page's desk label, e.g. "Sports") › page.
+  - The rail poll always shows result bars.
+  - Likes, reactions, saves, follows, comments, share image and report already have their UI and optimistic updates. Guests get the login sheet. The endpoints arrive in Milestone 3.
+- **Topic page tabs:** Latest; Explainers (stories with a read time of 4+ minutes); Live scores (jumps to the result strip and only shows when the page has one); Polls (polls on the page's stories). The "Upcoming" tiles come from `pages.upcoming`.
+- **Explore tiles:** each opens the category's topic page, or Home filtered by that category if it has none.
+- **Search:**
+  - Uses MySQL full-text (natural language) on story headlines and card text, falling back to `LIKE` for short words and for SQLite in tests.
+  - Results appear in the reader's language, even when the match was in the other language.
+  - Recent searches are saved in this browser's localStorage only.
+- **Mobile story bar:** the like/save/WhatsApp bar sits above the bottom nav, so both stay visible.
+- **Blade gotcha:** `@error` is a Blade directive, so the audio player uses `x-on:error` instead of `@error`.
+
+**Milestone 3 (accounts):**
+- **OTP:**
+  - 6 digits, valid for 10 minutes; only a bcrypt hash is stored.
+  - 5 wrong tries lock the code.
+  - One SMS per 30 seconds and 5 per hour per number.
+  - Route throttles: 5 sends a minute per IP, 10 verifies a minute per IP.
+  - `SmsSender`: `LogSmsSender` locally; `Msg91Sender` uses the MSG91 Flow API, and its DLT template needs an `##otp##` variable.
+- **After login:**
+  - New users go to `/onboarding`. Returning users go back to the page they were on.
+  - The action a guest tried (like, save, follow, vote, react, comment, share, report or opening For You) is kept in `sessionStorage` and replayed once they're signed in. After onboarding, the replay happens on the page they land on.
+  - Readers who haven't finished onboarding are sent back to it from any page (`TrackReader` middleware), which also updates `last_active_at`.
+- **Onboarding:**
+  - Saves language, topics (at least 1) and city.
+  - Automatically follows the chosen city's page, if one exists.
+  - "Use my current location" picks the nearest of the listed cities, using the browser's location only.
+- **For You:**
+  - Shows stories from the last 7 days in the reader's topics and followed pages, skipping stories they have already read (max 30). "You're all caught up ✓" comes after them.
+  - A card counts as read after 3 seconds on screen. On the story page, a read counts after 8 seconds.
+- **Comments:**
+  - Replies are one level deep.
+  - The profanity filter covers English, romanised Hindi and Devanagari, including masked letters such as `f*ck` or `sh1t`.
+  - Accounts under 24 hours old can post 3 comments a day.
+  - Rate limits: 5 comments a minute and 90 engagement actions a minute per reader.
+- **Reports:** one per reader per item, with reasons spam / abusive / misinformation / other. They go to the moderation queue (Filament, Milestone 5).
+- **Share as image:**
+  - A 1080×1350 JPEG made with Intervention Image: photo, red band with the logo, tag, headline, card text and site name. Cached per story + language and rebuilt when the story changes.
+  - The sheet offers WhatsApp, Download, Copy link and the phone's native share.
+  - **Hindi:** GD can't shape Devanagari. A pre-pass fixes the ि vowel sign, but conjuncts still show a visible halant (e.g. क्र). For production, set `IMAGE_DRIVER=imagick` with ImageMagick built with libraqm.
+  - The fonts (Inter and Noto Sans Devanagari, OFL) are in `resources/fonts/`.
+- **Account:**
+  - Text size scales story reading text.
+  - **Dark mode:** the theme has no dark palette, so dark mode inverts the light theme and re-inverts photos. Treat it as a stopgap until designed dark tokens exist.
+  - **Notifications:** "Notifications (max per day)" is saved in a new `users.notifications_per_day` column, for the Android app.
+  - **Delete account:** added (soft delete), because the Privacy page promises erasure.
+  - Library pages are `/account/saved|following|liked|history`.
+
+**Milestone 4 (habit features):**
+- **Morning 5:**
+  - `PickMorning5` runs at 06:00 IST. It ranks stories from the last 24 hours by importance × 10 + reads in the last 24 hours + likes ÷ 50.
+  - Editor override: if today's briefing already exists (an editor edited it in `/admin`), its stories are kept and only the audio is rebuilt.
+  - `BuildBriefingAudio` joins the 5 stories' audio (headline + card) into one EN and one HI track and stores each story's start second (`chapter_offsets`, per language).
+  - The track lasts as long as the five stories take to read. With FakeTts that's about 2–3 minutes; "5 minutes" is the tagline.
+  - Manual runs: `php artisan briefing:pick` and `php artisan briefing:audio`.
+- **Briefing player:**
+  - HTML5 audio with 1x/1.25x/1.5x, previous/next story (jumping by timestamp), and a seekable progress bar (←/→ keys = 10 s).
+  - Played waveform bars turn white.
+  - The "In this briefing" row for the story that's playing is highlighted; tapping a row jumps to it, and the chevron opens the story.
+- **Daily quiz:**
+  - 30 seconds a question; a timed-out question counts as wrong.
+  - Correct answers and explanations never reach the browser before the reader answers: each answer is checked by `POST /quiz/answers`, and answers can't be changed.
+  - The end screen shows the score, the streak with a "+1" pop, and "Share result" (a server-made 1080×1350 image with WhatsApp and Download).
+  - Quizzes need status `approved` or `published`; `DraftQuiz` comes in Milestone 5.
+- **Streaks (IST):**
+  - A day counts at 3 reads or a finished quiz; the reader's streak is updated the moment that happens.
+  - `UpdateStreaks` at 00:05 IST spends a freeze on a missed day (2 per calendar month, reset on the 1st) or resets the streak.
+  - The "This week" card works out the last 7 days from reads and quiz attempts.
+- **Polls:**
+  - One vote per reader (unique index). A second try returns 409 with their existing vote. Closed polls refuse votes. Results appear after voting.
+  - Readers' polls need a question (10–150 chars), 2–4 options and a run of 1, 3 or 7 days. They pass the profanity filter, are limited to 3 a day, and start as `pending` until an editor approves them (Milestone 5).
+  - `ClosePolls` and `ExpirePageStories` run every 15 minutes.
+- **Scheduler:** run `php artisan schedule:work` (plus `php artisan queue:work` for queued jobs) locally. In production, a cron runs `schedule:run` every minute, with Horizon running the queue.
+
+**Milestone 5 (newsroom):**
+- **Pipeline** (queued jobs):
+  1. `FetchFeeds`, every 5 minutes: RSS 2.0, Atom or JSON Feed, deduplicated by URL.
+  2. `ClusterItems`: same event = title similarity (Jaccard ≥ 0.45 on meaningful words) within 12 hours.
+  3. `GenerateDrafts`: one story per cluster. The photo comes from the feed's image, else the category photo.
+  4. `RunChecks`, then `RouteStory`: auto-publish, or `pending_approval` plus `NotifyEditor` (Filament bell + email).
+  5. On publish: `GenerateAudio`, page-cache flush, and the `StoryPublished` event (sitemaps hook in Milestone 6).
+  - `DraftQuiz` at 21:00 IST writes tomorrow's quiz from today's top 5 stories. It's approved automatically only if every source story is low-risk.
+  - Manual run of the whole pipeline: `php artisan newsroom:run` (prints each new story's decision and why). Tomorrow's quiz by hand: `php artisan quiz:draft`.
+- **AiWriter** (`app/Services/AiWriter.php`), Claude via Laravel's HTTP client:
+  - Model `claude-opus-5-5` (`ANTHROPIC_MODEL`), effort `medium` (`ANTHROPIC_EFFORT`), API version `2026-10-21`.
+  - Strict JSON through structured outputs (`output_config.format` = `json_schema`).
+  - **Refusal fallback on:** `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`) re-runs a safety-declined request on Anthropic's recommended fallback model. If the whole chain still refuses, the cluster goes to editors as a notice. Remove `fallbacks` and the beta header in `AiWriter::call()` to opt out.
+  - Retries 429/5xx/connection errors 3 times with backoff; `max_tokens` cut-offs and invalid JSON are errors.
+  - Prompt rule: our own words, facts only from the sources, never copy sentences.
+  - With `ANTHROPIC_API_KEY` empty it returns seeded sample drafts, and the quiz falls back to "Which page covered…?" questions. The sample text doesn't match real sources, so the checks route those drafts to the approval queue.
+- **Checks** (`app/Services/Newsroom/StoryChecks.php`):
+  - **Fact check:** every number, month/weekday and multi-word name in the English draft must appear in the sources.
+  - **Copy check:** the share of the draft's 5-word sequences found in the sources (`copy_score`).
+  - **Sensitive check:** sensitive category, keyword match (EN + HI + source), any AI risk flag, or breaking news.
+  - **Confidence:** the AI's confidence minus 0.15 per missing fact (max 3), minus 0.3 when over the copy threshold.
+  - **Auto-publish** only when low risk, no missing facts, copy < threshold, confidence ≥ threshold, **and every source feed is marked trusted**. "Trusted" is my reading of the Feeds screen's toggle; untrusted feeds always go to an editor.
+  - Every decision and its reasons are stored in `ai_checks` (new `reasons` and `risk_flags` columns) and shown in the Auto-publish log.
+- **Filament admin** at `/admin` (staff log in with email + password; `admins` table, `admin` guard):
+  - **Newsroom:**
+    - Approval queue (draft + AI checks next to the source reports; Approve / Edit then publish / Reject with reason).
+    - Stories (both language versions, photo upload, Publish / Unpublish, correction label, "Write a story").
+    - Auto-publish log; Feeds (add, toggle active/trusted, Fetch now).
+  - **Daily:** Morning 5 (pick and reorder 5 stories; saving rebuilds the audio) and Daily quiz (edit questions, approve drafts).
+  - **Moderation:**
+    - Comments (reported first; hide/restore keeps the story's comment count right).
+    - Polls (approve reader polls, keeping their chosen run length from approval; reject; close; editorial polls).
+    - Reports (take down or dismiss).
+  - **Site:** Pages and Categories (full CRUD, uploads, result strip, Upcoming tiles).
+  - **Settings:** Auto-publish settings (sensitive categories, keywords, thresholds).
+  - **Roles:** editor = Newsroom (except Feeds), Daily and Moderation; chief = + Feeds and Auto-publish settings; admin = + Pages and Categories.
+- **Filament note:** table closures must name their argument `$query` (Filament injects by name).
+
+## Milestones
+
+1. ✅ **Setup:** Laravel, theme, layout (header, footer, mobile nav, app banner, chips), components, migrations, seeders. Home shows a first version (greeting, hero, Latest News, poll). Other routes render a placeholder naming their milestone.
+2. ✅ **Reading:** Home (full, desktop + mobile), Story (3 tabs, language switch, Listen mini player with fake audio, SEO), Topic page, Explore, Search, static pages.
+3. ✅ **Accounts:** OTP login sheet, onboarding, account page, For You, likes, reactions, saves, follows, comments, reports, share image.
+4. ✅ **Habit features:** Briefing page with the Morning 5 player, daily quiz, streaks (with freezes), polls (vote, create, results), scheduled jobs.
+5. ✅ **Newsroom:** feeds, clustering, AI drafts (Claude), fact/copy/sensitivity checks, auto-publish routing, approval queue, Filament admin, scheduler.
+6. Launch prep: SEO/sitemaps, caching, GA4/Sentry, accessibility, tests, final README.
