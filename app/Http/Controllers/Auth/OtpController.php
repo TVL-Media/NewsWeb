@@ -38,6 +38,10 @@ class OtpController extends Controller
         }
 
         $user = User::withTrashed()->firstOrNew(['phone' => $data['phone']]);
+        if ($user->exists && $user->effectiveStatus() === 'suspended') {
+            // Set in the admin panel (Readers → Account action).
+            throw ValidationException::withMessages(['code' => __('Your account is suspended. Contact the grievance officer if you think this is a mistake.')]);
+        }
         if ($user->trashed()) {
             $user->restore();
         }

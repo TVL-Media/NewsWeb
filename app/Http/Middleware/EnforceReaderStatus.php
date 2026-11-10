@@ -41,8 +41,8 @@ class EnforceReaderStatus
             $message = __('Your account is suspended. Contact the grievance officer if you think this is a mistake.');
 
             return $request->expectsJson()
-                ? response()->json(['message' => $message], 403)
-                : redirect()->route('home')->with('status', $message);
+                ? response()->json(['message' => $message, 'account_status' => 'suspended'], 403)
+                : redirect()->route('home')->with('account_notice', $message);
         }
 
         if ($status === 'restricted' && ! $request->isMethodSafe()
@@ -51,8 +51,8 @@ class EnforceReaderStatus
             $message = __('Your account is restricted').$until.'. '.__('You can keep reading, but likes, comments, votes and polls are paused.');
 
             return $request->expectsJson()
-                ? response()->json(['message' => $message], 403)
-                : back()->with('status', $message);
+                ? response()->json(['message' => $message, 'account_status' => 'restricted'], 403)
+                : back()->with('account_notice', $message);
         }
 
         return $next($request);

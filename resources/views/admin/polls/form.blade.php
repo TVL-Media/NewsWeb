@@ -14,8 +14,8 @@
       <div class="help">2 to 4 options.</div>@error('options')<div class="err">{{ $message }}</div>@enderror @error('options.*')<div class="err">{{ $message }}</div>@enderror
     </div>
     <div class="form-grid">
-      <x-admin.field label="Show with story" name="story_id" class="full" help="The poll appears in the story’s side rail."><select name="story_id"><option value="">None</option>@foreach($stories as $id => $t)<option value="{{ $id }}" @selected(old('story_id', $poll->story_id) == $id)>{{ \Illuminate\Support\Str::limit($t, 100) }}</option>@endforeach</select></x-admin.field>
-      <x-admin.field label="Category" name="category_id"><select name="category_id"><option value="">None</option>@foreach($categories as $c)<option value="{{ $c->id }}" @selected(old('category_id', $poll->category_id) == $c->id)>{{ $c->name_en }}</option>@endforeach</select></x-admin.field>
+      <x-admin.field label="Show with story" name="story_id" class="full" help="The poll appears in the story’s side rail. Without a story, the newest live poll is the one on the home page."><select name="story_id"><option value="">None</option>@foreach($stories as $id => $t)<option value="{{ $id }}" @selected(old('story_id', $poll->story_id) == $id)>{{ \Illuminate\Support\Str::limit($t, 100) }}</option>@endforeach</select></x-admin.field>
+      <x-admin.field label="Category" name="category_id" help="Shown first on that category’s home page."><select name="category_id"><option value="">None</option>@foreach($categories as $c)<option value="{{ $c->id }}" @selected(old('category_id', $poll->category_id) == $c->id)>{{ $c->name_en }}</option>@endforeach</select></x-admin.field>
       <x-admin.field label="Ends" name="ends_at" :help="tz_label()"><input type="datetime-local" name="ends_at" value="{{ old('ends_at', to_local_input($poll->ends_at)) }}"></x-admin.field>
     </div>
   </div>

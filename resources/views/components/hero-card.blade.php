@@ -6,7 +6,7 @@
 @props(['story', 'label' => null])
 @php
     $v = $story->version();
-    $label ??= ($story->category?->name() ?? '').' · '.__('Top story');
+    $label ??= ($story->is_breaking && $story->published_at?->gt(now()->subHours(12)) ? __('Breaking').' · ' : '').($story->category?->name() ?? '').' · '.__('Top story');
 @endphp
 <article {{ $attributes->merge(['class' => 'hero-card min-h-[260px] bg-ink md:min-h-[420px]']) }}>
     @if ($story->photoUrl())

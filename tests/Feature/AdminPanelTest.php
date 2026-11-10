@@ -205,6 +205,37 @@ describe('readers and moderation', function () {
     });
 });
 
+describe('admin → website', function () {
+    it('shows a breaking flag the editor sets', function () {
+        $story = Story::published()->latest('published_at')->first();
+        $story->update(['is_breaking' => true, 'published_at' => now()->subHour()]);
+        $this->get(route('story.show', $story))->assertOk()->assertSee('Breaking');
+    });
+
+    it('stops a suspended reader from signing in again', function () {
+        config(['services.sms.dev_code' => '123456']);
+        $reader = User::first();
+        $reader->update(['status' => 'suspended']);
+        $this->postJson('/auth/otp/verify', ['phone' => $reader->phone, 'code' => '123456'])->assertUnprocessable();
+        $this->assertGuest('web');
+    });
+
+    it('uses the streak rule from the panel in the website copy', function () {
+        \App\Support\Settings::set('streaks.reads_per_day', 4);
+        $this->get('/briefing')->assertOk()->assertSee('read 4 stories', false);
+    });
+
+    it('tells moderators about a new report and a reader poll', function () {
+        $reader = User::first();
+        $story = Story::published()->first();
+        $this->actingAs($reader, 'web')->postJson('/reports', ['target_type' => 'story', 'target_id' => $story->id, 'reason' => 'spam'])->assertSuccessful();
+        expect(AdminNotification::where('type', 'report')->exists())->toBeTrue();
+
+        Poll::create(['question' => 'Should the city add more buses at night?', 'status' => 'pending', 'created_by' => $reader->id, 'ends_at' => now()->addDay()]);
+        expect(AdminNotification::where('type', 'poll')->exists())->toBeTrue();
+    });
+});
+
 describe('sign in', function () {
     it('signs staff in with email and password and records it', function () {
         $this->post('/admin/login', ['email' => 'chief@nextgennews.test', 'password' => 'password'])->assertRedirect('/admin');

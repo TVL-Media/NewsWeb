@@ -98,6 +98,9 @@
                     @if ($page)<a href="{{ route('page.show', $page) }}" class="no-underline">{{ $page->name() }}</a>@endif
                 </nav>
 
+                @if ($story->is_breaking && $story->published_at?->gt(now()->subHours(12)))
+                    <p class="mt-3 mr-1 inline-flex rounded-full bg-brand px-3 py-1 text-[12.5px] font-bold uppercase tracking-wide text-white">{{ __('Breaking') }}</p>
+                @endif
                 @if ($story->correction_label)
                     <p class="mt-3 inline-flex rounded-full bg-brand-tint px-3 py-1 text-[12.5px] font-bold text-brand-dark">{{ $story->correction_label }}</p>
                 @endif

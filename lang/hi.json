@@ -163,8 +163,8 @@
     "done": "पूरा",
     "today": "आज",
     "missed": "छूटा",
-    "Read 3 stories or finish the quiz to keep your streak. 2 freezes a month cover missed days.": "स्ट्रीक बनाए रखने के लिए 3 ख़बरें पढ़ें या क्विज़ पूरा करें। हर महीने 2 फ़्रीज़ छूटे दिनों को बचाते हैं।",
-    "Log in to start a daily streak: read 3 stories or finish the quiz each day.": "रोज़ की स्ट्रीक शुरू करने के लिए लॉग इन करें: हर दिन 3 ख़बरें पढ़ें या क्विज़ पूरा करें।",
+    "Read :reads stories or finish the quiz to keep your streak. :freezes freezes a month cover missed days.": "स्ट्रीक बनाए रखने के लिए :reads ख़बरें पढ़ें या क्विज़ पूरा करें। हर महीने :freezes फ़्रीज़ छूटे दिनों को बचाते हैं।",
+    "Log in to start a daily streak: read :reads stories or finish the quiz each day.": "रोज़ की स्ट्रीक शुरू करने के लिए लॉग इन करें: हर दिन :reads ख़बरें पढ़ें या क्विज़ पूरा करें।",
     "No polls right now.": "अभी कोई पोल नहीं है।",
     "Results": "नतीजे",
     "Today's quiz is being prepared.": "आज का क्विज़ तैयार हो रहा है।",
@@ -261,5 +261,10 @@
     "Switch language": "भाषा बदलें",
     "Replying to": "जवाब दे रहे हैं",
     "Cancel": "रद्द करें",
-    "That OTP is wrong or has expired.": "यह OTP ग़लत है या इसकी समय-सीमा ख़त्म हो गई है।"
+    "That OTP is wrong or has expired.": "यह OTP ग़लत है या इसकी समय-सीमा ख़त्म हो गई है।",
+    "Breaking": "ब्रेकिंग",
+    "Your account is suspended. Contact the grievance officer if you think this is a mistake.": "आपका खाता निलंबित है। अगर आपको लगता है कि यह ग़लती है, तो शिकायत अधिकारी से संपर्क करें।",
+    "Your account is restricted": "आपका खाता सीमित है",
+    "until :date": ":date तक",
+    "You can keep reading, but likes, comments, votes and polls are paused.": "आप पढ़ते रह सकते हैं, लेकिन लाइक, कमेंट, वोट और पोल अभी बंद हैं।"
 }

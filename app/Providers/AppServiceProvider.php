@@ -68,6 +68,20 @@ class AppServiceProvider extends ServiceProvider
             ]);
             $view->with('navNotifications', AdminNotification::where('admin_id', $a->id)->latest('created_at')->limit(8)->get());
         });
+        // Website → admin panel: tell moderators about new reports and reader polls (bell + dashboard).
+        Report::created(function (Report $r) {
+            $n = Report::where('target_type', $r->target_type)->where('target_id', $r->target_id)->whereIn('status', ['open', 'escalated'])->count();
+            if (in_array($n, [1, 5], true)) { // first report, and again when it piles up
+                \App\Support\Notify::permission('reports.handle', 'report', $n === 1 ? 'New report: '.$r->target_type : "{$n} reports on one {$r->target_type}",
+                    \Illuminate\Support\Str::limit($r->targetLabel(), 120), route('admin.reports.show', $r));
+            }
+        });
+        Poll::created(function (Poll $p) {
+            if ($p->created_by && $p->status === 'pending') {
+                \App\Support\Notify::permission('polls.manage', 'poll', 'Reader poll waiting for approval', \Illuminate\Support\Str::limit($p->question, 120), route('admin.polls.show', $p));
+            }
+        });
+
         RateLimiter::for('admin-login', fn (Request $r) => [
             Limit::perMinute(5)->by(strtolower((string) $r->input('email')).'|'.$r->ip()),
             Limit::perMinute(20)->by($r->ip()),

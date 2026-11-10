@@ -56,7 +56,10 @@ class HomeController extends Controller
             'trending' => Rails::trending(),
             'pagesToFollow' => Rails::pagesToFollow($user, 4),
             'followed' => $followed,
-            'poll' => Poll::live()->with('options')->whereNull('created_by')->latest()->first(),
+            // Newest live editorial poll; on a category page, one set to that category (admin → Polls) comes first.
+            'poll' => Poll::live()->with('options')->whereNull('created_by')
+                ->when($category, fn ($q) => $q->orderByRaw('CASE WHEN category_id = ? THEN 0 ELSE 1 END', [$category->id]))
+                ->latest()->first(),
         ]);
     }
 
