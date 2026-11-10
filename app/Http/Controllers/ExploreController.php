@@ -14,7 +14,7 @@ class ExploreController extends Controller
 
         // Each tile opens the category's topic page when it has one, else Home filtered by category.
         $categories = Category::with(['pages' => fn ($q) => $q->where('type', 'topic')->orderBy('id')])
-            ->orderBy('sort_order')->get();
+            ->active()->orderBy('sort_order')->get();
 
         return view('explore', [
             'categories' => $categories,

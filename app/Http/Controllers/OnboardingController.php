@@ -17,7 +17,7 @@ class OnboardingController extends Controller
         }
 
         return view('onboarding', [
-            'categories' => Category::orderBy('sort_order')->get(),
+            'categories' => Category::active()->orderBy('sort_order')->get(),
             'cities' => City::orderBy('id')->get(),
         ]);
     }

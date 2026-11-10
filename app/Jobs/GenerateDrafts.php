@@ -11,7 +11,7 @@ use App\Models\Source;
 use App\Models\Story;
 use App\Models\StoryCluster;
 use App\Services\AiWriter;
-use Filament\Notifications\Notification;
+use App\Support\Notify;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
@@ -47,8 +47,7 @@ class GenerateDrafts implements ShouldQueue
             $draft = $ai->draft($cluster->items, $options);
         } catch (AiWriterException $e) {
             Log::warning("Draft failed for cluster {$cluster->id}: {$e->getMessage()}");
-            Notification::make()->title('AI draft failed')->body(Str::limit($cluster->items->first()->title, 80).' — '.$e->getMessage())
-                ->danger()->sendToDatabase(Admin::all());
+            Notify::permission('review.decide', 'ai_failed', 'AI draft failed', Str::limit($cluster->items->first()->title, 80).' — '.Str::limit($e->getMessage(), 300), route('admin.newsroom.feeds'));
             $cluster->items()->update(['processed' => true]);
 
             return;

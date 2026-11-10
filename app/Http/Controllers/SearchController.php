@@ -43,7 +43,7 @@ class SearchController extends Controller
             'q' => $q,
             'type' => $type,
             'category' => $category,
-            'categories' => Category::orderBy('sort_order')->get(),
+            'categories' => Category::active()->orderBy('sort_order')->get(),
             'stories' => $stories,
             'pages' => $pages,
         ]);

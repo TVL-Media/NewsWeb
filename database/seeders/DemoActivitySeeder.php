@@ -29,10 +29,12 @@ class DemoActivitySeeder extends Seeder
         $tz = config('app.timezone');
         $today = now($tz)->toDateString();
 
-        // Newsroom staff (Filament /admin). Local demo passwords: "password".
-        Admin::create(['name' => 'Site Admin', 'email' => 'admin@nextgennews.test', 'password' => 'password', 'role' => 'admin']);
-        Admin::create(['name' => 'Chief Editor', 'email' => 'chief@nextgennews.test', 'password' => 'password', 'role' => 'chief']);
-        Admin::create(['name' => 'Desk Editor', 'email' => 'editor@nextgennews.test', 'password' => 'password', 'role' => 'editor']);
+        // Newsroom staff (admin panel at /admin). Local demo passwords: "password".
+        Admin::create(['name' => 'Site Admin', 'email' => 'admin@nextgennews.test', 'password' => 'password', 'role' => 'admin'])->assignRole('Super Admin');
+        Admin::create(['name' => 'Chief Editor', 'email' => 'chief@nextgennews.test', 'password' => 'password', 'role' => 'chief'])->assignRole('Chief Editor');
+        Admin::create(['name' => 'Desk Editor', 'email' => 'editor@nextgennews.test', 'password' => 'password', 'role' => 'editor'])->assignRole('Editor');
+        // Demo only: don't force two-factor on these local accounts. Turn it back on in Settings → Security.
+        \App\Support\Settings::set('security.enforce_2fa_roles', []);
 
         AutoPublishSetting::create([
             'sensitive_categories' => Category::where('is_sensitive', true)->pluck('slug')->all(),

@@ -7,7 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
-/** POST /reports — stories, comments and polls go to the moderation queue (Filament, Milestone 5). */
+/** POST /reports — stories, comments and polls go to the moderation queue (admin panel → Reports). */
 class ReportController extends Controller
 {
     public const REASONS = ['spam', 'abusive', 'misinformation', 'other'];

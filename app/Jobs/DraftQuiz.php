@@ -6,7 +6,7 @@ use App\Models\Admin;
 use App\Models\Quiz;
 use App\Models\Story;
 use App\Services\AiWriter;
-use Filament\Notifications\Notification;
+use App\Support\Notify;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
@@ -65,9 +65,7 @@ class DraftQuiz implements ShouldQueue
         });
 
         if ($quiz->status === 'draft') {
-            Notification::make()->title("Tomorrow's quiz needs approval")
-                ->body('One or more source stories are sensitive.')->warning()
-                ->sendToDatabase(Admin::all());
+            Notify::permission('quiz.manage', 'quiz', "Tomorrow's quiz needs approval", 'One or more source stories are sensitive.', route('admin.daily.quizzes'));
         }
     }
 }

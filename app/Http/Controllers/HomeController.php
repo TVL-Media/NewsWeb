@@ -92,7 +92,7 @@ class HomeController extends Controller
         $chosen = $user ? $user->categories()->orderBy('sort_order')->limit($room)->get() : collect();
         $categories = $chosen->isNotEmpty()
             ? $chosen
-            : Category::orderBy('sort_order')->limit(min(6, $room))->get();
+            : Category::active()->orderBy('sort_order')->limit(min(6, $room))->get();
 
         return ['viewer' => $viewer, 'categories' => $categories];
     }
