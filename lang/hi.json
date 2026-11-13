@@ -326,5 +326,6 @@
     "Location is blocked. Allow location for this site in your browser settings, or pick your city.": "लोकेशन बंद है। ब्राउज़र सेटिंग में इस साइट के लिए लोकेशन की अनुमति दें, या अपना शहर चुनें।",
     "Detected from your location. Tap to try again.": "आपकी लोकेशन से पता चला। दोबारा कोशिश के लिए टैप करें।",
     "The latest stories in this topic": "इस विषय की ताज़ा ख़बरें",
-    "No new stories in :topic this week.": "इस हफ़्ते :topic में कोई नई ख़बर नहीं है।"
+    "No new stories in :topic this week.": "इस हफ़्ते :topic में कोई नई ख़बर नहीं है।",
+    "React to this story": "इस ख़बर पर प्रतिक्रिया दें"
 }

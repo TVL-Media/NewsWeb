@@ -216,13 +216,19 @@
                         <span x-text="likes.toLocaleString('en-IN')">{{ number_format($story->likes_count) }}</span>
                         <span class="sr-only">{{ __('likes') }}</span>
                     </button>
-                    @foreach ($reactions as $type => $label)
-                        <button type="button" @click="react('{{ $type }}')" :aria-pressed="(reaction === '{{ $type }}').toString()"
-                                class="h-11 rounded-full border-[1.5px] px-3.5 text-[13px] font-bold"
-                                :class="reaction === '{{ $type }}' ? 'border-brand bg-brand-tint text-brand' : 'border-line-2 bg-white text-ink-2 hover:bg-chip'">
-                            {{ $label }}
-                        </button>
-                    @endforeach
+                    {{-- Reactions as icons; the name shows as a tooltip and is the button's accessible label. --}}
+                    @php $reactionIcons = ['surprising' => 'face-surprised', 'unfair' => 'face-angry', 'need_info' => 'help-circle', 'good_news' => 'face-smile']; @endphp
+                    <div class="flex items-center gap-1.5" role="group" aria-label="{{ __('React to this story') }}">
+                        @foreach ($reactions as $type => $label)
+                            <button type="button" @click="react('{{ $type }}')" :aria-pressed="(reaction === '{{ $type }}').toString()"
+                                    aria-label="{{ $label }}" title="{{ $label }}"
+                                    class="group relative inline-flex h-11 w-11 items-center justify-center rounded-full border-[1.5px] transition"
+                                    :class="reaction === '{{ $type }}' ? 'border-brand bg-brand-tint text-brand' : 'border-line-2 bg-white text-ink-2 hover:border-ink hover:text-ink'">
+                                <x-icon :name="$reactionIcons[$type]" size="22" />
+                                <span class="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-[8px] bg-ink px-2.5 py-1 text-[12px] font-bold text-white opacity-0 shadow-[var(--shadow-float)] transition group-hover:opacity-100 group-focus-visible:opacity-100" aria-hidden="true">{{ $label }}</span>
+                            </button>
+                        @endforeach
+                    </div>
                     <div class="ml-auto flex items-center gap-2">
                         <button type="button" @click="shareImage()" class="btn rounded-full bg-ink px-4 text-[13.5px] text-white hover:bg-black">
                             <x-icon name="image" size="17" /> {{ __('Share as image') }}
