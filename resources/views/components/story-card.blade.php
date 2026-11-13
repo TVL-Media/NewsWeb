@@ -19,9 +19,9 @@
                      class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]">
             @endif
         </div>
-        <div class="flex flex-1 flex-col p-4">
+        <div class="flex flex-1 flex-col px-3.5 pb-3 pt-3">
             @if ($tag)<p class="tag">{{ $tag }}</p>@endif
-            <h3 class="mt-1.5 line-clamp-3 text-[16px] font-extrabold leading-[1.3]">
+            <h3 class="mt-1 line-clamp-3 text-[16px] font-extrabold leading-[1.3]">
                 <a href="{{ $url }}" class="text-ink no-underline after:absolute after:inset-0 hover:text-brand">{{ $v?->headline }}</a>
             </h3>
             <p class="meta mt-auto pt-2">{{ $story->ago() }} · {{ trans_choice(':count min read', $story->read_minutes) }}</p>

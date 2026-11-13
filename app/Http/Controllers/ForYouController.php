@@ -10,12 +10,14 @@ use App\Support\Rails;
 use Illuminate\Http\Request;
 
 /**
- * For You: only stories from the reader's chosen categories and followed pages, newest first,
- * skipping stories they have already read. After the last card: "You're all caught up ✓".
+ * For You: only stories from the reader's chosen categories and followed pages.
+ * New (unread) stories first, then "You're all caught up ✓", then "Earlier": stories they
+ * have already seen, newest first — so the feed never goes blank between news cycles.
  */
 class ForYouController extends Controller
 {
     public const LIMIT = 30;
+    public const EARLIER_LIMIT = 20;
 
     public function __invoke(Request $request)
     {
@@ -24,19 +26,21 @@ class ForYouController extends Controller
         $pageIds = Rails::followedPageIds($user);
         $readIds = ReadingEvent::where('user_id', $user->id)->pluck('story_id')->unique()->all();
 
-        $stories = Story::published()
+        $base = fn () => Story::published()
             ->with(['versions', 'category', 'source', 'page'])
             ->where(fn ($q) => $q->whereIn('category_id', $categoryIds ?: [0])->orWhereIn('page_id', $pageIds ?: [0]))
-            ->whereNotIn('id', $readIds ?: [0])
             ->where('published_at', '>=', now()->subDays(7))
-            ->latest('published_at')
-            ->limit(self::LIMIT)
-            ->get();
+            ->latest('published_at');
+
+        $new = $base()->whereNotIn('id', $readIds ?: [0])->limit(self::LIMIT)->get();
+        $earlier = $readIds ? $base()->whereIn('id', $readIds)->limit(self::EARLIER_LIMIT)->get() : collect();
+        $stories = $new->concat($earlier)->values();
 
         $ids = $stories->pluck('id');
 
         return view('for-you', [
             'stories' => $stories,
+            'newCount' => $new->count(),
             'followed' => $pageIds,
             'liked' => Like::where('user_id', $user->id)->where('likeable_type', Story::class)->whereIn('likeable_id', $ids)->pluck('likeable_id')->all(),
             'saved' => Save::where('user_id', $user->id)->whereIn('story_id', $ids)->pluck('story_id')->all(),

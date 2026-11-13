@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\BriefingController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\ReelController;
+use App\Http\Middleware\EnsureReelsEnabled;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\ExploreController;
@@ -34,6 +36,29 @@ Route::view('/grievance-officer', 'static.grievance')->name('grievance');
 Route::view('/privacy', 'static.privacy')->name('privacy');
 Route::view('/terms', 'static.terms')->name('terms');
 Route::view('/community-rules', 'static.community')->name('community');
+
+// ── Reels (REELS_ENABLED=false → 404) ─────────────────────────────────────
+Route::middleware(EnsureReelsEnabled::class)->group(function () {
+    Route::get('/reels', [ReelController::class, 'index'])->name('reels');
+    Route::get('/reels/feed', [ReelController::class, 'feed'])->middleware('throttle:60,1')->name('reels.feed');
+    Route::get('/reels/{reel:id}/data', [ReelController::class, 'data'])->whereNumber('reel')->middleware('throttle:60,1')->name('reels.data');
+    Route::get('/reels/{reel:id}/comments', [CommentController::class, 'indexReel'])->whereNumber('reel')->name('reels.comments.index');
+    Route::post('/reels/{reel:id}/view', [ReelController::class, 'view'])->whereNumber('reel')->middleware('throttle:120,1')->name('reels.view');
+    Route::post('/reels/{reel:id}/share', [ReelController::class, 'share'])->whereNumber('reel')->middleware('throttle:engage')->name('reels.share');
+
+    Route::middleware(['auth', 'throttle:engage'])->group(function () {
+        Route::match(['post', 'delete'], '/reels/{reel:id}/like', [ReelController::class, 'like'])->name('reels.like');
+        Route::match(['post', 'delete'], '/reels/{reel:id}/save', [ReelController::class, 'save'])->name('reels.save');
+        Route::post('/reels/{reel:id}/comments', [CommentController::class, 'storeReel'])->middleware('throttle:comments')->name('reels.comments.store');
+    });
+
+    Route::get('/reels/{reel:slug}', [ReelController::class, 'show'])->name('reels.show');
+});
+
+// ── Later-phase teasers (PROMPT.md: video/podcasts are a later phase) ──────
+// These exist only so the Explore tiles have somewhere to go; no media backend behind them.
+Route::view('/videos', 'coming-soon', ['title' => __('Videos'), 'icon' => 'video', 'description' => __('Video reports are coming in a later phase.')])->name('videos');
+Route::view('/podcast', 'coming-soon', ['title' => __('Podcast'), 'icon' => 'mic', 'description' => __('An audio podcast is coming in a later phase.')])->name('podcast');
 
 // ── Login (phone + OTP) ───────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
@@ -75,6 +100,3 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/briefing', BriefingController::class)->name('briefing');
-
-
-

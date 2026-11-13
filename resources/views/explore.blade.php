@@ -22,6 +22,40 @@
                     </a>
                 </li>
             @endforeach
+
+            @if (config('reels.enabled'))
+                <li>
+                    <a href="{{ route('reels') }}" class="hero-card group flex h-[150px] items-center justify-center bg-brand no-underline md:h-[190px]">
+                        <span class="absolute left-4 top-4 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-brand">{{ __('New') }}</span>
+                        <x-icon name="square-play" size="38" class="text-white/80 transition group-hover:text-white" />
+                        <span class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4">
+                            <span class="text-[18px] font-black leading-tight text-white md:text-[21px]">{{ __('Reels') }}</span>
+                            <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-white" aria-hidden="true">
+                                <x-icon name="arrow-right" size="17" />
+                            </span>
+                        </span>
+                    </a>
+                </li>
+            @endif
+
+            {{-- Later-phase teasers: no photo (nothing is published yet), so an icon stands in for one. --}}
+            @foreach ([
+                ['route' => 'videos', 'icon' => 'video', 'label' => __('Videos')],
+                ['route' => 'podcast', 'icon' => 'mic', 'label' => __('Podcast')],
+            ] as $teaser)
+                <li>
+                    <a href="{{ route($teaser['route']) }}" class="hero-card group flex h-[150px] items-center justify-center bg-ink no-underline md:h-[190px]">
+                        <span class="absolute left-4 top-4 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white">{{ __('Soon') }}</span>
+                        <x-icon :name="$teaser['icon']" size="34" class="text-white/50 transition group-hover:text-white/70" />
+                        <span class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4">
+                            <span class="text-[18px] font-black leading-tight text-white md:text-[21px]">{{ $teaser['label'] }}</span>
+                            <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-white" aria-hidden="true">
+                                <x-icon name="arrow-right" size="17" />
+                            </span>
+                        </span>
+                    </a>
+                </li>
+            @endforeach
         </ul>
 
         <div class="mt-8 flex flex-wrap gap-6">

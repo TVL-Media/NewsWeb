@@ -6,17 +6,21 @@ use App\Models\Page;
 use App\Models\Poll;
 use App\Models\Story;
 use App\Support\Rails;
+use App\Support\ReelFeed;
 use Illuminate\Http\Request;
 
-/** Topic / city / show page, e.g. /page/cricket. Tabs: latest | explainers | polls. */
+/** Topic / city / show page, e.g. /page/cricket. Tabs: latest | explainers | reels | polls. */
 class PageController extends Controller
 {
-    public const TABS = ['latest', 'explainers', 'polls'];
+    public const TABS = ['latest', 'explainers', 'reels', 'polls'];
 
     public function show(Request $request, Page $page)
     {
         $page->loadCount('followers')->load('pinnedStory');
         $tab = in_array($request->query('tab'), self::TABS, true) ? $request->query('tab') : 'latest';
+        if ($tab === 'reels' && ! config('reels.enabled')) {
+            $tab = 'latest';
+        }
         $user = $request->user();
 
         $stories = Story::published()
@@ -49,6 +53,7 @@ class PageController extends Controller
             'top' => $tab === 'polls' ? null : $stories->first(),
             'more' => $tab === 'polls' ? collect() : $stories->slice(1)->values(),
             'polls' => $polls,
+            'reels' => $tab === 'reels' ? ReelFeed::query($user, null, ['topic' => $page->slug])->limit(40)->get() : collect(),
             'updatedAt' => Story::published()->where('page_id', $page->id)->max('published_at'),
             'following' => in_array($page->id, $followed, true),
             'followed' => $followed,

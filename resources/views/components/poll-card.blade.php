@@ -14,7 +14,7 @@
         'options' => $poll->options->map(fn ($o) => ['id' => $o->id, 'label' => $o->label, 'votes' => (int) $o->votes_count])->values(),
     ];
 @endphp
-<section {{ $attributes->merge(['class' => 'card p-5']) }}
+<section {{ $attributes->merge(['class' => 'card p-4']) }}
          x-data="{
             ...@js($state),
             busy: false,
@@ -39,7 +39,7 @@
          @ngn-replay.window="const p = $event.detail; if (!p.done && p.action === 'vote' && p.payload?.poll === id) { p.done = true; const o = options.find(o => o.id === p.payload.option); if (o) vote(o); }"
          aria-labelledby="poll-{{ $poll->id }}-q">
     <div class="flex items-center justify-between gap-3">
-        <h3 class="text-[17px] font-black">{{ $title ?? __('Poll') }}</h3>
+        <h3 class="text-[16px] font-black">{{ $title ?? __('Poll') }}</h3>
         @if ($showCreate)
             <button type="button" class="btn-outline"
                     @click="if ($store.auth.require('create_poll')) $dispatch('ngn-create-poll')">
@@ -48,7 +48,7 @@
         @endif
     </div>
 
-    <p id="poll-{{ $poll->id }}-q" class="mt-3 text-[15px] font-bold leading-snug">{{ $poll->question }}</p>
+    <p id="poll-{{ $poll->id }}-q" class="mt-2.5 text-[14.5px] font-bold leading-snug">{{ $poll->question }}</p>
 
     {{-- Options --}}
     <div class="mt-3 space-y-2" x-show="!showResults">

@@ -14,7 +14,10 @@ beforeEach(fn () => $this->seed(DatabaseSeeder::class));
 
 it('seeds the demo content described in the brief', function () {
     expect(Category::count())->toBe(8)
-        ->and(City::pluck('name_en')->sort()->values()->all())->toBe(['Bhopal', 'Delhi', 'Jaipur', 'Lucknow', 'Mumbai', 'Patna'])
+        // Every state/UT capital plus major cities (database/seeders/data/cities.php), not just
+        // the original 6 demo cities — the city picker now covers the whole country.
+        ->and(City::count())->toBe(count(require base_path('database/seeders/data/cities.php')))
+        ->and(City::pluck('name_en'))->toContain('Bhopal', 'Delhi', 'Jaipur', 'Lucknow', 'Mumbai', 'Patna')
         ->and(Page::count())->toBe(10)
         ->and(Story::published()->count())->toBe(30)
         ->and(Poll::count())->toBe(3)

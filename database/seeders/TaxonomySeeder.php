@@ -33,15 +33,11 @@ class TaxonomySeeder extends Seeder
             ]);
         }
 
-        foreach ([
-            ['Lucknow', 'लखनऊ', 'Uttar Pradesh'],
-            ['Delhi', 'दिल्ली', 'Delhi'],
-            ['Mumbai', 'मुंबई', 'Maharashtra'],
-            ['Jaipur', 'जयपुर', 'Rajasthan'],
-            ['Patna', 'पटना', 'Bihar'],
-            ['Bhopal', 'भोपाल', 'Madhya Pradesh'],
-        ] as [$en, $hi, $state]) {
-            City::create(['name_en' => $en, 'name_hi' => $hi, 'state' => $state]);
+        // Every state/UT capital plus major cities (database/seeders/data/cities.php), so the
+        // city picker (onboarding, Account → Preferences) covers the whole country, not just
+        // the original 6 demo cities. is_popular marks the picker's default-shown shortlist.
+        foreach (require __DIR__.'/data/cities.php' as [$en, $hi, $state, $lat, $lng, $popular]) {
+            City::create(['name_en' => $en, 'name_hi' => $hi, 'state' => $state, 'latitude' => $lat, 'longitude' => $lng, 'is_popular' => $popular]);
         }
 
         foreach ([

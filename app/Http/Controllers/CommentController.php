@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Like;
+use App\Models\Reel;
 use App\Models\Story;
 use App\Support\Lang;
 use App\Support\ProfanityFilter;
@@ -11,14 +12,33 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-/** GET|POST /stories/{story}/comments */
+/** GET|POST /stories/{story}/comments and /reels/{reel}/comments */
 class CommentController extends Controller
 {
     public const NEW_ACCOUNT_DAILY_LIMIT = 3;
 
     public function index(Request $request, Story $story): JsonResponse
     {
-        $comments = $story->comments()->visible()->whereNull('parent_id')
+        return $this->list($request, $story);
+    }
+
+    public function indexReel(Request $request, Reel $reel): JsonResponse
+    {
+        abort_unless($reel->status === 'published', 404);
+
+        return $this->list($request, $reel);
+    }
+
+    public function storeReel(Request $request, Reel $reel): JsonResponse
+    {
+        abort_unless($reel->status === 'published', 404);
+
+        return $this->create($request, $reel);
+    }
+
+    private function list(Request $request, Story|Reel $owner): JsonResponse
+    {
+        $comments = $owner->comments()->visible()->whereNull('parent_id')
             ->with(['user', 'replies' => fn ($q) => $q->visible()->with('user')->orderBy('id')])
             ->orderByDesc('id')
             ->cursorPaginate(20);
@@ -32,6 +52,11 @@ class CommentController extends Controller
     }
 
     public function store(Request $request, Story $story): JsonResponse
+    {
+        return $this->create($request, $story);
+    }
+
+    private function create(Request $request, Story|Reel $owner): JsonResponse
     {
         $data = $request->validate([
             'body' => ['required', 'string', 'min:2', 'max:1000'],
@@ -51,16 +76,16 @@ class CommentController extends Controller
 
         $parent = null;
         if (! empty($data['parent_id'])) {
-            $parent = $story->comments()->visible()->whereKey($data['parent_id'])->firstOrFail();
+            $parent = $owner->comments()->visible()->whereKey($data['parent_id'])->firstOrFail();
             $parent = $parent->parent_id ? $parent->parent : $parent; // replies stay one level deep
         }
 
-        $comment = $story->comments()->create([
+        $comment = $owner->comments()->create([
             'user_id' => $user->id,
             'parent_id' => $parent?->id,
             'body' => trim($data['body']),
         ]);
-        $story->increment('comments_count');
+        $owner->increment('comments_count');
 
         return response()->json(['comment' => self::present($comment->load('user')->setRelation('replies', collect()), [])], 201);
     }

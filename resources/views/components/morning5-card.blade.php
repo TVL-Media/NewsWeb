@@ -35,19 +35,32 @@
         <span class="sr-only">{{ __('Play Morning 5') }}</span>
     </a>
 @else
-    <section {{ $attributes->merge(['class' => 'player-bg relative overflow-hidden rounded-[26px] p-5']) }} aria-labelledby="m5-title">
-        <div class="flex items-center gap-4">
-            <span class="logo-tile h-[72px] w-[72px] shrink-0 !rounded-[20px]"><x-logo :wordmark="false" :size="34" /></span>
-            <div>
-                <h2 id="m5-title" class="text-[24px] font-black leading-tight tracking-[-0.5px] text-white">{{ __('Morning 5') }}</h2>
-                <p class="text-[13px] text-brand-pink-text">{{ __('Top 5 stories in 5 minutes') }}</p>
+    @php $headlines = $briefing ? $briefing->stories()->take(3)->map(fn ($s) => $s->version()?->headline)->filter()->values() : collect(); @endphp
+    <section {{ $attributes->merge(['class' => 'player-bg relative flex flex-col overflow-hidden rounded-[22px] p-4']) }} aria-labelledby="m5-title">
+        <div class="flex items-center gap-3">
+            <span class="logo-tile h-[52px] w-[52px] shrink-0 !rounded-[15px]"><x-logo :wordmark="false" :size="26" /></span>
+            <div class="min-w-0 flex-1">
+                <h2 id="m5-title" class="text-[19px] font-black leading-tight tracking-[-0.3px] text-white">{{ __('Morning 5') }}</h2>
+                <p class="text-[12.5px] text-brand-pink-text">{{ __('Top 5 stories in 5 minutes') }}</p>
             </div>
         </div>
-        <x-waveform class="mt-5" :bars="40" :height="30" />
-        <div class="mt-4 flex items-center justify-between gap-3">
-            <p class="text-[13px] font-semibold text-brand-pink-text">{{ $progress }}</p>
-            <a href="{{ route('briefing') }}" class="player-play !h-14 !w-14 no-underline" aria-label="{{ __('Play Morning 5') }}">
-                <x-icon name="play" size="24" class="ml-1 fill-current" />
+
+        @if ($headlines->isNotEmpty())
+            <ol class="mt-3 space-y-1.5 border-t border-white/15 pt-3">
+                @foreach ($headlines as $i => $headline)
+                    <li class="flex gap-2 text-[13px] leading-snug text-white">
+                        <span class="mt-px w-4 shrink-0 font-black text-brand-pink-text">{{ $i + 1 }}</span>
+                        <span class="line-clamp-2">{{ $headline }}</span>
+                    </li>
+                @endforeach
+            </ol>
+        @endif
+
+        <x-waveform class="mt-auto pt-3" :bars="44" :height="22" />
+        <div class="mt-2.5 flex items-center justify-between gap-3">
+            <p class="text-[12.5px] font-semibold text-brand-pink-text">{{ $progress }}</p>
+            <a href="{{ route('briefing') }}" class="player-play !h-12 !w-12 shrink-0 no-underline" aria-label="{{ __('Play Morning 5') }}">
+                <x-icon name="play" size="20" class="ml-0.5 fill-current" />
             </a>
         </div>
     </section>

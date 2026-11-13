@@ -43,9 +43,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('engage', fn (Request $r) => Limit::perMinute(90)->by('engage:'.$r->user()?->id));
         RateLimiter::for('comments', fn (Request $r) => Limit::perMinute(5)->by('comments:'.$r->user()?->id));
 
-        // Category chips row (header). Cached for 10 minutes; cleared by the seeder and admin edits.
-        // Plain arrays are cached (Laravel 13's cache won't unserialize objects by default).
-        View::composer('components.category-chips', function ($view) {
+        // Category chips (header) and the footer's Categories columns share the same list.
+        // Cached for 10 minutes; cleared by the seeder and admin edits. Plain arrays are cached
+        // (Laravel 13's cache won't unserialize objects by default).
+        View::composer(['components.category-chips', 'components.site-footer'], function ($view) {
             $rows = Cache::remember('nav.categories', 600,
                 fn () => Category::orderBy('sort_order')->get()->map->getAttributes()->all());
             $view->with('navCategories', Category::hydrate($rows));

@@ -8,6 +8,7 @@ use App\Models\Poll;
 use App\Models\Story;
 use App\Support\Lang;
 use App\Support\Rails;
+use App\Support\ReelFeed;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -57,6 +58,9 @@ class HomeController extends Controller
             'pagesToFollow' => Rails::pagesToFollow($user, 4),
             'followed' => $followed,
             'poll' => Poll::live()->with('options')->whereNull('created_by')->latest()->first(),
+            'reels' => config('reels.enabled')
+                ? ReelFeed::query($user, null, ['category' => $category?->slug])->limit(10)->get()
+                : collect(),
         ]);
     }
 

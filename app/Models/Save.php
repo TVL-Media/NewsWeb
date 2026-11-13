@@ -17,4 +17,8 @@ class Save extends Model
     {
         return $this->belongsTo(Story::class);
     }
+    public function reel(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Reel::class);
+    }
 }

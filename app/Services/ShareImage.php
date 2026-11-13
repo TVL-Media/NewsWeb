@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Story;
+use App\Services\Concerns\DrawsText;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
@@ -18,6 +19,8 @@ use Intervention\Image\ImageManager;
  */
 class ShareImage
 {
+    use DrawsText;
+
     private const W = 1080;
     private const H = 1350;
 
@@ -154,38 +157,5 @@ class ShareImage
         $center("Can you beat me? Play at {$host}", self::H - 92, $bold, 32, '#FFFFFF');
 
         return (string) $img->encodeUsingFormat(\Intervention\Image\Format::JPEG, quality: 88);
-    }
-
-    /** Greedy word wrap using real glyph widths (GD's FreeType metrics). */
-    private function wrap(string $text, string $font, int $size, int $width): array
-    {
-        $lines = [];
-        $line = '';
-        foreach (preg_split('/\s+/u', trim($text)) as $word) {
-            $try = $line === '' ? $word : "$line $word";
-            $box = imagettfbbox($size * 0.75, 0, $font, $try); // points → px, matching Intervention's GD text size
-            if ($line !== '' && ($box[2] - $box[0]) > $width) {
-                $lines[] = $line;
-                $line = $word;
-            } else {
-                $line = $try;
-            }
-        }
-        if ($line !== '') {
-            $lines[] = $line;
-        }
-
-        return $lines;
-    }
-
-    /**
-     * GD draws code points in logical order without Indic shaping, so the short-i sign (ि, U+093F)
-     * would appear after its consonant. Move it before the consonant cluster it belongs to.
-     */
-    private function reorderMatras(string $text): string
-    {
-        $c = '[\x{0915}-\x{0939}\x{0958}-\x{095F}]\x{093C}?';
-
-        return preg_replace("/((?:{$c}\x{094D})*{$c})\x{093F}/u", "\u{093F}$1", $text);
     }
 }

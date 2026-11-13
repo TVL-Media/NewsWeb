@@ -7,7 +7,7 @@
     $cityPage = $city?->page;
 @endphp
 <nav aria-label="{{ __('Categories') }}" {{ $attributes->merge(['class' => 'border-b border-line bg-white']) }}>
-    <div class="no-scrollbar mx-auto flex max-w-[1280px] gap-2 overflow-x-auto px-4 py-2.5 md:px-6">
+    <div class="no-scrollbar mx-auto flex max-w-[1280px] gap-2 overflow-x-auto px-4 py-2 md:px-6">
         <a href="{{ route('home') }}" class="{{ $active === 'all' ? 'chip-active' : 'chip hover:bg-line' }}" @if ($active === 'all') aria-current="page" @endif>{{ __('All') }}</a>
         @foreach ($order as $slug)
             @if ($slug === '__city')

@@ -5,13 +5,14 @@
     $nav = [
         'home' => ['label' => __('Home'), 'url' => route('home')],
         'for-you' => ['label' => __('For You'), 'url' => route('for-you')],
+        ...(config('reels.enabled') ? ['reels' => ['label' => __('Reels'), 'url' => route('reels')]] : []),
         'briefing' => ['label' => __('Briefing'), 'url' => route('briefing')],
         'explore' => ['label' => __('Explore'), 'url' => route('explore')],
     ];
 @endphp
 <header class="sticky top-0 z-40 border-b border-line bg-white">
     {{-- Desktop (≥ 768px) --}}
-    <div class="mx-auto hidden h-[72px] max-w-[1280px] items-center gap-3 px-6 md:flex">
+    <div class="mx-auto hidden h-[64px] max-w-[1280px] items-center gap-3 px-6 md:flex">
         <a href="{{ route('home') }}" class="no-underline" aria-label="NextGenNews home">
             <x-logo />
         </a>
@@ -19,7 +20,7 @@
         <nav aria-label="{{ __('Main') }}" class="ml-3 flex items-center gap-1">
             @foreach ($nav as $key => $item)
                 <a href="{{ $item['url'] }}"
-                   class="{{ $active === $key ? 'nav-link-active' : 'nav-link hover:bg-chip hover:text-ink' }}"
+                   class="{{ $active === $key ? 'nav-link-active' : 'nav-link hover:bg-chip hover:text-ink' }} whitespace-nowrap"
                    @if ($active === $key) aria-current="page" @endif
                    @if ($key === 'for-you') @click="if (!$store.auth.require('visit', { url: '{{ $item['url'] }}' })) $event.preventDefault()" @endif>
                     {{ $item['label'] }}

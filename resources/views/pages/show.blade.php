@@ -2,6 +2,7 @@
 @php
     $chips = ['latest' => __('Latest'), 'explainers' => __('Explainers')];
     if ($page->pinned_text) { $chips['live'] = __('Live scores'); }
+    if (config('reels.enabled')) { $chips['reels'] = __('Reels'); }
     $chips['polls'] = __('Polls');
     $updated = $updatedAt ? \App\Support\Lang::ago(\Illuminate\Support\Carbon::parse($updatedAt)) : null;
 @endphp
@@ -59,7 +60,17 @@
                     </section>
                 @endif
 
-                @if ($tab === 'polls')
+                @if ($tab === 'reels')
+                    @if ($reels->isEmpty())
+                        <div class="card p-8 text-center text-muted">{{ __('No reels on this page yet.') }}</div>
+                    @else
+                        <ul class="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
+                            @foreach ($reels as $reel)
+                                <li><x-reel-card :reel="$reel" :query="['topic' => $page->slug]" /></li>
+                            @endforeach
+                        </ul>
+                    @endif
+                @elseif ($tab === 'polls')
                     @forelse ($polls as $poll)
                         <x-poll-card :poll="$poll" :show-create="false" :title="__('Poll')" />
                     @empty

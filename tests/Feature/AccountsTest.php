@@ -131,12 +131,29 @@ describe('For You', function () {
         $response->assertDontSee('story-ring', false); // no story circles
     });
 
-    it('skips stories the reader has already read', function () {
+    it('puts read stories under "Earlier", after the caught-up marker', function () {
         $user = User::factory()->create();
         $user->categories()->attach($this->story->category_id);
-        ReadingEvent::create(['user_id' => $user->id, 'story_id' => $this->story->id, 'read_at' => now(), 'read_on' => now()->toDateString()]);
+        ReadingEvent::query()->insertOrIgnore(['user_id' => $user->id, 'story_id' => $this->story->id, 'read_at' => now(), 'read_on' => now()->toDateString()]);
 
-        $this->actingAs($user)->get('/for-you')->assertDontSee($this->story->version('en')->headline);
+        $html = $this->actingAs($user)->get('/for-you')->assertOk()->assertSee('Scroll for earlier stories')->getContent();
+        $caughtUp = strpos($html, "You&#039;re all caught up");
+        $readCard = strpos($html, e($this->story->version('en')->headline));
+
+        expect($caughtUp)->not->toBeFalse()
+            ->and($readCard)->toBeGreaterThan($caughtUp);
+    });
+
+    it('never goes blank once everything has been read', function () {
+        $user = User::factory()->create();
+        $user->categories()->attach($this->story->category_id);
+        Story::published()->where('category_id', $this->story->category_id)->pluck('id')->each(fn ($id) => ReadingEvent::query()->insertOrIgnore([
+            'user_id' => $user->id, 'story_id' => $id, 'read_at' => now(), 'read_on' => now()->toDateString(),
+        ]));
+
+        $html = $this->actingAs($user)->get('/for-you')->assertOk()->getContent();
+        expect(strpos($html, "You&#039;re all caught up"))->toBeLessThan(strpos($html, e($this->story->version('en')->headline)))
+            ->and(substr_count($html, '<article'))->toBeGreaterThan(0);
     });
 });
 

@@ -8,7 +8,7 @@ class Report extends Model
 {
     protected $guarded = [];
 
-    public const TARGETS = ['story' => Story::class, 'comment' => Comment::class, 'poll' => Poll::class];
+    public const TARGETS = ['story' => Story::class, 'comment' => Comment::class, 'poll' => Poll::class, 'reel' => Reel::class];
 
     public function reporter(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

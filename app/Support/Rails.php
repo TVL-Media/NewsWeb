@@ -44,7 +44,8 @@ class Rails
     /** Today's Morning 5 and how many of its stories the reader has read today. */
     public static function morning5(?User $user): array
     {
-        $briefing = Briefing::today();
+        // Before 06:00 IST (or if the job hasn't run) show the latest briefing rather than nothing.
+        $briefing = Briefing::today() ?? Briefing::latest('date')->first();
         $read = 0;
 
         if ($briefing && $user) {

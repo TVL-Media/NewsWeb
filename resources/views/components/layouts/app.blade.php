@@ -5,7 +5,7 @@
 @props([
     'title' => null,
     'description' => null,
-    'active' => null,        // home | for-you | briefing | explore
+    'active' => null,        // home | for-you | reels | briefing | explore
     'chips' => false,        // show the category chips row under the header
     'activeChip' => 'all',
     'canonical' => null,
@@ -13,6 +13,7 @@
     'ogType' => 'website',
     'noReplay' => false,     // onboarding: don't replay a guest's pending action yet
     'bare' => false,         // no header/footer/nav (onboarding, full-screen flows)
+    'immersive' => false,    // reels: dark page, no footer; mobile also hides the header (bottom nav stays)
 ])
 @php
     $pageTitle = $title ? $title.' · NextGenNews' : 'NextGenNews · '.__('Short news with depth, in Hindi and English');
@@ -59,13 +60,17 @@
         </script>
     @endif
 </head>
-<body class="min-h-screen flex flex-col {{ $bare ? '' : 'pb-[calc(66px+env(safe-area-inset-bottom))] md:pb-0' }}"
+<body class="min-h-screen flex flex-col {{ $bare ? '' : 'pb-[calc(66px+env(safe-area-inset-bottom))] md:pb-0' }} {{ $immersive ? 'bg-[#111111]' : '' }}"
       x-data x-init="@if (request()->boolean('login')) $store.auth.show() @endif">
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-white">{{ __('Skip to content') }}</a>
 
     @unless ($bare)
-        <x-site-header :active="$active" />
-        <x-app-banner />
+        @if ($immersive)
+            <div class="hidden md:block"><x-site-header :active="$active" /></div>
+        @else
+            <x-site-header :active="$active" />
+            <x-app-banner />
+        @endif
         @if ($chips)
             <x-category-chips :active="$activeChip" />
         @endif
@@ -76,7 +81,7 @@
     </main>
 
     @unless ($bare)
-        <x-site-footer />
+        @unless ($immersive)<x-site-footer />@endunless
         <x-bottom-nav :active="$active" />
     @endunless
     <x-audio-player />

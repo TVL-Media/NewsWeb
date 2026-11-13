@@ -11,6 +11,11 @@ class City extends Model
 {
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return ['latitude' => 'float', 'longitude' => 'float', 'is_popular' => 'boolean'];
+    }
+
     public function name(?string $lang = null): string
     {
         return ($lang ?? Lang::current()) === 'hi' ? $this->name_hi : $this->name_en;

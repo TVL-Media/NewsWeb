@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
     {
         // Fresh demo media on every seed.
         $disk = Storage::disk(config('filesystems.media'));
-        foreach (['categories', 'pages', 'stories', 'page-stories', 'audio'] as $dir) {
+        foreach (['categories', 'pages', 'stories', 'page-stories', 'audio', 'reels'] as $dir) {
             $disk->deleteDirectory($dir);
         }
 
@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             TaxonomySeeder::class,
             StorySeeder::class,
             DemoActivitySeeder::class,
+            ReelSeeder::class,
         ]);
 
         Cache::forget('nav.categories');

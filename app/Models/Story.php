@@ -144,4 +144,9 @@ class Story extends Model
     {
         return $this->hasMany(Poll::class);
     }
+
+    public function reels(): HasMany
+    {
+        return $this->hasMany(Reel::class);
+    }
 }

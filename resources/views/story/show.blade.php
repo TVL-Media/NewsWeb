@@ -133,6 +133,14 @@
                             <x-icon name="headphones" size="17" />
                             {{ __('Listen') }} · {{ max(1, (int) ceil(($v->audio_seconds ?: 60) / 60)) }} {{ __('min') }}
                         </button>
+                        @foreach ($reels as $l => $reel)
+                            @if ($reel)
+                                <a href="{{ route('reels.show', $reel) }}" x-show="lang === '{{ $l }}'" @if ($l !== $lang) x-cloak @endif
+                                   class="btn rounded-full bg-ink px-4 text-[13.5px] text-white no-underline hover:bg-black hover:text-white">
+                                    <x-icon name="play" size="15" class="fill-current" /> {{ __('Watch reel') }}
+                                </a>
+                            @endif
+                        @endforeach
                         @if ($hasOther)
                             <button type="button" class="btn-ghost" @click="lang = lang === 'en' ? 'hi' : 'en'" :aria-pressed="(lang !== @js($lang)).toString()">
                                 <span x-show="lang === 'en'" @if ($lang !== 'en') x-cloak @endif>Read in <span lang="hi">हिंदी</span></span>

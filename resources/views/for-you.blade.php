@@ -13,7 +13,7 @@
          @keydown.window.arrow-up="if (!['INPUT','TEXTAREA'].includes($event.target.tagName)) { $event.preventDefault(); next(-1); }">
         <h1 class="sr-only">{{ __('For You') }}</h1>
 
-        <div x-ref="feed" class="no-scrollbar h-[calc(100dvh-58px-66px)] snap-y snap-mandatory overflow-y-auto md:h-[calc(100dvh-72px)]"
+        <div x-ref="feed" class="no-scrollbar h-[calc(100dvh-58px-66px)] snap-y snap-mandatory overflow-y-auto md:h-[calc(100dvh-64px)]"
              tabindex="-1" aria-label="{{ __('Your stories') }}">
 
             @if (! $hasTopics)
@@ -27,7 +27,11 @@
             @endif
 
             @foreach ($stories as $i => $story)
+                @if ($hasTopics && $i === $newCount)
+                    @include('partials.for-you-caught-up', ['hasEarlier' => true])
+                @endif
                 @php
+                    $isEarlier = $i >= $newCount;
                     $en = $story->version('en'); $hi = $story->version('hi');
                     $lang = app()->getLocale();
                     $v = $story->version($lang);
@@ -45,11 +49,11 @@
                 @endphp
                 <section class="flex h-full snap-start snap-always items-stretch justify-center md:px-4 md:py-5"
                          aria-label="{{ __('Story :n of :total', ['n' => $i + 1, 'total' => $stories->count()]) }}">
-                    <article class="flex h-full w-full max-w-[560px] flex-col overflow-hidden bg-white md:h-auto md:max-h-full md:self-center md:rounded-[26px] md:shadow-[var(--shadow-hero)]"
+                    <article class="flex h-full min-h-0 w-full max-w-[560px] flex-col overflow-hidden bg-white md:h-auto md:max-h-full md:self-center md:rounded-[26px] md:shadow-[var(--shadow-hero)]"
                              x-data="{
                                 ...@js($data),
                                 get t() { return this.text[this.lang].headline ? this.text[this.lang] : this.text[this.lang === 'en' ? 'hi' : 'en']; },
-                                readSent: false,
+                                readSent: @js($isEarlier),
                                 seen() { if (this.readSent) return; setTimeout(() => { if (!this.readSent) { this.readSent = true; window.ngnFetch('/stories/' + this.id + '/read'); } }, 3000); },
                                 async like() {
                                     this.liked = !this.liked; this.likes += this.liked ? 1 : -1;
@@ -69,7 +73,10 @@
                             @if ($story->photoUrl())
                                 <img src="{{ $story->photoUrl() }}" alt="" @if ($i > 1) loading="lazy" @endif width="1120" height="600" class="h-full w-full object-cover">
                             @endif
-                            <span class="chip-red absolute left-4 top-4 h-7 text-[12px]">{{ $story->category?->name() }}</span>
+                            <span class="absolute left-4 top-4 flex gap-1.5">
+                                <span class="chip-red h-7 text-[12px]">{{ $story->category?->name() }}</span>
+                                @if ($isEarlier)<span class="photo-pill h-7">{{ __('Earlier') }}</span>@endif
+                            </span>
                             <button type="button" @click="$dispatch('ngn-listen', { src: t.audio, title: t.headline })"
                                     class="absolute bottom-4 right-4 inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-3.5 text-[13px] font-bold text-ink shadow-[var(--shadow-float)]"
                                     :aria-label="'{{ __('Listen') }} ' + t.len">
@@ -90,10 +97,11 @@
                                 </div>
                             @endif
 
-                            {{-- Text --}}
+                            {{-- Text: the paragraph is clamped so its height is predictable and "Read more" + the
+                                 actions row below can never be pushed past the card's clipped bottom edge. --}}
                             <div class="mt-3 min-h-0 flex-1 overflow-hidden md:flex-none" :lang="t === text.hi ? 'hi' : 'en'">
-                                <h2 class="text-[21px] font-extrabold leading-[1.25] tracking-[-0.3px]" x-text="t.headline">{{ $v->headline }}</h2>
-                                <p class="reading-text mt-2 text-[15.5px] leading-[1.55] text-ink-2" x-text="t.card">{{ $v->card_text }}</p>
+                                <h2 class="line-clamp-2 text-[21px] font-extrabold leading-[1.25] tracking-[-0.3px]" x-text="t.headline">{{ $v->headline }}</h2>
+                                <p class="reading-text mt-2 line-clamp-4 text-[15.5px] leading-[1.55] text-ink-2" x-text="t.card">{{ $v->card_text }}</p>
                                 <a href="{{ route('story.show', $story) }}" class="mt-1.5 inline-block text-[14px] font-bold no-underline">{{ __('Read more') }} ›</a>
                             </div>
 
@@ -130,18 +138,9 @@
                 </section>
             @endforeach
 
-            @if ($hasTopics)
-                <section class="flex h-full snap-start items-center justify-center p-6">
-                    <div class="text-center">
-                        <span class="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-success-tint text-success"><x-icon name="check" size="30" :stroke="3" /></span>
-                        <h2 class="mt-4 text-[24px] font-black tracking-[-0.5px]">{{ __("You're all caught up") }} ✓</h2>
-                        <p class="mt-1.5 text-[15px] text-muted">{{ __('New stories from your topics and pages will appear here.') }}</p>
-                        <div class="mt-5 flex justify-center gap-2">
-                            <a href="{{ route('home') }}" class="btn-primary">{{ __('Latest News') }}</a>
-                            <a href="{{ route('explore') }}" class="btn-ghost">{{ __('Explore') }}</a>
-                        </div>
-                    </div>
-                </section>
+            {{-- Nothing read yet (or no earlier stories): the marker goes after the last card. --}}
+            @if ($hasTopics && $newCount === $stories->count())
+                @include('partials.for-you-caught-up', ['hasEarlier' => false])
             @endif
         </div>
     </div>

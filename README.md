@@ -224,6 +224,50 @@ Where the brief was silent, I picked the simplest option:
   - **Roles:** editor = Newsroom (except Feeds), Daily and Moderation; chief = + Feeds and Auto-publish settings; admin = + Pages and Categories.
 - **Filament note:** table closures must name their argument `$query` (Filament injects by name).
 
+## Reels (short vertical news videos)
+
+Settings in `.env`: `REELS_ENABLED`, `FFMPEG_PATH`, `REEL_MAX_SECONDS` (default 60, a hard cap for every reel). Details in `config/reels.php`.
+
+### Install FFmpeg (the only extra tool)
+
+FFprobe ships with FFmpeg and must sit next to it (or set `FFPROBE_PATH`).
+
+- **Windows, winget (what this machine uses):**
+  ```powershell
+  winget install --id Gyan.FFmpeg -e
+  ```
+  Then set `FFMPEG_PATH=C:/Users/<you>/AppData/Local/Microsoft/WinGet/Links/ffmpeg.exe`.
+- **Windows, Laragon:** download the "release essentials" zip from https://www.gyan.dev/ffmpeg/builds/. Extract it to `C:\laragon\bin\ffmpeg` so that `C:\laragon\bin\ffmpeg\bin\ffmpeg.exe` exists. Then set `FFMPEG_PATH=C:/laragon/bin/ffmpeg/bin/ffmpeg.exe`.
+- **Linux server (Ubuntu/Debian):**
+  ```bash
+  sudo apt update && sudo apt install -y ffmpeg
+  ```
+  Then set `FFMPEG_PATH=/usr/bin/ffmpeg`. On distributions without an `ffmpeg` package (for example Amazon Linux), use a static build from https://johnvansickle.com/ffmpeg/ and point `FFMPEG_PATH` at it.
+
+Check it with `ffmpeg -version`. The build needs `libx264` and `aac`; the packages above have both.
+
+### How a reel is made
+
+- **Auto reels:** `StoryPublished` → `QueueStoryReels` → `GenerateReel` (queued, once per language version) → `App\Services\Reels\ReelBuilder`.
+  - **Voice-over:** our TTS reads each segment in turn: headline, key point 1, 2, 3, then "Read the full story on NextGenNews". FFprobe measures each clip.
+  - **Stills:** `ReelSlides` draws them at 720×1280 with GD/Intervention, using the same fonts as the share card (Inter / Noto Sans Devanagari). There is one transparent overlay per segment (logo, dark fade, red #D7141E accent bar, label pill, big white text), plus the end card and a JPG thumbnail.
+  - **Video:** one FFmpeg run applies a slow zoom/pan to the story photo, shows each overlay for exactly as long as its segment is spoken, adds the end card, and outputs 720×1280 (~1.5 Mbps) and 480×854 (~700 kbps) H.264/AAC MP4s with `+faststart`.
+  - **Storage:** files go to the media disk under `reels/{id}/` with a fresh random prefix on every build, so CloudFront never serves a stale file.
+- **Length 20–45 s:** if the voice-over runs long, trailing key points are dropped (the headline and point 1 always stay). If it runs short, the end card is held longer.
+- **Uploads:** `ProcessUploadedReel` turns an editor upload into the same two MP4s plus a thumbnail. The video is fitted over a blurred copy of itself, so landscape agency footage isn't cropped. A silent track is added if the upload has no audio. Uploads longer than `REEL_MAX_SECONDS` fail with a clear message. The Filament upload form comes in Reels Milestone 2.
+- **Status:** a low-risk story → `published`; a sensitive story (`ai_checks.risk_level = sensitive`) or any upload → `pending_approval`; an error → `failed`, with the FFmpeg/FFprobe message in `error_message`. Editor alerts and the review screens come in Reels Milestone 2.
+- **Re-runs:** a story that is published again with the same headline, key points and photo doesn't re-render (`source_hash`). Pass `force: true` to rebuild anyway.
+- **Engagement:** likes (already polymorphic) and reports (`target_type = reel`) needed no schema change. Comments, saves and shares got a nullable `reel_id` next to `story_id`.
+- **Sample data:** `ReelSeeder` renders 10 English reels from low-risk seeded stories. It runs synchronously at the end of `migrate:fresh --seed` (a few minutes). It is skipped when `REELS_ENABLED=false` or FFmpeg is missing. Tests set `REELS_ENABLED=false`.
+
+### Reels decisions and limits
+
+- **Text drawing:** text is drawn with PHP/GD, not FFmpeg's `drawtext`, so fonts render the same on Windows and Linux without fontconfig.
+- **Captions:** they are synced per sentence. Each headline or key point is on screen exactly while it is spoken. Word-by-word captions would need word timings, and our TTS doesn't return them.
+- **Photos:** stories have one photo, so the zoom/pan runs over that single photo. A multi-photo slideshow needs a story-gallery field first.
+- **Music:** none. `REEL_MUSIC_DIR` is reserved for the licensed music folder.
+- **Hindi in reels:** Hindi has the same GD shaping caveat as the share card. Set `IMAGE_DRIVER=imagick` (with libraqm) in production for perfect conjuncts.
+
 ## Milestones
 
 1. ✅ **Setup:** Laravel, theme, layout (header, footer, mobile nav, app banner, chips), components, migrations, seeders. Home shows a first version (greeting, hero, Latest News, poll). Other routes render a placeholder naming their milestone.
@@ -232,3 +276,21 @@ Where the brief was silent, I picked the simplest option:
 4. ✅ **Habit features:** Briefing page with the Morning 5 player, daily quiz, streaks (with freezes), polls (vote, create, results), scheduled jobs.
 5. ✅ **Newsroom:** feeds, clustering, AI drafts (Claude), fact/copy/sensitivity checks, auto-publish routing, approval queue, Filament admin, scheduler.
 6. Launch prep: SEO/sitemaps, caching, GA4/Sentry, accessibility, tests, final README.
+
+**Reels:**
+
+1. ✅ Database, reel generation and video processing (FFmpeg), sample reels (10 stories × English + Hindi).
+2. Filament admin, auto-publish rules + editor alerts, the `/api/v1` endpoints. **Waiting on the admin work from the other developer.** `ReelResource` is already shaped for the API.
+3. ✅ Website pages:
+   - `/reels` and `/reels/{slug}` (mobile snap-scroll, desktop centred player, comments and share sheets, SEO + VideoObject JSON-LD)
+   - Reels in the header and the 5-item bottom nav
+   - the Home reels row, the Story "Watch reel" pill, the topic Reels tab and the Explore tile
+
+**Reels screens: notes**
+
+- **Stack:** the site already uses Blade + Tailwind + Alpine (from Livewire), so the player is an Alpine component (`reelFeed` in `resources/js/app.js`). No new npm packages.
+- **Feed order:** reels from followed pages first, then the newest day, and the most watched within each day. It uses page numbers (8 reels per page), not a cursor.
+- **Language:** one reel per story, in the reader's language. If a story only has a reel in the other language, that one is shown.
+- **Views:** a view is counted when the reader leaves a reel after watching at least 1 second (`sendBeacon`).
+- **Shares:** guests can share; shares are counted but not gated.
+- **Burned-in text:** it stays out of the right 140 px and a 58 px side margin. On tall phones, `object-fit: cover` trims the sides, and the like/comment column covers the right edge.

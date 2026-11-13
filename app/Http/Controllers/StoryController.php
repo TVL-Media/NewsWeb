@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Like;
 use App\Models\Poll;
 use App\Models\Reaction;
+use App\Models\Reel;
 use App\Models\Save;
 use App\Models\Story;
 use App\Support\Rails;
@@ -58,6 +59,22 @@ class StoryController extends Controller
             'saved' => $user ? Save::where(['user_id' => $user->id, 'story_id' => $story->id])->exists() : false,
             'reaction' => $user ? Reaction::where(['user_id' => $user->id, 'story_id' => $story->id])->value('type') : null,
             'votedOptionId' => $user && $poll ? $poll->votes()->where('user_id', $user->id)->value('poll_option_id') : null,
+            // "▶ Watch reel" per reading language, falling back to the other language's reel.
+            'reels' => $this->reels($story),
         ]);
+    }
+
+    private function reels(Story $story): array
+    {
+        if (! config('reels.enabled')) {
+            return ['en' => null, 'hi' => null];
+        }
+
+        $reels = Reel::published()->where('story_id', $story->id)->get()->keyBy('language');
+
+        return [
+            'en' => $reels->get('en') ?? $reels->get('hi'),
+            'hi' => $reels->get('hi') ?? $reels->get('en'),
+        ];
     }
 }

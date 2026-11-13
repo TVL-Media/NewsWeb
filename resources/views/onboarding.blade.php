@@ -1,12 +1,10 @@
 @php
-    // Approximate city centres for "Use my current location" (nearest of the listed cities).
-    $coords = [
-        'Lucknow' => [26.8467, 80.9462], 'Delhi' => [28.6139, 77.2090], 'Mumbai' => [19.0760, 72.8777],
-        'Jaipur' => [26.9124, 75.7873], 'Patna' => [25.5941, 85.1376], 'Bhopal' => [23.2599, 77.4126],
-    ];
+    // Every state/UT capital plus major cities (~120); coords come straight from the cities
+    // table now, not a hardcoded map, so "Use my current location" works for all of them.
     $cityData = $cities->map(fn ($c) => [
         'id' => $c->id, 'name' => $c->name(), 'name_en' => $c->name_en, 'name_hi' => $c->name_hi,
-        'state' => $c->state, 'coords' => $coords[$c->name_en] ?? null,
+        'state' => $c->state, 'coords' => $c->latitude !== null ? [$c->latitude, $c->longitude] : null,
+        'popular' => (bool) $c->is_popular,
     ])->values();
 @endphp
 <x-layouts.app :title="__('Welcome')" bare no-replay>
@@ -21,9 +19,16 @@
                 query: '',
                 locating: false, locError: '',
                 cities: @js($cityData),
+                // Biggest/most-recognised first for the default shortlist (cities.php groups by
+                // state alphabetically, which would otherwise put Andhra Pradesh ahead of Delhi/Mumbai).
+                cityPriority: ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Surat', 'Jaipur', 'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Bhopal', 'Patna', 'Chandigarh', 'Kochi', 'Coimbatore', 'Visakhapatnam', 'Guwahati', 'Bhubaneswar', 'Thiruvananthapuram'],
                 get filtered() {
                     const q = this.query.trim().toLowerCase();
-                    return q ? this.cities.filter(c => c.name_en.toLowerCase().includes(q) || c.name_hi.includes(q) || c.state.toLowerCase().includes(q)) : this.cities;
+                    if (!q) {
+                        return this.cities.filter(c => c.popular)
+                            .sort((a, b) => this.cityPriority.indexOf(a.name_en) - this.cityPriority.indexOf(b.name_en));
+                    }
+                    return this.cities.filter(c => c.name_en.toLowerCase().includes(q) || c.name_hi.includes(q) || c.state.toLowerCase().includes(q));
                 },
                 toggle(id) { this.selected.includes(id) ? this.selected = this.selected.filter(i => i !== id) : this.selected.push(id); },
                 locate() {
@@ -121,7 +126,7 @@
                 </button>
                 <p x-show="locError" x-text="locError" x-cloak class="mt-2 text-[13px] text-brand-dark"></p>
 
-                <p class="mt-6 text-[12px] font-extrabold tracking-[0.1em] text-muted-2">{{ __('POPULAR CITIES') }}</p>
+                <p x-show="!query.trim()" class="mt-6 text-[12px] font-extrabold tracking-[0.1em] text-muted-2">{{ __('POPULAR CITIES') }}</p>
                 <ul class="mt-1" role="radiogroup" aria-label="{{ __('City') }}">
                     <template x-for="c in filtered" :key="c.id">
                         <li>
