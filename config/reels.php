@@ -14,6 +14,9 @@ return [
     'auto_min_seconds' => 20,
     'auto_max_seconds' => 45,
 
+    // Largest video an editor can upload in the admin panel (PHP's upload_max_filesize / post_max_size must allow it).
+    'upload_max_mb' => (int) env('REEL_UPLOAD_MAX_MB', 200),
+
     // Licensed background music folder (not used yet — reels have no music until it is provided).
     'music_dir' => env('REEL_MUSIC_DIR'),
 

@@ -19,6 +19,7 @@ class Reel extends Model
     {
         return [
             'published_at' => 'datetime',
+            'reviewed_at' => 'datetime',
             'duration_seconds' => 'integer',
         ];
     }
@@ -50,6 +51,18 @@ class Reel extends Model
             ->where('published_at', '<=', now());
     }
 
+    /** Published and, for a story reel, its story is still live (an unpublished story takes its reels with it). */
+    public function scopeVisible(Builder $query): Builder
+    {
+        return $query->published()
+            ->where(fn (Builder $q) => $q->whereNull('story_id')->orWhereHas('story', fn (Builder $s) => $s->published()));
+    }
+
+    public function isVisible(): bool
+    {
+        return self::visible()->whereKey($this->id)->exists();
+    }
+
     public function videoUrl(string $size = '720'): ?string
     {
         $path = $size === '480' ? $this->video_480_path : $this->video_720_path;
@@ -69,7 +82,7 @@ class Reel extends Model
             return null;
         }
 
-        return self::published()
+        return self::visible()
             ->where('story_id', $this->story_id)
             ->where('language', $this->language === 'hi' ? 'en' : 'hi')
             ->first();
@@ -99,6 +112,11 @@ class Reel extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(Admin::class, 'created_by');
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class, 'reviewed_by');
     }
 
     public function views(): HasMany

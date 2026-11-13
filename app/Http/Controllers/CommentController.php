@@ -24,14 +24,14 @@ class CommentController extends Controller
 
     public function indexReel(Request $request, Reel $reel): JsonResponse
     {
-        abort_unless($reel->status === 'published', 404);
+        abort_unless($reel->isVisible(), 404);
 
         return $this->list($request, $reel);
     }
 
     public function storeReel(Request $request, Reel $reel): JsonResponse
     {
-        abort_unless($reel->status === 'published', 404);
+        abort_unless($reel->isVisible(), 404);
 
         return $this->create($request, $reel);
     }

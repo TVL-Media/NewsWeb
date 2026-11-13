@@ -28,6 +28,7 @@
       ['admin.newsroom.feeds', 'Feeds & auto-publish', 'rss', 'feeds.manage|autopublish.manage|review.view', 'admin.newsroom.*'],
       ['admin.translations.index', 'Translations', 'languages', 'translation.review|translation.request', 'admin.translations.*|admin.glossary.*', $navCounts['translations'] ?? 0],
       ['admin.media.index', 'Media library', 'image', 'media.upload', 'admin.media.*'],
+      ...(config('reels.enabled') ? [['admin.reels.index', 'Reels', 'video', 'reels.view', 'admin.reels.*', $navCounts['reels'] ?? 0]] : []),
     ],
     'Daily' => [
       ['admin.daily.briefings', 'Morning 5', 'sunrise', 'briefing.manage', 'admin.daily.briefing*'],

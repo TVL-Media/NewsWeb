@@ -9,7 +9,7 @@
 </nav>
 <div class="card">
   <form class="filters" method="get"><input type="hidden" name="status" value="{{ $status }}">
-    <select name="type" style="width:auto" onchange="this.form.submit()"><option value="">All types</option>@foreach(['story' => 'Stories', 'comment' => 'Comments', 'poll' => 'Polls'] as $k=>$l)<option value="{{ $k }}" @selected(request('type')===$k)>{{ $l }}</option>@endforeach</select>
+    <select name="type" style="width:auto" onchange="this.form.submit()"><option value="">All types</option>@foreach(['story' => 'Stories', 'comment' => 'Comments', 'poll' => 'Polls', 'reel' => 'Reels'] as $k=>$l)<option value="{{ $k }}" @selected(request('type')===$k)>{{ $l }}</option>@endforeach</select>
     <select name="reason" style="width:auto" onchange="this.form.submit()"><option value="">All reasons</option>@foreach(\App\Http\Controllers\Admin\ReportController::REASONS as $k=>$l)<option value="{{ $k }}" @selected(request('reason')===$k)>{{ $l }}</option>@endforeach</select>
   </form>
   <table class="t"><thead><tr><th>Reported item</th><th>Type</th><th>Reason</th><th class="num">Reports</th><th>Latest</th><th>Status</th><th></th></tr></thead><tbody>

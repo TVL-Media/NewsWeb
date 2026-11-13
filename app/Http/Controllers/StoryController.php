@@ -70,7 +70,7 @@ class StoryController extends Controller
             return ['en' => null, 'hi' => null];
         }
 
-        $reels = Reel::published()->where('story_id', $story->id)->get()->keyBy('language');
+        $reels = Reel::visible()->where('story_id', $story->id)->get()->keyBy('language');
 
         return [
             'en' => $reels->get('en') ?? $reels->get('hi'),

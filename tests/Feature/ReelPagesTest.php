@@ -13,24 +13,6 @@ beforeEach(function () {
     config(['reels.enabled' => true]);
 });
 
-function makeReel(Story $story, string $lang = 'en', array $attrs = []): Reel
-{
-    return Reel::create([
-        'story_id' => $story->id, 'page_id' => $story->page_id, 'category_id' => $story->category_id,
-        'language' => $lang, 'title' => $story->version($lang)->headline,
-        'slug' => $story->slug.($lang === 'hi' ? '-hi' : '').'-reel',
-        'video_720_path' => "reels/x/{$story->id}-{$lang}-720.mp4", 'video_480_path' => "reels/x/{$story->id}-{$lang}-480.mp4",
-        'thumbnail_path' => "reels/x/{$story->id}-{$lang}-thumb.jpg", 'duration_seconds' => 28,
-        'status' => 'published', 'published_at' => now()->subHour(),
-        ...$attrs,
-    ]);
-}
-
-function reader(): User
-{
-    return User::where('phone', '9876543210')->first();
-}
-
 it('shows Reels in the desktop header and as the 5th mobile nav item', function () {
     $html = $this->get('/')->assertOk()->getContent();
 

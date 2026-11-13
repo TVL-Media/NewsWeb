@@ -26,7 +26,10 @@
       @elseif($target instanceof \App\Models\Comment)
         <div class="pv-cat">Comment · <x-admin.pill :tone="$target->status === 'hidden' ? 'red' : 'green'">{{ ucfirst($target->status) }}</x-admin.pill></div>
         <blockquote style="margin:8px 0;padding:10px 14px;border-left:3px solid var(--line);background:var(--canvas);white-space:pre-line">{{ $target->body }}</blockquote>
-        <div class="small">On <a href="{{ route('story.show', $target->story) }}#comments" target="_blank">{{ $target->story?->title() }}</a></div>
+        @if($target->story)<div class="small">On <a href="{{ route('story.show', $target->story) }}#comments" target="_blank">{{ $target->story->title() }}</a></div>@elseif($target->reel)<div class="small">On reel <a href="{{ route('admin.reels.show', $target->reel) }}">{{ $target->reel->title }}</a></div>@endif
+      @elseif($target instanceof \App\Models\Reel)
+        <div class="pv-cat">Reel · <x-admin.pill :tone="\App\Http\Controllers\Admin\ReelController::LABELS[$target->status][1] ?? 'neutral'">{{ \App\Http\Controllers\Admin\ReelController::LABELS[$target->status][0] ?? $target->status }}</x-admin.pill></div>
+        <div class="row mt-2" style="align-items:flex-start;gap:14px">@if($target->thumbnailUrl())<img src="{{ $target->thumbnailUrl() }}" alt="" style="width:90px;aspect-ratio:9/16;object-fit:cover;border-radius:10px">@endif<div><strong>{{ $target->title }}</strong><div class="mt-2"><a href="{{ route('admin.reels.show', $target) }}" class="small">Open the reel (preview)</a>@if($target->status === 'published') · <a href="{{ route('reels.show', $target) }}" target="_blank" class="small">Open on site</a>@endif</div></div></div>
       @elseif($target instanceof \App\Models\Poll)
         <div class="pv-cat">Poll · {{ $target->status }}</div><strong>{{ $target->question }}</strong><ul class="mt-2">@foreach($target->options as $o)<li>{{ $o->label }}</li>@endforeach</ul><a href="{{ route('admin.polls.show', $target) }}" class="small">Open poll</a>
       @endif

@@ -8,3 +8,5 @@ pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(fn () => Storage::fake('public'))
     ->in('Feature');
+
+require_once __DIR__.'/ReelHelpers.php';

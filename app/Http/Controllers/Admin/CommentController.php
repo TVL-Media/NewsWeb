@@ -19,7 +19,7 @@ class CommentController extends Controller
     {
         $reported = fn ($q) => $q->whereExists(fn ($e) => $e->from('reports')->whereColumn('reports.target_id', 'comments.id')
             ->where('reports.target_type', 'comment')->whereIn('reports.status', ['open', 'escalated']));
-        $q = Comment::with(['user:id,name,phone,status', 'story.versions:id,story_id,language,headline'])
+        $q = Comment::with(['user:id,name,phone,status', 'story.versions:id,story_id,language,headline', 'reel:id,title,slug,status'])
             ->select('comments.*')
             ->selectSub(fn ($s) => $s->from('reports')->selectRaw('count(*)')->whereColumn('reports.target_id', 'comments.id')->where('reports.target_type', 'comment')->whereIn('reports.status', ['open', 'escalated']), 'open_reports');
         $tab = $r->query('tab', 'reported');
@@ -63,9 +63,11 @@ class CommentController extends Controller
             return 0;
         }
         $comment->update(['status' => $status]);
+        // A comment belongs to a story or to a reel; keep the right count in step.
+        $owner = $comment->reel_id ? \App\Models\Reel::whereKey($comment->reel_id) : Story::whereKey($comment->story_id);
         $status === 'hidden'
-            ? Story::whereKey($comment->story_id)->where('comments_count', '>', 0)->decrement('comments_count')
-            : Story::whereKey($comment->story_id)->increment('comments_count');
+            ? $owner->where('comments_count', '>', 0)->decrement('comments_count')
+            : $owner->increment('comments_count');
         $closed = DB::table('reports')->where('target_type', 'comment')->where('target_id', $comment->id)->whereIn('status', ['open', 'escalated'])
             ->update(['status' => $status === 'hidden' ? 'actioned' : 'dismissed', 'handled_by' => auth('admin')->id(), 'handled_at' => now(), 'updated_at' => now()]);
         ModerationAction::create(['target_type' => 'comment', 'target_id' => $comment->id, 'action' => $status === 'hidden' ? 'hide' : 'restore', 'note' => $reason, 'reports_closed' => $closed, 'admin_id' => auth('admin')->id()]);

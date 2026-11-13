@@ -29,7 +29,7 @@ class ReelController extends Controller
     // GET /reels/{slug} — the feed, starting at this reel
     public function show(Request $request, Reel $reel)
     {
-        abort_unless($reel->status === 'published' && $reel->published_at?->isPast(), 404);
+        abort_unless($reel->isVisible(), 404);
 
         return $this->feedView($request, $reel);
     }
@@ -48,7 +48,7 @@ class ReelController extends Controller
     // GET /reels/{reel}/data — one reel (the player's हिं/EN switch)
     public function data(Request $request, Reel $reel): JsonResponse
     {
-        abort_unless($reel->status === 'published', 404);
+        abort_unless($reel->isVisible(), 404);
 
         return response()->json(['reel' => (new ReelResource(ReelFeed::decorate(collect([$reel->load(['page', 'story'])]), $request->user())->first()))->resolve($request)]);
     }
@@ -56,6 +56,7 @@ class ReelController extends Controller
     // POST /reels/{reel}/view  { watched_seconds, completed } — guests too
     public function view(Request $request, Reel $reel): JsonResponse
     {
+        abort_unless($reel->isVisible(), 404);
         $data = $request->validate([
             'watched_seconds' => ['required', 'integer', 'min:0', 'max:3600'],
             'completed' => ['nullable', 'boolean'],
@@ -75,6 +76,7 @@ class ReelController extends Controller
     // POST / DELETE /reels/{reel}/like
     public function like(Request $request, Reel $reel): JsonResponse
     {
+        abort_unless($reel->isVisible(), 404);
         $attrs = ['user_id' => $request->user()->id, 'likeable_type' => Reel::class, 'likeable_id' => $reel->id];
 
         $liked = DB::transaction(function () use ($request, $reel, $attrs) {
@@ -98,6 +100,7 @@ class ReelController extends Controller
     // POST / DELETE /reels/{reel}/save
     public function save(Request $request, Reel $reel): JsonResponse
     {
+        abort_unless($reel->isVisible() || $request->isMethod('DELETE'), 404);
         $where = ['user_id' => $request->user()->id, 'reel_id' => $reel->id];
         $request->isMethod('DELETE') ? Save::where($where)->delete() : Save::firstOrCreate($where);
 
@@ -107,6 +110,7 @@ class ReelController extends Controller
     // POST /reels/{reel}/share  { channel } — guests too (shares are counted, not gated)
     public function share(Request $request, Reel $reel): JsonResponse
     {
+        abort_unless($reel->isVisible(), 404);
         $data = $request->validate(['channel' => ['nullable', Rule::in(['whatsapp', 'link', 'native'])]]);
 
         Share::create(['user_id' => $request->user()?->id, 'reel_id' => $reel->id, 'channel' => $data['channel'] ?? 'link']);

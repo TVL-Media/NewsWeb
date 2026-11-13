@@ -16,7 +16,7 @@
       <tr>
         <td style="max-width:420px"><div class="small" style="white-space:pre-line">{{ \Illuminate\Support\Str::limit($c->body, 300) }}</div>@if($c->parent_id)<div class="t2">reply</div>@endif</td>
         <td class="small nowrap">@if($c->user)@can('users.view')<a href="{{ route('admin.users.show', $c->user) }}">{{ $c->user->name ?: 'Reader #'.$c->user_id }}</a>@else{{ $c->user->name ?: 'Reader' }}@endcan @if($c->user->status !== 'active') <x-admin.pill tone="red">{{ $c->user->status }}</x-admin.pill>@endif @endif</td>
-        <td class="small" style="max-width:240px">@if($c->story)<a href="{{ route('story.show', $c->story) }}#comments" target="_blank">{{ \Illuminate\Support\Str::limit($c->story->title(), 60) }}</a>@endif</td>
+        <td class="small" style="max-width:240px">@if($c->story)<a href="{{ route('story.show', $c->story) }}#comments" target="_blank">{{ \Illuminate\Support\Str::limit($c->story->title(), 60) }}</a>@elseif($c->reel)<span class="pill">Reel</span> <a href="{{ route('admin.reels.show', $c->reel) }}">{{ \Illuminate\Support\Str::limit($c->reel->title, 60) }}</a>@endif</td>
         <td class="num">@if($c->open_reports)<span class="pill red">{{ $c->open_reports }}</span>@else<span class="muted">0</span>@endif</td>
         <td><x-admin.pill :tone="$c->status === 'hidden' ? 'red' : 'green'">{{ ucfirst($c->status) }}</x-admin.pill></td>
         <td class="small muted nowrap">{{ $c->created_at->diffForHumans() }}</td>

@@ -21,49 +21,6 @@ use Illuminate\Support\Facades\Storage;
 
 beforeEach(fn () => $this->seed(DatabaseSeeder::class));
 
-/**
- * Fake ffmpeg/ffprobe: ffprobe reports $seconds for every file; ffmpeg "writes" each output file
- * it is given, or fails with $error.
- */
-function fakeFfmpeg(float $seconds = 6.0, ?string $error = null, bool $audio = true): void
-{
-    Process::fake(['*' => function (PendingProcess $process) use ($seconds, $error, $audio) {
-        $args = (array) $process->command;
-
-        if (str_contains(implode(' ', $args), 'format=duration')) {
-            return Process::result(sprintf('%.6f', $seconds));
-        }
-        if (str_contains(implode(' ', $args), 'stream=index')) {
-            return Process::result($audio ? '1' : '');
-        }
-        if (in_array('-version', $args, true)) {
-            return Process::result('ffmpeg version 9.0');
-        }
-        if ($error) {
-            return Process::result(errorOutput: $error, exitCode: 1);
-        }
-
-        foreach ($args as $i => $arg) {
-            if (preg_match('/\.(mp4|jpg)$/', $arg) && ($args[$i - 1] ?? '') !== '-i') {
-                file_put_contents($arg, 'fake-'.basename($arg));
-            }
-        }
-
-        return Process::result();
-    }]);
-}
-
-function lowRiskStory(): Story
-{
-    return Story::published()->whereNotNull('photo_path')
-        ->whereHas('aiCheck', fn ($q) => $q->where('risk_level', 'low'))->orderByDesc('importance')->firstOrFail();
-}
-
-function sensitiveStory(): Story
-{
-    return Story::published()->whereHas('aiCheck', fn ($q) => $q->where('risk_level', 'sensitive'))->firstOrFail();
-}
-
 it('lets comments, saves, shares, likes and reports belong to a reel', function () {
     $story = lowRiskStory();
     $reel = Reel::create([

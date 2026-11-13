@@ -34,12 +34,14 @@ class ProcessUploadedReel implements ShouldQueue
         } catch (Throwable $e) {
             $reel->markFailed($e->getMessage());
             report($e);
+            NotifyReelEditors::dispatch($reel->id);
 
             return;
         }
 
         $reel->update([...$files, 'status' => 'pending_approval', 'published_at' => null]);
         $builder->deleteFiles($old);
+        NotifyReelEditors::dispatch($reel->id);
     }
 
     public function failed(?Throwable $e): void

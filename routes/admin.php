@@ -67,6 +67,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:admin', 'admin.active'
     });
     Route::delete('stories/{story:id}', [Admin\StoryController::class, 'destroy'])->middleware(['permission:content.delete', 'password.confirmed.inline'])->name('stories.destroy');
 
+    // Reels (short vertical videos): auto reels from stories + uploads
+    Route::middleware('permission:reels.view')->group(function () {
+        Route::get('reels', [Admin\ReelController::class, 'index'])->name('reels.index');
+        Route::get('reels/{reel:id}', [Admin\ReelController::class, 'show'])->whereNumber('reel')->name('reels.show');
+    });
+    Route::middleware('permission:reels.manage')->group(function () {
+        Route::get('reels/upload', [Admin\ReelController::class, 'create'])->name('reels.create');
+        Route::post('reels', [Admin\ReelController::class, 'store'])->name('reels.store');
+        Route::post('reels/{reel:id}/approve', [Admin\ReelController::class, 'approve'])->name('reels.approve');
+        Route::post('reels/{reel:id}/reject', [Admin\ReelController::class, 'reject'])->name('reels.reject');
+        Route::post('reels/{reel:id}/unpublish', [Admin\ReelController::class, 'unpublish'])->name('reels.unpublish');
+        Route::post('reels/{reel:id}/regenerate', [Admin\ReelController::class, 'regenerate'])->name('reels.regenerate');
+    });
+
     // Approval queue & schedule
     Route::middleware('permission:review.view')->group(function () {
         Route::get('review', [Admin\ReviewController::class, 'index'])->name('review.index');

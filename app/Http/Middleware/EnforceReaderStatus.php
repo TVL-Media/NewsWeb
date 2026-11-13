@@ -17,7 +17,7 @@ class EnforceReaderStatus
     /** Routes a restricted reader may still post to. */
     private const ALWAYS_ALLOWED = [
         'logout', 'account.update', 'account.destroy', 'onboarding.store', 'preferences.language',
-        'stories.read', 'quiz.answer',
+        'stories.read', 'quiz.answer', 'reels.view',
     ];
 
     public function handle(Request $request, Closure $next): Response

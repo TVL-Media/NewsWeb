@@ -21,6 +21,7 @@ class PermissionSeeder extends Seeder
         'Newsroom' => ['feeds.manage' => 'Feeds & sources', 'autopublish.manage' => 'Auto-publish settings *', 'briefing.manage' => 'Morning 5', 'quiz.manage' => 'Daily quiz'],
         'Site' => ['categories.view' => 'View categories', 'categories.manage' => 'Create, edit, reorder categories and tags', 'categories.delete' => 'Delete empty categories *', 'pages.manage' => 'Pages (topic, city, show)'],
         'Media' => ['media.upload' => 'Upload & use media', 'media.delete' => 'Delete media'],
+        'Reels' => ['reels.view' => 'View reels', 'reels.manage' => 'Approve, reject, upload & re-generate reels'],
         'Polls' => ['polls.view' => 'View polls', 'polls.manage' => 'Create, approve & manage polls', 'polls.close' => 'Close polls', 'polls.results' => 'View poll results'],
         'Translation' => ['translation.request' => 'Request AI translations', 'translation.review' => 'Review & approve translations', 'translation.settings' => 'Translation settings & glossary *'],
         'Readers' => ['users.view' => 'View readers', 'users.view.pii' => 'See full phone numbers', 'users.restrict' => 'Restrict readers', 'users.suspend' => 'Suspend readers *', 'streaks.manage' => 'Streak settings & fixes *'],
@@ -31,7 +32,7 @@ class PermissionSeeder extends Seeder
 
     private const EDITOR = ['dashboard.view', 'content.view', 'content.create', 'content.edit.own', 'content.edit.any', 'content.edit.published', 'content.submit',
         'content.publish', 'content.schedule', 'review.view', 'review.decide', 'briefing.manage', 'quiz.manage', 'categories.view', 'media.upload',
-        'polls.view', 'polls.manage', 'polls.close', 'polls.results', 'translation.request', 'translation.review',
+        'polls.view', 'polls.manage', 'polls.close', 'polls.results', 'reels.view', 'reels.manage', 'translation.request', 'translation.review',
         'comments.moderate', 'reports.view', 'reports.handle', 'reports.escalate', 'analytics.view'];
 
     /** "Editor" / "Chief Editor" match the website's original editor / chief roles; admin → Super Admin. */
@@ -40,7 +41,7 @@ class PermissionSeeder extends Seeder
         'Chief Editor' => [...self::EDITOR, 'review.assign', 'feeds.manage', 'autopublish.manage', 'content.delete', 'users.view', 'users.restrict', 'analytics.all', 'analytics.export', 'audit.view'],
         'Editor' => self::EDITOR,
         'Writer' => ['dashboard.view', 'content.view', 'content.create', 'content.edit.own', 'content.submit', 'categories.view', 'media.upload', 'translation.request'],
-        'Community Moderator' => ['dashboard.view', 'comments.moderate', 'users.view', 'users.restrict', 'users.suspend', 'reports.view', 'reports.handle', 'reports.escalate', 'polls.view', 'polls.manage', 'analytics.view', 'analytics.export'],
+        'Community Moderator' => ['dashboard.view', 'comments.moderate', 'users.view', 'users.restrict', 'users.suspend', 'reports.view', 'reports.handle', 'reports.escalate', 'polls.view', 'polls.manage', 'reels.view', 'analytics.view', 'analytics.export'],
         'Analyst' => ['dashboard.view', 'analytics.view', 'analytics.all', 'analytics.export'],
     ];
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\ModerationAction;
 use App\Models\Poll;
+use App\Models\Reel;
 use App\Models\Report;
 use App\Models\Story;
 use App\Models\User;
@@ -89,6 +90,7 @@ class ReportController extends Controller
                     $target instanceof Comment => CommentController::setStatus($target, 'hidden', 'Report: '.$data['note']),
                     $target instanceof Story => $target->isLive() ? $wf->unpublish($target, $me, 'Report: '.$data['note']) : null,
                     $target instanceof Poll => $target->update(['status' => 'rejected', 'rejection_reason' => 'Report: '.$data['note']]),
+                    $target instanceof Reel => (new ReelController)->takeDown($target, 'reel.taken_down', 'Report: '.$data['note']),
                     default => null,
                 };
                 PageCache::flush();

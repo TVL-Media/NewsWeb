@@ -240,11 +240,17 @@ Check it with `ffmpeg -version`. The build needs `libx264` and `aac`; the packag
   - **Video:** one FFmpeg run applies a slow zoom/pan to the story photo, shows each overlay for exactly as long as its segment is spoken, adds the end card, and outputs 720×1280 (~1.5 Mbps) and 480×854 (~700 kbps) H.264/AAC MP4s with `+faststart`.
   - **Storage:** files go to the media disk under `reels/{id}/` with a fresh random prefix on every build, so CloudFront never serves a stale file.
 - **Length 20–45 s:** if the voice-over runs long, trailing key points are dropped (the headline and point 1 always stay). If it runs short, the end card is held longer.
-- **Uploads:** `ProcessUploadedReel` turns an editor upload into the same two MP4s plus a thumbnail. The video is fitted over a blurred copy of itself, so landscape agency footage isn't cropped. A silent track is added if the upload has no audio. Uploads longer than `REEL_MAX_SECONDS` fail with a clear message. The upload form in the `/admin` Reels section comes in Reels Milestone 2.
-- **Status:** a low-risk story → `published`; a sensitive story (`ai_checks.risk_level = sensitive`) or any upload → `pending_approval`; an error → `failed`, with the FFmpeg/FFprobe message in `error_message`. Editor alerts and the review screens come in Reels Milestone 2.
+- **Uploads:** `ProcessUploadedReel` turns an editor upload into the same two MP4s plus a thumbnail. The video is fitted over a blurred copy of itself, so landscape agency footage isn't cropped. A silent track is added if the upload has no audio. Uploads longer than `REEL_MAX_SECONDS` fail with a clear message.
+- **Status:**
+  - a low-risk story → `published`;
+  - a sensitive story (`ai_checks.risk_level = sensitive`) or any upload → `pending_approval`;
+  - an error → `failed`, with the FFmpeg/FFprobe message in `error_message`.
+- **Editor alerts:** `NotifyReelEditors`, the same as `NotifyEditor` for stories: a bell notice in `/admin` plus an email to staff with `reels.manage`, for "waiting for approval" and for "failed".
+- **Taken off the site:** an editor rejection, an unpublish or a report take-down sets `rejected` and keeps the reason in `rejection_reason`. If the story changes afterwards, the rebuilt reel goes back to the queue, never straight live. Approving clears the reason.
+- **Story unpublished:** its reels leave the website too (`Reel::visible()`).
 - **Re-runs:** a story that is published again with the same headline, key points and photo doesn't re-render (`source_hash`). Pass `force: true` to rebuild anyway.
 - **Engagement:** likes (already polymorphic) and reports (`target_type = reel`) needed no schema change. Comments, saves and shares got a nullable `reel_id` next to `story_id`.
-- **Sample data:** `ReelSeeder` renders 10 English reels from low-risk seeded stories. It runs synchronously at the end of `migrate:fresh --seed` (a few minutes). It is skipped when `REELS_ENABLED=false` or FFmpeg is missing. Tests set `REELS_ENABLED=false`.
+- **Sample data:** `ReelSeeder` renders reels from 10 low-risk seeded stories, in English and Hindi. It runs synchronously at the end of `migrate:fresh --seed` (a few minutes). It is skipped when `REELS_ENABLED=false` or FFmpeg is missing. Tests set `REELS_ENABLED=false`.
 
 ### Reels decisions and limits
 
@@ -253,6 +259,50 @@ Check it with `ffmpeg -version`. The build needs `libx264` and `aac`; the packag
 - **Photos:** stories have one photo, so the zoom/pan runs over that single photo. A multi-photo slideshow needs a story-gallery field first.
 - **Music:** none. `REEL_MUSIC_DIR` is reserved for the licensed music folder.
 - **Hindi in reels:** Hindi has the same GD shaping caveat as the share card. Set `IMAGE_DRIVER=imagick` (with libraqm) in production for perfect conjuncts.
+- **Unpublish:** the brief's reel statuses have no "unpublished", so Unpublish uses `rejected` with the reason "Unpublished: …". An editor can approve it again.
+
+### Reels in the admin panel (`/admin/reels`)
+
+- **Who:** `reels.view` (Chief Editor, Editor, Community Moderator) and `reels.manage` (Chief Editor, Editor). Super Admin has everything. Migration `2026_11_13_000300` adds these permissions to existing roles.
+- **List:** thumbnail, title, language, status, duration and views. Tabs for "waiting for approval" and each status, plus filters for language, auto/upload and search. Failed reels show their error.
+- **Reel page:** preview player (720p / 480p), views, average watch time, completion rate, likes and comments.
+- **Actions:** Approve, Reject (reason required), Unpublish (optional reason), Re-generate (rebuilds from the story, or re-processes the upload), Upload video. Every action goes to the audit log.
+- **Moderation:**
+  - Comments: reel comments appear on the Comments screen, and hiding or restoring one keeps the reel's count right.
+  - Reports: reels can be reported, and "Take it down" unpublishes the reel. A report on a reel comment links to the reel.
+- **Sidebar:** the count shows reels waiting for approval plus failed ones.
+- **Local uploads:** two things are needed.
+  - PHP's limits must allow the file. This machine's `php.ini` was raised to `upload_max_filesize = 256M` and `post_max_size = 260M`; the original is saved as `php.ini.bak-before-reels`. `REEL_UPLOAD_MAX_MB` (default 200) is the app's own limit.
+  - Jobs run on the queue, so start a worker: `php artisan queue:work`.
+
+### App API (`/api/v1`, Sanctum)
+
+Readers send `Authorization: Bearer <token>`; reading works without a token. Responses use `App\Http\Resources\ReelResource`, the same JSON the website player uses.
+
+| Method | Path | Auth | Notes |
+|---|---|---|---|
+| GET | `/api/v1/reels?cursor=&category=&lang=&limit=` | optional | Followed pages first (with a token), then newest day, then most watched. `meta.next_cursor` gives the next page. |
+| GET | `/api/v1/reels/{id}` | optional | |
+| POST | `/api/v1/reels/{id}/view` | optional | `{watched_seconds, completed}` |
+| POST | `/api/v1/reels/{id}/share` | optional | `{channel: whatsapp\|link\|native}` |
+| GET | `/api/v1/reels/{id}/comments` | optional | Same shape as the website comments. |
+| POST, DELETE | `/api/v1/reels/{id}/like`, `/save` | token | |
+| POST | `/api/v1/reels/{id}/comments` | token | `{body, parent_id?}` |
+| POST | `/api/v1/reels/{id}/report` | token | `{reason: spam\|abusive\|misinformation\|other}` |
+
+Each reel has these fields:
+
+- `video_720_url`, `video_480_url`, `thumbnail_url`, `duration`
+- `title`, `slug`, `language`, `other_language_reel_id`
+- `page {id, slug, name, avatar, verified, is_following}`
+- `story_id`, `story_slug`, `story_url`
+- `counts {likes, comments, shares, views}`, `is_liked`, `is_saved`, `published_at`
+
+API notes:
+
+- **Restrictions:** the admin panel's reader restrictions apply. A suspended reader gets 403 everywhere; a restricted reader can read and send views, but nothing else.
+- **No app login endpoint:** the brief doesn't cover app sign-in, so nothing issues tokens yet. For testing, create one with `$user->createToken('android')->plainTextToken`.
+- **Cursor:** the cursor is an opaque position in the ranked feed. The ranking uses computed values, which Laravel's cursor pagination can't page through.
 
 ## Milestones
 
@@ -266,7 +316,7 @@ Check it with `ffmpeg -version`. The build needs `libx264` and `aac`; the packag
 **Reels:**
 
 1. ✅ Database, reel generation and video processing (FFmpeg), sample reels (10 stories × English + Hindi).
-2. Reels section in the `/admin` panel (see "Admin panel" below), auto-publish rules + editor alerts, the `/api/v1` endpoints. `ReelResource` is already shaped for the API.
+2. ✅ Reels section in the `/admin` panel, auto-publish rules + editor alerts, reel moderation, and the `/api/v1` endpoints (Sanctum).
 3. ✅ Website pages:
    - `/reels` and `/reels/{slug}` (mobile snap-scroll, desktop centred player, comments and share sheets, SEO + VideoObject JSON-LD)
    - Reels in the header and the 5-item bottom nav

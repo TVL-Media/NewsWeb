@@ -24,7 +24,7 @@ class ReelFeed
         $lang ??= Lang::current();
         $followed = Rails::followedPageIds($user);
 
-        return Reel::published()
+        return Reel::visible()
             ->with(['page', 'story'])
             ->where(function (Builder $q) use ($lang) {
                 $q->where('language', $lang)
@@ -59,7 +59,7 @@ class ReelFeed
         $saved = $user ? Save::where('user_id', $user->id)->whereIn('reel_id', $ids)->pluck('reel_id')->all() : [];
         $followed = Rails::followedPageIds($user);
 
-        $others = Reel::published()
+        $others = Reel::visible()
             ->whereIn('story_id', $reels->pluck('story_id')->filter())
             ->get(['id', 'story_id', 'language'])
             ->groupBy('story_id');

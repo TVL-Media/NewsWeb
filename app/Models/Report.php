@@ -41,6 +41,7 @@ class Report extends Model
             $t instanceof Story => $t->title(),
             $t instanceof Comment => '“'.\Illuminate\Support\Str::limit($t->body, 90).'”',
             $t instanceof Poll => $t->question,
+            $t instanceof Reel => 'Reel: '.$t->title,
             default => ucfirst($this->target_type).' #'.$this->target_id.' (deleted)',
         };
     }

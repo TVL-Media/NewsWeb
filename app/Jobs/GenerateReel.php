@@ -44,6 +44,10 @@ class GenerateReel implements ShouldQueue
             return;
         }
 
+        // An editor took this reel off the site (reason kept until it is approved again):
+        // a rebuild goes back to the queue, never straight live.
+        $editorRejected = $reel->exists && $reel->rejection_reason !== null;
+
         $reel->fill([
             'page_id' => $story->page_id,
             'category_id' => $story->category_id,
@@ -61,19 +65,24 @@ class GenerateReel implements ShouldQueue
         } catch (Throwable $e) {
             $reel->markFailed($e->getMessage());
             report($e);
+            NotifyReelEditors::dispatch($reel->id);
 
             return;
         }
 
-        $sensitive = $story->aiCheck?->risk_level === 'sensitive';
+        $review = $editorRejected || $story->aiCheck?->risk_level === 'sensitive';
         $reel->update([
             ...$files,
             'source_hash' => $hash,
-            'status' => $sensitive ? 'pending_approval' : 'published',
-            'published_at' => $sensitive ? null : ($reel->published_at ?? now()),
+            'status' => $review ? 'pending_approval' : 'published',
+            'published_at' => $review ? null : ($reel->published_at ?? now()),
         ]);
 
         $builder->deleteFiles($old);
+
+        if ($review) {
+            NotifyReelEditors::dispatch($reel->id);
+        }
     }
 
     public function failed(?Throwable $e): void

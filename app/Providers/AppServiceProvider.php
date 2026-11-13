@@ -63,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
                 'review' => $a->can('review.view') ? Story::where('status', 'pending_approval')->count() : 0,
                 'reports' => $a->can('reports.view') ? Report::whereIn('status', ['open', 'escalated'])->distinct()->get(['target_type', 'target_id'])->count() : 0,
                 'polls' => $a->can('polls.view') ? Poll::where('status', 'pending')->count() : 0,
+                'reels' => $a->can('reels.view') ? \App\Models\Reel::whereIn('status', ['pending_approval', 'failed'])->count() : 0,
                 'translations' => $a->can('translation.review') ? TranslationJob::where('status', 'ai_completed')->count() : 0,
                 'unread' => AdminNotification::where('admin_id', $a->id)->whereNull('read_at')->count(),
             ]);
@@ -93,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
             Limit::perHour(10)->by('otp-phone:'.$r->input('phone')),
         ]);
         RateLimiter::for('otp-verify', fn (Request $r) => Limit::perMinute(10)->by('otpv:'.$r->ip()));
-        RateLimiter::for('engage', fn (Request $r) => Limit::perMinute(90)->by('engage:'.$r->user()?->id));
+        RateLimiter::for('engage', fn (Request $r) => Limit::perMinute(90)->by('engage:'.($r->user()?->id ?? 'ip:'.$r->ip())));
         RateLimiter::for('comments', fn (Request $r) => Limit::perMinute(5)->by('comments:'.$r->user()?->id));
 
         // Category chips (header) and the footer's Categories columns share the same list.
