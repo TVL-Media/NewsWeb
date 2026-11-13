@@ -16,9 +16,13 @@
   .no-scrollbar { scrollbar-width: none; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
 
-  /* Account › Text size: scales story reading text (key points, explainers, full story, For You cards). */
-  html[data-text-size="small"] .reading-text { font-size: 15px !important; }
-  html[data-text-size="large"] .reading-text { font-size: 19.5px !important; line-height: 1.6 !important; }
+  /*
+    Account › Text size: scales everything in the page content (sizes are in px across the site, so a
+    root font-size change would not reach them). The full-screen reels player is sized to the screen
+    and opts out with .text-zoom-off.
+  */
+  html[data-text-size="small"] main:not(.text-zoom-off) { zoom: 0.9; }
+  html[data-text-size="large"] main:not(.text-zoom-off) { zoom: 1.15; }
 
   /*
     Account › Dark mode. The theme ships no dark palette, so this inverts the light theme and

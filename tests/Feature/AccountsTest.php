@@ -327,3 +327,15 @@ it('loads any topic in For You, even one the reader has not chosen', function ()
         ->assertSee($story->version('en')->headline)
         ->assertSee(route('for-you', ['topic' => $other->slug]).'" class="chip-active"', false);
 });
+
+it('applies Text size to the whole page content, except the full-screen reels player', function () {
+    $user = User::where('phone', '9876543210')->first();
+    $user->update(['text_size' => 'large']);
+    config(['reels.enabled' => true]);
+
+    $this->actingAs($user)->get('/account')->assertSee('data-text-size="large"', false)->assertSee('<main id="main" class="flex-1 ">', false);
+    $this->actingAs($user)->get('/reels')->assertSee('<main id="main" class="flex-1 text-zoom-off">', false);
+    expect(file_get_contents(resource_path('css/app.css')))
+        ->toContain('html[data-text-size="large"] main:not(.text-zoom-off) { zoom: 1.15; }')
+        ->toContain('html[data-text-size="small"] main:not(.text-zoom-off) { zoom: 0.9; }');
+});

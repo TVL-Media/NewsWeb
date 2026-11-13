@@ -78,7 +78,7 @@
         @endif
     @endunless
 
-    <main id="main" class="flex-1">
+    <main id="main" class="flex-1 {{ $immersive ? 'text-zoom-off' : '' }}">
         @if (session('account_notice'))
             <div class="mx-auto max-w-[1280px] px-4 pt-4 md:px-6"><p class="rounded-[14px] bg-brand-tint px-4 py-3 text-[14px] font-semibold text-brand" role="status">{{ session('account_notice') }}</p></div>
         @endif
