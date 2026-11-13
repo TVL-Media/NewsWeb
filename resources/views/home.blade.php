@@ -12,26 +12,18 @@
             </div>
 
             <ul class="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 md:mx-0 md:px-0" aria-label="{{ __('Stories') }}">
-                <li class="shrink-0">
-                    <a href="{{ route('briefing') }}" class="flex w-[58px] flex-col items-center gap-1 text-ink no-underline">
-                        <span class="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-brand text-[21px] font-black text-white">5</span>
-                        <span class="w-full truncate text-center text-[11px] font-semibold">{{ __('Top 5') }}</span>
-                    </a>
-                </li>
-                @foreach ($circles['viewer'] as $i => $group)
+                {{-- Every circle opens the story viewer at its group; stories then play on into the next circles. --}}
+                @foreach ($circles as $i => $group)
                     <li class="shrink-0">
-                        <button type="button" @click="$dispatch('open-stories', { group: {{ $i }} })" class="flex w-[58px] flex-col items-center gap-1 text-ink">
-                            <span class="story-ring !h-[54px] !w-[54px] !p-[2px]"><img src="{{ $group['avatar'] }}" alt=""></span>
-                            <span class="w-full truncate text-center text-[11px] font-semibold">{{ $group['page'] }}</span>
+                        <button type="button" @click="$dispatch('open-stories', { group: {{ $i }} })" class="flex w-[58px] flex-col items-center gap-1 text-ink"
+                                aria-label="{{ __('Stories') }}: {{ $group['label'] }}">
+                            @if ($group['badge'])
+                                <span class="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-brand text-[21px] font-black text-white ring-2 ring-brand ring-offset-2">{{ $group['badge'] }}</span>
+                            @else
+                                <span class="story-ring !h-[54px] !w-[54px] !p-[2px]"><img src="{{ $group['avatar'] }}" alt="" @if ($i > 3) loading="lazy" @endif></span>
+                            @endif
+                            <span class="w-full truncate text-center text-[11px] font-semibold">{{ $group['label'] }}</span>
                         </button>
-                    </li>
-                @endforeach
-                @foreach ($circles['categories'] as $category)
-                    <li class="shrink-0">
-                        <a href="{{ route('home', ['category' => $category->slug]) }}" class="flex w-[58px] flex-col items-center gap-1 text-ink no-underline">
-                            <span class="story-ring !h-[54px] !w-[54px] !p-[2px]"><img src="{{ $category->imageUrl() }}" alt="" loading="lazy"></span>
-                            <span class="w-full truncate text-center text-[11px] font-semibold">{{ $category->name() }}</span>
-                        </a>
                     </li>
                 @endforeach
             </ul>
@@ -103,7 +95,7 @@
         </div>
     </div>
 
-    @if ($circles['viewer']->isNotEmpty())
-        <x-story-viewer :groups="$circles['viewer']" />
+    @if ($circles)
+        <x-story-viewer :groups="$circles" />
     @endif
 </x-layouts.app>

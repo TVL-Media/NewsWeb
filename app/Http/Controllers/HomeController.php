@@ -68,38 +68,79 @@ class HomeController extends Controller
 
     public const MAX_CIRCLES = 8;
 
+    public const CATEGORY_SLIDES = 6;
+
     /**
-     * Story circles after the red "5":
-     * - signed-in readers: 24-hour stories from pages they follow (opened in the full-screen viewer),
-     *   then their chosen topics as category circles, so the row is never empty
-     * - guests: top categories
+     * Story circles. Every circle opens the full-screen viewer (Instagram-style); when one circle's
+     * stories end, the next circle's start. Order:
+     * - "Top 5": the five trending stories
+     * - signed-in readers: 24-hour stories from pages they follow
+     * - topics (the reader's chosen ones, or the top categories for guests): each topic's latest stories
+     * Topics without a story in the last 3 days get no circle.
+     *
+     * @return list<array{kind: string, label: string, avatar: ?string, badge: ?string, slides: list<array>}>
      */
     private function circles($user, array $followed): array
     {
-        $pageStories = ! $user ? collect() : PageStory::active()
-            ->with(['page', 'story.versions'])
-            ->whereIn('page_id', $followed)
-            ->orderBy('expires_at')
+        $slide = fn (Story $s) => [
+            'image' => $s->photoUrl(),
+            'headline' => $s->version()?->headline,
+            'url' => route('story.show', $s),
+            'ago' => $s->ago(),
+        ];
+
+        $groups = [[
+            'kind' => 'top5', 'label' => __('Top 5'), 'avatar' => null, 'badge' => '5',
+            'slides' => Rails::trending()->map($slide)->values()->all(),
+        ]];
+
+        if ($user) {
+            $pageStories = PageStory::active()
+                ->with(['page', 'story.versions'])
+                ->whereIn('page_id', $followed)
+                ->orderBy('expires_at')
+                ->get()
+                ->groupBy('page_id');
+
+            foreach ($pageStories as $items) {
+                $groups[] = [
+                    'kind' => 'page', 'label' => $items->first()->page->name(), 'avatar' => $items->first()->page->avatarUrl(), 'badge' => null,
+                    'slides' => $items->map(fn (PageStory $ps) => [
+                        'image' => $ps->imageUrl(),
+                        'headline' => $ps->story?->version()?->headline,
+                        'url' => $ps->story ? route('story.show', $ps->story) : route('page.show', $ps->page),
+                        'ago' => Lang::ago($ps->created_at),
+                    ])->values()->all(),
+                ];
+            }
+        }
+
+        $room = max(0, self::MAX_CIRCLES - count($groups) + 1);
+        $chosen = $user ? $user->categories()->orderBy('sort_order')->get() : collect();
+        $categories = ($chosen->isNotEmpty() ? $chosen : Category::active()->orderBy('sort_order')->get());
+
+        $recent = Story::published()->with('versions')
+            ->whereIn('category_id', $categories->pluck('id'))
+            ->where('published_at', '>=', now()->subDays(3))
+            ->latest('published_at')
             ->get()
-            ->groupBy('page_id');
+            ->groupBy('category_id');
 
-        $viewer = $pageStories->map(fn ($items) => [
-            'page' => $items->first()->page->name(),
-            'avatar' => $items->first()->page->avatarUrl(),
-            'slides' => $items->map(fn (PageStory $ps) => [
-                'image' => $ps->imageUrl(),
-                'headline' => $ps->story?->version()?->headline,
-                'url' => $ps->story ? route('story.show', $ps->story) : route('page.show', $ps->page),
-                'ago' => Lang::ago($ps->created_at),
-            ])->values(),
-        ])->values();
+        foreach ($categories as $category) {
+            if ($room <= 0) {
+                break;
+            }
+            $stories = $recent->get($category->id);
+            if (! $stories || $stories->isEmpty()) {
+                continue;
+            }
+            $groups[] = [
+                'kind' => 'category', 'label' => $category->name(), 'avatar' => $category->imageUrl(), 'badge' => null,
+                'slides' => $stories->take(self::CATEGORY_SLIDES)->map($slide)->values()->all(),
+            ];
+            $room--;
+        }
 
-        $room = max(0, self::MAX_CIRCLES - $viewer->count());
-        $chosen = $user ? $user->categories()->orderBy('sort_order')->limit($room)->get() : collect();
-        $categories = $chosen->isNotEmpty()
-            ? $chosen
-            : Category::active()->orderBy('sort_order')->limit(min(6, $room))->get();
-
-        return ['viewer' => $viewer, 'categories' => $categories];
+        return array_values(array_filter($groups, fn ($g) => ! empty($g['slides'])));
     }
 }

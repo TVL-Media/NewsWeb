@@ -1,12 +1,15 @@
 {{--
-    Full-screen 24-hour page story viewer. Open with $dispatch('open-stories', { group: i }).
-    Progress bars, auto-advance (5s), tap left/right, ←/→ keys, swipe up (or "Read story") opens the story.
-    $groups: [{ page, avatar, slides: [{ image, headline, url, ago }] }]
+    Full-screen story viewer (Instagram-style). Open with $dispatch('open-stories', { group: i }).
+    Progress bars, auto-advance (5s) into the next group, tap left/right, ←/→ keys, press and hold to pause,
+    swipe up (or "Swipe up to read") opens the story.
+    $groups: [{ label, avatar|null, badge|null, slides: [{ image, headline, url, ago }] }]
 --}}
 @props(['groups'])
 <div x-data="{
         groups: @js($groups),
-        open: false, g: 0, s: 0, progress: 0, timer: null, startY: null,
+        open: false, g: 0, s: 0, progress: 0, timer: null, startY: null, held: false, downAt: 0,
+        // A long press pauses; letting go after it must not also count as a tap.
+        tap(dir) { if (Date.now() - this.downAt > 300) return; dir < 0 ? this.prev() : this.next(); },
         get group() { return this.groups[this.g] || { slides: [] }; },
         get slide() { return this.group.slides[this.s] || {}; },
         show(i) { this.g = i; this.s = 0; this.open = true; this.play(); },
@@ -14,7 +17,9 @@
             clearInterval(this.timer); this.progress = 0;
             const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             if (reduce) return; // no auto-advance; tap to move
-            this.timer = setInterval(() => { this.progress += 2; if (this.progress >= 100) this.next(); }, 100);
+            this.timer = setInterval(() => { if (this.held) return; this.progress += 2; if (this.progress >= 100) this.next(); }, 100);
+            const after = this.group.slides[this.s + 1] || this.groups[this.g + 1]?.slides[0];
+            if (after?.image) (new Image()).src = after.image; // preload the next picture
         },
         next() {
             if (this.s < this.group.slides.length - 1) { this.s++; }
@@ -37,9 +42,10 @@
      @keydown.window.arrow-left="open && prev()"
      x-show="open" x-cloak
      class="fixed inset-0 z-[65] flex items-center justify-center bg-black"
-     role="dialog" aria-modal="true" aria-label="{{ __('Page stories') }}">
+     role="dialog" aria-modal="true" aria-label="{{ __('Stories') }}">
     <div class="relative h-full w-full max-w-[460px] overflow-hidden bg-ink md:h-[92vh] md:rounded-[26px]"
-         x-trap.noscroll="open" @touchstart="touchStart($event)" @touchend="touchEnd($event)">
+         x-trap.noscroll="open" @touchstart="touchStart($event)" @touchend="touchEnd($event)"
+         @pointerdown="held = true; downAt = Date.now()" @pointerup="held = false" @pointerleave="held = false" @pointercancel="held = false">
         <img :src="slide.image" alt="" class="absolute inset-0 h-full w-full object-cover">
         <div class="scrim"></div>
         <div class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/60 to-transparent"></div>
@@ -55,9 +61,10 @@
 
         {{-- Page + close --}}
         <div class="absolute inset-x-3 top-7 flex items-center gap-2.5">
-            <img :src="group.avatar" alt="" class="h-9 w-9 rounded-[10px] object-cover ring-2 ring-white">
+            <img x-show="group.avatar" :src="group.avatar" alt="" class="h-9 w-9 rounded-full object-cover ring-2 ring-white">
+            <span x-show="!group.avatar" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand text-[16px] font-black text-white ring-2 ring-white" x-text="group.badge"></span>
             <div class="min-w-0 flex-1 text-white">
-                <p class="truncate text-[14px] font-extrabold" x-text="group.page"></p>
+                <p class="truncate text-[14px] font-extrabold" x-text="group.label"></p>
                 <p class="text-[11.5px] text-white/75" x-text="slide.ago"></p>
             </div>
             <button type="button" @click="close()" class="inline-flex h-11 w-11 items-center justify-center rounded-full text-white" aria-label="{{ __('Close') }}">
@@ -66,8 +73,8 @@
         </div>
 
         {{-- Tap zones --}}
-        <button type="button" class="absolute bottom-32 left-0 top-20 w-1/3" @click="prev()" aria-label="{{ __('Previous') }}"></button>
-        <button type="button" class="absolute bottom-32 right-0 top-20 w-2/3" @click="next()" aria-label="{{ __('Next') }}"></button>
+        <button type="button" class="absolute bottom-32 left-0 top-20 w-1/3" @click="tap(-1)" aria-label="{{ __('Previous') }}"></button>
+        <button type="button" class="absolute bottom-32 right-0 top-20 w-2/3" @click="tap(1)" aria-label="{{ __('Next') }}"></button>
 
         {{-- Headline + open --}}
         <div class="absolute inset-x-0 bottom-0 p-5 text-white">

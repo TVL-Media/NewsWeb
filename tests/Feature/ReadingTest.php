@@ -25,34 +25,47 @@ describe('home', function () {
             ->assertSee('Load more');
     });
 
-    it('shows category circles to guests and followed-page story circles to readers', function () {
-        $this->get('/')->assertSee('?category=india', false)->assertDontSee('open-stories', false);
+    it('opens every circle in the story viewer, Top 5 first, for guests too', function () {
+        $html = $this->get('/')->assertOk()
+            ->assertSee('open-stories', false)
+            ->assertSee('Stories: Top 5', false)
+            ->assertSee('Stories: India', false)
+            ->assertSee('Swipe up to read')
+            ->getContent();
 
+        // The viewer gets every group: Top 5's slides are the trending stories, a topic's are its latest.
+        $top = \App\Support\Rails::trending()->first();
+        expect(substr_count($html, "open-stories', { group:"))->toBeGreaterThan(3)
+            ->and($html)->toContain(e(route('story.show', $top)));
+    });
+
+    it('adds followed-page story circles for signed-in readers', function () {
         $reader = User::where('phone', '9876543210')->first();
+        $page = \App\Models\PageStory::active()->with('page')->whereIn('page_id', $reader->followedPages()->pluck('pages.id'))->first()->page;
+
         $this->actingAs($reader)->get('/')
             ->assertSee('Good ')                     // Good Morning/Afternoon/Evening, Riya
             ->assertSee('Riya')
-            ->assertSee('open-stories', false)       // circles open the viewer
-            ->assertSee('Swipe up to read')
+            ->assertSee('Stories: '.$page->name(), false)
             ->assertSee('keeps your 12-day streak');
     });
 
-    it('shows topic circles to signed-in readers who follow no pages with live stories', function () {
+    it('shows the reader\'s own topics as story circles', function () {
         $user = User::factory()->create();
         $user->categories()->attach(\App\Models\Category::whereIn('slug', ['business', 'tech'])->pluck('id'));
 
         $this->actingAs($user)->get('/')
-            ->assertSee('?category=business', false)
-            ->assertSee('?category=tech', false)
-            ->assertDontSee('open-stories', false);
+            ->assertSee('Stories: Business', false)
+            ->assertSee('Stories: Tech', false)
+            ->assertDontSee('Stories: Cricket', false);
     });
 
     it('still shows topic circles once every followed page story has expired', function () {
         \App\Models\PageStory::query()->update(['expires_at' => now()->subMinute()]);
 
         $this->actingAs(User::where('phone', '9876543210')->first())->get('/')
-            ->assertDontSee('open-stories', false)
-            ->assertSee('?category=cricket', false);
+            ->assertSee('Stories: Top 5', false)
+            ->assertSee('Stories: Cricket', false);
     });
 
     it('gives a page a fresh 24-hour circle when one of its stories is published', function () {
