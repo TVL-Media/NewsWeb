@@ -12,13 +12,14 @@ beforeEach(function () {
 });
 
 describe('home', function () {
-    it('shows the hero, Morning 5, quiz, trending, pages to follow and a poll', function () {
+    it('shows the hero, Top 5 trending, quiz, pages to follow and a poll', function () {
         $this->get('/')
             ->assertOk()
             ->assertSee($this->top->version('en')->headline)
-            ->assertSee('Morning 5')
+            ->assertSee('Top 5')
+            ->assertSee('Trending right now')
+            ->assertSee(route('story.show', \App\Support\Rails::trending()[0]), false)
             ->assertSee('Daily quiz')
-            ->assertSee('Trending Now')
             ->assertSee('Pages to follow')
             ->assertSee('Who should open the batting in the ODI series?')
             ->assertSee('Load more');
@@ -33,7 +34,6 @@ describe('home', function () {
             ->assertSee('Riya')
             ->assertSee('open-stories', false)       // circles open the viewer
             ->assertSee('Swipe up to read')
-            ->assertSee('2 of 5 read today')
             ->assertSee('keeps your 12-day streak');
     });
 
@@ -117,7 +117,8 @@ describe('story page', function () {
             ->assertSee('<meta name="description" content="'.e($this->top->version('en')->card_text).'">', false);
     });
 
-    it('generates Listen audio with the fake TTS and links it', function () {
+    it('generates Listen audio with the fake TTS and links it when audio is on', function () {
+        config(['services.audio.enabled' => true]);
         $version = $this->top->version('en');
 
         expect($version->audio_path)->toEndWith('.wav')
@@ -125,6 +126,12 @@ describe('story page', function () {
         Storage::disk('public')->assertExists($version->audio_path);
 
         $this->get(route('story.show', $this->top))->assertSee(basename($version->audio_path), false);
+    });
+
+    it('hides every Listen button and the audio player when audio is off (default)', function () {
+        $this->get('/')->assertOk()->assertDontSee('ngn-listen', false)->assertDontSee('<audio', false);
+        $this->get(route('story.show', $this->top))->assertOk()->assertDontSee('ngn-listen', false)->assertDontSee('Listen ·');
+        $this->actingAs(User::where('phone', '9876543210')->first())->get('/for-you')->assertOk()->assertDontSee('ngn-listen', false);
     });
 
     it('hides stories that are not published', function () {

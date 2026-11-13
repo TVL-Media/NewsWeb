@@ -59,7 +59,8 @@ describe('Morning 5 and briefing', function () {
         expect(Briefing::today()->story_ids)->toBe($editor);
     });
 
-    it('renders the player, list, quiz card, week card and polls', function () {
+    it('renders the player, list, quiz card, week card and polls when audio is on', function () {
+        config(['services.audio.enabled' => true]);
         $briefing = Briefing::today();
         $first = Story::with('versions')->find($briefing->story_ids[0]);
 
@@ -70,6 +71,17 @@ describe('Morning 5 and briefing', function () {
             ->assertSee('Daily quiz')->assertSee('This week')->assertSee('Polls');
 
         $this->actingAs($this->reader)->get('/briefing')->assertOk()->assertSee('12-day streak');
+    });
+
+    it('shows the Top 5 trending stories instead of the audio player when audio is off', function () {
+        $top = \App\Support\Rails::trending();
+
+        $this->get('/briefing')->assertOk()
+            ->assertSee('Top 5')->assertSee('Trending right now')
+            ->assertSee(route('story.show', $top[0]), false)
+            ->assertSee($top[4]->version('en')->headline)
+            ->assertDontSee('<audio', false)->assertDontSee('In this briefing')
+            ->assertSee('Daily quiz')->assertSee('Polls');
     });
 });
 

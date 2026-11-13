@@ -26,11 +26,13 @@
                 {{ $story->ago() }} · {{ trans_choice(':count min read', $story->read_minutes) }}@if ($story->source) · {{ __('Source') }}: {{ $story->source->name }}@endif
             </p>
         </div>
+        @if (config('services.audio.enabled'))
         <button type="button"
                 class="relative z-10 hidden h-11 shrink-0 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-bold text-ink shadow-[var(--shadow-float)] hover:bg-brand-tint sm:inline-flex"
                 @click="$dispatch('ngn-listen', { src: @js($v?->audioUrl()), title: @js($v?->headline) })"
                 aria-label="{{ __('Listen') }}: {{ $v?->headline }}">
             <x-icon name="play" size="15" class="fill-current" /> {{ __('Listen') }}
         </button>
+        @endif
     </div>
 </article>

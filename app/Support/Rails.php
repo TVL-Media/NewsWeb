@@ -15,12 +15,22 @@ class Rails
     /** Most engaged stories from the last 3 days. */
     public static function trending(int $limit = 5): Collection
     {
-        return Story::published()
+        $trending = Story::published()
             ->with('versions')
             ->where('published_at', '>=', now()->subDays(3))
             ->orderByRaw('(likes_count + shares_count * 2 + comments_count * 3 + importance * 40) desc')
             ->limit($limit)
             ->get();
+
+        // A quiet news day still gets a full list ("Top 5"): top up with the latest important stories.
+        if ($trending->count() < $limit) {
+            $trending = $trending->concat(Story::published()->with('versions')
+                ->whereNotIn('id', $trending->pluck('id'))
+                ->orderByDesc('published_at')->orderByDesc('importance')
+                ->limit($limit - $trending->count())->get());
+        }
+
+        return $trending;
     }
 
     /** Popular pages the reader doesn't follow yet. */
@@ -39,24 +49,6 @@ class Rails
     public static function followedPageIds(?User $user): array
     {
         return $user ? $user->followedPages()->pluck('pages.id')->all() : [];
-    }
-
-    /** Today's Morning 5 and how many of its stories the reader has read today. */
-    public static function morning5(?User $user): array
-    {
-        // Before 06:00 IST (or if the job hasn't run) show the latest briefing rather than nothing.
-        $briefing = Briefing::today() ?? Briefing::latest('date')->first();
-        $read = 0;
-
-        if ($briefing && $user) {
-            $read = ReadingEvent::where('user_id', $user->id)
-                ->whereIn('story_id', $briefing->story_ids)
-                ->whereDate('read_on', now(config('app.timezone'))->toDateString())
-                ->distinct()
-                ->count('story_id');
-        }
-
-        return ['briefing' => $briefing, 'read' => $read];
     }
 
     public static function streakDays(?User $user): int

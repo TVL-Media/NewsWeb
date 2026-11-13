@@ -12,7 +12,7 @@
     </span>
     <p class="min-w-0 flex-1 text-[12.5px] leading-snug">
         <strong class="font-extrabold">{{ __('Get the Android app') }}</strong>
-        <span class="text-white/75">· {{ __('Audio, streaks and daily quiz') }}</span>
+        <span class="text-white/75">· {{ config('services.audio.enabled') ? __('Audio, streaks and daily quiz') : __('Streaks and daily quiz') }}</span>
     </p>
     <a href="{{ config('app.android_url') }}" class="btn-primary h-9 px-4 text-[13px]" rel="noopener">{{ __('Open') }}</a>
     <button type="button" @click="dismiss()" class="inline-flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:text-white" aria-label="{{ __('Close') }}">

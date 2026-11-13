@@ -32,6 +32,7 @@ class BriefingController extends Controller
         return view('briefing', [
             'briefing' => $briefing,
             'stories' => $stories,
+            'trending' => Rails::trending()->loadMissing('category'),
             'polls' => $polls,
             'votes' => $user ? PollVote::where('user_id', $user->id)->whereIn('poll_id', $polls->pluck('id'))->pluck('poll_option_id', 'poll_id')->all() : [],
             'streak' => Rails::streakDays($user),

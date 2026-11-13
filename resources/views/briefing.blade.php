@@ -16,6 +16,45 @@
     <div class="mx-auto max-w-[1280px] px-4 pt-5 md:px-6 md:pt-8">
         <h1 class="sr-only">{{ __('Briefing') }}</h1>
 
+        @unless (config('services.audio.enabled'))
+        {{-- ===== Top 5 trending (audio is off on the website) ===== --}}
+        <section id="top5" class="player-bg overflow-hidden rounded-[28px] p-5 md:rounded-[32px] md:p-9" aria-labelledby="top5-page-title">
+            <div class="flex flex-wrap gap-8">
+                <div class="flex min-w-0 flex-col" style="flex: 1 1 320px">
+                    <p class="flex items-center gap-2 text-[14px] font-semibold text-brand-pink-text">
+                        <x-icon name="calendar" size="17" /> <span>{{ now(config('app.timezone'))->translatedFormat('l, j F') }}</span>
+                    </p>
+                    <div class="mt-6 flex items-center gap-5 md:mt-8">
+                        <span class="logo-tile h-[88px] w-[88px] shrink-0 md:h-[120px] md:w-[120px]"><span class="text-[44px] font-black text-brand md:text-[58px]">5</span></span>
+                        <div>
+                            <h2 id="top5-page-title" class="text-[34px] font-black leading-none tracking-[-1px] text-white md:text-[46px]">{{ __('Top 5') }}</h2>
+                            <p class="mt-2 flex items-center gap-1.5 text-[14px] text-brand-pink-text md:text-[16px]"><x-icon name="trending-up" size="18" /> {{ __('Trending right now') }}</p>
+                        </div>
+                    </div>
+                    <p class="mt-6 max-w-[420px] text-[14.5px] leading-relaxed text-white/85">{{ __('The five stories readers are liking, sharing and talking about most right now.') }}</p>
+                </div>
+
+                <div class="briefing-list min-w-0 self-start" style="flex: 1 1 340px; max-width: 520px">
+                    <h3 class="px-1 pb-2 text-[16px] font-black">{{ __('Trending now') }}</h3>
+                    <ol>
+                        @foreach ($trending as $i => $story)
+                            <li>
+                                <a href="{{ route('story.show', $story) }}" class="flex items-center gap-3 rounded-[14px] px-1.5 py-2.5 text-ink no-underline hover:bg-white hover:text-ink {{ $i ? 'border-t border-[#F3DADC]' : '' }}">
+                                    <span class="num-badge">{{ $i + 1 }}</span>
+                                    @if ($story->photoUrl())<img src="{{ $story->photoUrl() }}" alt="" loading="lazy" class="h-10 w-[52px] shrink-0 rounded-[10px] object-cover">@endif
+                                    <span class="min-w-0 flex-1">
+                                        <span class="line-clamp-2 text-[14px] font-bold leading-snug">{{ $story->version()?->headline }}</span>
+                                        @if ($story->category)<span class="mt-0.5 block text-[11.5px] font-bold uppercase tracking-wide text-brand">{{ $story->category->name() }}</span>@endif
+                                    </span>
+                                    <x-icon name="chevron-right" size="18" class="text-muted-2" />
+                                </a>
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+            </div>
+        </section>
+        @else
         {{-- ===== Morning 5 player ===== --}}
         <section class="player-bg overflow-hidden rounded-[28px] p-5 md:rounded-[32px] md:p-9" aria-labelledby="m5-player-title"
                  x-data="{
@@ -127,6 +166,7 @@
                 </div>
             @endif
         </section>
+        @endunless
 
         {{-- ===== Quiz + This week ===== --}}
         <div class="mt-6 grid gap-5 md:grid-cols-2">

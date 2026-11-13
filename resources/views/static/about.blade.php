@@ -7,7 +7,11 @@
         <li><strong>Explain Simply</strong> – the same story in plain, everyday language.</li>
         <li><strong>Full Story</strong> – a link to the original report from the source publisher.</li>
     </ul>
+    @if (config('services.audio.enabled'))
     <p>You can also listen to <strong>Morning 5</strong>, a short audio briefing of five stories to start your day. The audio is generated with text-to-speech. There is a daily quiz, polls on the news, and pages you can follow for the topics, places and subjects you care about.</p>
+    @else
+    <p><strong>Top 5</strong> shows the five stories readers are liking, sharing and talking about most right now. There is a daily quiz, polls on the news, and pages you can follow for the topics, places and subjects you care about.</p>
+    @endif
     <p>You can read without an account. If you log in with your mobile number and a one-time password (OTP), you can like, comment, share and save stories, follow pages, vote in polls, take the quiz and keep a reading streak.</p>
 
     <h2>How our stories are made</h2>

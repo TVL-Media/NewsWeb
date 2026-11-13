@@ -41,6 +41,12 @@ return [
         'google_key' => env('GOOGLE_TTS_KEY'),
     ],
 
+    // Audio on the website (Listen buttons, the docked player, the Morning 5 player on /briefing).
+    // Off: none of it is shown and the "Top 5" card lists the trending stories. Reels keep their voice-over.
+    'audio' => [
+        'enabled' => (bool) env('AUDIO_ENABLED', false),
+    ],
+
     // Share-as-image renderer: gd | imagick (imagick + libraqm renders Hindi conjuncts correctly)
     'image' => [
         'driver' => env('IMAGE_DRIVER', 'gd'),

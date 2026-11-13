@@ -44,9 +44,11 @@
             liked: @js($liked), likes: {{ (int) $story->likes_count }},
             saved: @js($saved),
             reaction: @js($reaction),
+            @if (config('services.audio.enabled'))
             audio: @js(['en' => $versions['en']?->audioUrl(), 'hi' => $versions['hi']?->audioUrl()]),
             headlines: @js(['en' => $versions['en']?->headline, 'hi' => $versions['hi']?->headline]),
             listen() { $dispatch('ngn-listen', { src: this.audio[this.lang], title: this.headlines[this.lang] }); },
+            @endif
             async like() {
                 if (!$store.auth.require('like', { story: {{ $story->id }} })) return;
                 this.liked = !this.liked; this.likes += this.liked ? 1 : -1;
@@ -132,10 +134,12 @@
                     @endif
 
                     <div class="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+                        @if (config('services.audio.enabled'))
                         <button type="button" class="btn-tint" @click="listen()">
                             <x-icon name="headphones" size="17" />
                             {{ __('Listen') }} · {{ max(1, (int) ceil(($v->audio_seconds ?: 60) / 60)) }} {{ __('min') }}
                         </button>
+                        @endif
                         @foreach ($reels as $l => $reel)
                             @if ($reel)
                                 <a href="{{ route('reels.show', $reel) }}" x-show="lang === '{{ $l }}'" @if ($l !== $lang) x-cloak @endif
@@ -334,7 +338,7 @@
 
             {{-- ===== Right rail ===== --}}
             <aside class="min-w-0 grow basis-[300px] space-y-5 md:max-w-[340px]" aria-label="{{ __('More') }}">
-                <x-morning5-card variant="mini" :briefing="$morning5['briefing']" />
+                <x-top5-card variant="mini" :stories="$trending" />
 
                 @if ($related->isNotEmpty())
                     <section class="card p-5" aria-labelledby="related-title">

@@ -52,7 +52,6 @@ class HomeController extends Controller
             'hero' => $hero,
             'latest' => $latest,
             'circles' => $this->circles($user, $followed),
-            'morning5' => Rails::morning5($user),
             'streak' => Rails::streakDays($user),
             'trending' => Rails::trending(),
             'pagesToFollow' => Rails::pagesToFollow($user, 4),

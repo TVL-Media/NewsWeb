@@ -77,11 +77,13 @@
                                 <span class="chip-red h-7 text-[12px]">{{ $story->category?->name() }}</span>
                                 @if ($isEarlier)<span class="photo-pill h-7">{{ __('Earlier') }}</span>@endif
                             </span>
+                            @if (config('services.audio.enabled'))
                             <button type="button" @click="$dispatch('ngn-listen', { src: t.audio, title: t.headline })"
                                     class="absolute bottom-4 right-4 inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-3.5 text-[13px] font-bold text-ink shadow-[var(--shadow-float)]"
                                     :aria-label="'{{ __('Listen') }} ' + t.len">
                                 <x-icon name="volume-2" size="16" /> {{ __('Listen') }} <span x-text="t.len">{{ $v->audioLength() }}</span>
                             </button>
+                            @endif
                         </div>
 
                         <div class="flex min-h-0 flex-1 flex-col px-5 pb-4 pt-4">

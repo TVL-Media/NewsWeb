@@ -210,6 +210,14 @@ Where the brief was silent, I picked the simplest option:
   - Every decision and its reasons are stored in `ai_checks` (new `reasons` and `risk_flags` columns) and shown in the Auto-publish log.
 - **Admin panel** at `/admin`: see [Admin panel](#admin-panel) below. (It replaced the Filament screens; everything they did is in the panel.)
 
+## Audio is hidden on the website (`AUDIO_ENABLED=false`)
+
+- **What's hidden:** the Listen buttons (hero, story page, For You), the docked audio player and the Morning 5 player on `/briefing`.
+- **"Top 5":** the red card on Home (desktop column and mobile), the story-page rail and the top of `/briefing` now list the **5 trending stories**. They come from `Rails::trending()`: likes, shares, comments and importance over the last 3 days, topped up with recent stories on quiet days. Each item links to its story. Home's separate "Trending Now" card was dropped because it showed the same list.
+- **Copy:** the app banner and the About page no longer mention audio.
+- **Still running:** TTS audio is still generated in the background (`GenerateAudio`, Morning 5 audio), and reels keep their voice-over.
+- **Turning it back on:** set `AUDIO_ENABLED=true` to bring back the Listen buttons and the `/briefing` player. The Top 5 card stays a trending list.
+
 ## Reels (short vertical news videos)
 
 Settings in `.env`: `REELS_ENABLED`, `FFMPEG_PATH`, `REEL_MAX_SECONDS` (default 60, a hard cap for every reel). Details in `config/reels.php`.

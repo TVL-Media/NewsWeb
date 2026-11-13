@@ -17,7 +17,9 @@
 ])
 @php
     $pageTitle = $title ? $title.' · NextGenNews' : 'NextGenNews · '.__('Short news with depth, in Hindi and English');
-    $metaDescription = $description ?? __('India\'s news in 60 words, with key points, simple explainers and audio. In Hindi and English.');
+    $metaDescription = $description ?? (config('services.audio.enabled')
+        ? __('India\'s news in 60 words, with key points, simple explainers and audio. In Hindi and English.')
+        : __('India\'s news in 60 words, with key points and simple explainers. In Hindi and English.'));
 @endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" data-text-size="{{ auth()->user()?->text_size ?? 'medium' }}" data-theme="{{ auth()->user()?->theme ?? 'light' }}">
@@ -87,7 +89,7 @@
         @unless ($immersive)<x-site-footer />@endunless
         <x-bottom-nav :active="$active" />
     @endunless
-    <x-audio-player />
+    @if (config('services.audio.enabled'))<x-audio-player />@endif
     <x-login-sheet />
     <x-reader-sheets />
 

@@ -15,7 +15,7 @@
                 <li class="shrink-0">
                     <a href="{{ route('briefing') }}" class="flex w-[58px] flex-col items-center gap-1 text-ink no-underline">
                         <span class="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-brand text-[21px] font-black text-white">5</span>
-                        <span class="w-full truncate text-center text-[11px] font-semibold">{{ __('Morning 5') }}</span>
+                        <span class="w-full truncate text-center text-[11px] font-semibold">{{ __('Top 5') }}</span>
                     </a>
                 </li>
                 @foreach ($circles['viewer'] as $i => $group)
@@ -51,13 +51,13 @@
                 </div>
             @endif
             <div class="hidden min-w-0 grow basis-[300px] flex-col gap-4 md:flex md:max-w-[340px]">
-                <x-morning5-card :briefing="$morning5['briefing']" :read="$morning5['read']" class="flex-1" />
+                <x-top5-card :stories="$trending" class="flex-1" />
                 <x-quiz-card :streak="$streak" />
             </div>
         </div>
 
-        {{-- Mobile: slim red Morning 5 strip --}}
-        <x-morning5-card variant="strip" :briefing="$morning5['briefing']" class="mt-3 md:hidden" />
+        {{-- Mobile: Top 5 under the hero --}}
+        <x-top5-card :stories="$trending" class="mt-3 md:hidden" />
 
         {{-- 3. Latest News + right rail --}}
         <div class="mt-6 flex flex-wrap gap-5">
@@ -95,7 +95,6 @@
             </section>
 
             <aside class="min-w-0 grow basis-[300px] space-y-4 md:max-w-[340px]" aria-label="{{ __('More') }}">
-                <x-trending-card :stories="$trending" />
                 <x-pages-to-follow :pages="$pagesToFollow" :followed="$followed" class="hidden md:block" />
                 @if ($poll)
                     <x-poll-card :poll="$poll" class="hidden md:block" />

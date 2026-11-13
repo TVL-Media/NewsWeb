@@ -53,7 +53,7 @@ class StoryController extends Controller
             'related' => $related,
             'poll' => $poll,
             'commentsData' => $comments->map(fn ($c) => CommentController::present($c, $likedComments))->values(),
-            'morning5' => Rails::morning5($user),
+            'trending' => Rails::trending(6)->reject(fn ($s) => $s->id === $story->id)->take(5)->values(),
             'following' => $story->page && in_array($story->page_id, Rails::followedPageIds($user), true),
             'liked' => $user ? Like::where(['user_id' => $user->id, 'likeable_type' => Story::class, 'likeable_id' => $story->id])->exists() : false,
             'saved' => $user ? Save::where(['user_id' => $user->id, 'story_id' => $story->id])->exists() : false,
