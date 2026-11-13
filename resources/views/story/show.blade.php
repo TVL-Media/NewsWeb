@@ -218,28 +218,25 @@
                     </button>
                     {{-- Reactions as icons; the name shows as a tooltip and is the button's accessible label. --}}
                     @php
-                        // Chosen reaction: border + tint in the icon's own colour.
-                        $reactionOn = [
-                            'surprising' => 'border-[#F5B000] bg-[#FFF6DA]',
-                            'unfair' => 'border-[#FF6B4A] bg-[#FFEDE8]',
-                            'need_info' => 'border-[#3B82F6] bg-[#EAF2FF]',
-                            'good_news' => 'border-[#22C55E] bg-[#E8F8EE]',
-                        ];
+                        // Chosen reaction: the icon grows a little and a dot in its own colour sits under it.
+                        $reactionDot = ['surprising' => 'bg-[#F5B000]', 'unfair' => 'bg-[#FF6B4A]', 'need_info' => 'bg-[#3B82F6]', 'good_news' => 'bg-[#22C55E]'];
                     @endphp
-                    <div class="flex items-center gap-1.5" role="group" aria-label="{{ __('React to this story') }}">
+                    <div class="flex items-center gap-0.5" role="group" aria-label="{{ __('React to this story') }}">
                         @foreach ($reactions as $type => $label)
                             <button type="button" @click="react('{{ $type }}')" :aria-pressed="(reaction === '{{ $type }}').toString()"
                                     aria-label="{{ $label }}" title="{{ $label }}"
-                                    class="group relative inline-flex h-11 w-11 items-center justify-center rounded-full border-[1.5px] transition hover:-translate-y-0.5"
-                                    :class="reaction === '{{ $type }}' ? '{{ $reactionOn[$type] }} scale-105' : 'border-line-2 bg-white hover:border-muted-2'">
-                                <x-reaction-icon :type="$type" size="26" />
+                                    class="group relative inline-flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-ink">
+                                <x-reaction-icon :type="$type" size="30" class="transition-transform duration-150 group-hover:scale-115"
+                                                 x-bind:class="reaction === '{{ $type }}' ? 'scale-115' : (reaction ? 'opacity-60 group-hover:opacity-100' : '')" />
+                                <span x-show="reaction === '{{ $type }}'" x-cloak class="absolute bottom-0 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full {{ $reactionDot[$type] }}" aria-hidden="true"></span>
                                 <span class="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-[8px] bg-ink px-2.5 py-1 text-[12px] font-bold text-white opacity-0 shadow-[var(--shadow-float)] transition group-hover:opacity-100 group-focus-visible:opacity-100" aria-hidden="true">{{ $label }}</span>
                             </button>
                         @endforeach
                     </div>
                     <div class="ml-auto flex items-center gap-2">
-                        <button type="button" @click="shareImage()" class="btn rounded-full bg-ink px-4 text-[13.5px] text-white hover:bg-black">
-                            <x-icon name="image" size="17" /> {{ __('Share as image') }}
+                        <button type="button" @click="shareImage()" title="{{ __('Share') }}" aria-label="{{ __('Share') }}"
+                                class="inline-flex h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-line-2 bg-white text-ink hover:bg-chip">
+                            <x-icon name="share" size="19" />
                         </button>
                         <button type="button" @click="save()" :aria-pressed="saved.toString()"
                                 class="inline-flex h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-line-2 bg-white hover:bg-chip"
