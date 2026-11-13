@@ -136,7 +136,7 @@ describe('For You', function () {
         $user->categories()->attach($this->story->category_id);
         ReadingEvent::query()->insertOrIgnore(['user_id' => $user->id, 'story_id' => $this->story->id, 'read_at' => now(), 'read_on' => now()->toDateString()]);
 
-        $html = $this->actingAs($user)->get('/for-you')->assertOk()->assertSee('Scroll for earlier stories')->getContent();
+        $html = $this->actingAs($user)->get('/for-you')->assertOk()->assertSee('Earlier stories')->getContent();
         $caughtUp = strpos($html, "You&#039;re all caught up");
         $readCard = strpos($html, e($this->story->version('en')->headline));
 
@@ -295,4 +295,24 @@ describe('account', function () {
         $this->assertGuest();
         expect(User::find($this->reader->id))->toBeNull();
     });
+});
+
+it('shows the For You sidebar: topic filters, followed pages with new-story dots, and the J / K hint', function () {
+    $user = User::where('phone', '9876543210')->first();
+    $topics = $user->categories()->get();
+    $pages = $user->followedPages()->get();
+
+    $res = $this->actingAs($user)->get('/for-you')->assertOk()
+        ->assertSee('Your topics')->assertSee('Edit topics')
+        ->assertSee('Pages you follow')
+        ->assertSee('for next / previous')
+        ->assertSee('data-card', false);
+
+    foreach ($topics as $topic) {
+        $res->assertSee("type: 'cat', id: {$topic->id}", false);
+    }
+    foreach ($pages as $page) {
+        $res->assertSee($page->name());
+    }
+    $res->assertDontSee('ngn-listen', false); // audio is off by default
 });

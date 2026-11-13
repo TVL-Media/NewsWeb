@@ -17,29 +17,43 @@
                 selected: [],
                 cityId: null,
                 query: '',
-                locating: false, locError: '',
+                locating: false, locError: '', detected: null,
                 cities: @js($cityData),
                 // Biggest/most-recognised first for the default shortlist (cities.php groups by
                 // state alphabetically, which would otherwise put Andhra Pradesh ahead of Delhi/Mumbai).
                 cityPriority: ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Surat', 'Jaipur', 'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Bhopal', 'Patna', 'Chandigarh', 'Kochi', 'Coimbatore', 'Visakhapatnam', 'Guwahati', 'Bhubaneswar', 'Thiruvananthapuram'],
+                get chosen() { return this.cities.find(c => c.id === this.cityId) || null; },
                 get filtered() {
                     const q = this.query.trim().toLowerCase();
                     if (!q) {
-                        return this.cities.filter(c => c.popular)
+                        const popular = this.cities.filter(c => c.popular)
                             .sort((a, b) => this.cityPriority.indexOf(a.name_en) - this.cityPriority.indexOf(b.name_en));
+                        // The picked city (found by location or search) always shows, at the top, even if it isn't popular.
+                        return this.chosen && !popular.includes(this.chosen) ? [this.chosen, ...popular] : popular;
                     }
                     return this.cities.filter(c => c.name_en.toLowerCase().includes(q) || c.name_hi.includes(q) || c.state.toLowerCase().includes(q));
                 },
                 toggle(id) { this.selected.includes(id) ? this.selected = this.selected.filter(i => i !== id) : this.selected.push(id); },
+                pickCity(id) { this.cityId = id; this.detected = null; },
                 locate() {
+                    this.locError = ''; this.detected = null;
+                    if (!window.isSecureContext) { this.locError = @js(__('Location only works on a secure (https) connection. Please pick your city.')); return; }
                     if (!navigator.geolocation) { this.locError = @js(__('Location is not available on this device.')); return; }
-                    this.locating = true; this.locError = '';
+                    this.locating = true;
                     navigator.geolocation.getCurrentPosition(pos => {
                         const { latitude: la, longitude: lo } = pos.coords;
                         let best = null, bestD = Infinity;
                         this.cities.forEach(c => { if (!c.coords) return; const d = (c.coords[0] - la) ** 2 + (c.coords[1] - lo) ** 2; if (d < bestD) { bestD = d; best = c; } });
-                        this.cityId = best?.id ?? null; this.locating = false;
-                    }, () => { this.locating = false; this.locError = @js(__('We couldn\'t get your location. Please pick a city.')); }, { timeout: 8000 });
+                        this.locating = false;
+                        if (!best) { this.locError = @js(__('We couldn\'t get your location. Please pick a city.')); return; }
+                        this.cityId = best.id; this.detected = best; this.query = '';
+                        this.$nextTick(() => document.getElementById('city-' + best.id)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+                    }, err => {
+                        this.locating = false;
+                        this.locError = err.code === 1
+                            ? @js(__('Location is blocked. Allow location for this site in your browser settings, or pick your city.'))
+                            : @js(__('We couldn\'t get your location. Please pick a city.'));
+                    }, { timeout: 15000, maximumAge: 600000 });
                 },
               }">
             @csrf
@@ -120,18 +134,25 @@
                     <input id="ob-city-q" x-model="query" type="search" class="input pl-11" placeholder="{{ __('Search city') }}">
                 </div>
 
-                <button type="button" @click="locate()" class="mt-3 flex h-[52px] items-center gap-3 rounded-[14px] bg-brand-tint px-4 text-[15px] font-bold text-brand-dark">
+                <button type="button" @click="locate()" :disabled="locating" class="mt-3 flex h-[52px] w-full items-center gap-3 rounded-[14px] px-4 text-left text-[15px] font-bold"
+                        :class="detected ? 'bg-[#E8F7EE] text-[#146C3A]' : 'bg-brand-tint text-brand-dark'">
                     <x-icon name="navigation" size="18" />
-                    <span x-text="locating ? '{{ __('Finding you…') }}' : '{{ __('Use my current location') }}'"></span>
+                    <span class="flex-1" x-show="!detected" x-text="locating ? @js(__('Finding you…')) : @js(__('Use my current location'))"></span>
+                    <span class="flex-1" x-show="detected" x-cloak>
+                        <span x-text="detected?.name + ', ' + detected?.state"></span>
+                        <span class="block text-[12.5px] font-semibold opacity-80">{{ __('Detected from your location. Tap to try again.') }}</span>
+                    </span>
+                    <span x-show="detected" x-cloak><x-icon name="check" size="18" :stroke="3" /></span>
                 </button>
-                <p x-show="locError" x-text="locError" x-cloak class="mt-2 text-[13px] text-brand-dark"></p>
+                <p x-show="locError" x-text="locError" x-cloak class="mt-2 text-[13px] font-semibold text-brand-dark" role="alert"></p>
 
                 <p x-show="!query.trim()" class="mt-6 text-[12px] font-extrabold tracking-[0.1em] text-muted-2">{{ __('POPULAR CITIES') }}</p>
                 <ul class="mt-1" role="radiogroup" aria-label="{{ __('City') }}">
                     <template x-for="c in filtered" :key="c.id">
-                        <li>
-                            <button type="button" role="radio" :aria-checked="(cityId === c.id).toString()" @click="cityId = c.id"
-                                    class="flex w-full items-center gap-3 border-b border-line py-3 text-left">
+                        <li :id="'city-' + c.id">
+                            <button type="button" role="radio" :aria-checked="(cityId === c.id).toString()" @click="pickCity(c.id)"
+                                    class="flex w-full items-center gap-3 border-b border-line py-3 text-left"
+                                    :class="cityId === c.id && 'bg-brand-tint/50'">
                                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-[12px] bg-chip text-ink-2"><x-icon name="building" size="19" /></span>
                                 <span class="flex-1">
                                     <span class="block text-[15.5px] font-extrabold" x-text="c.name"></span>

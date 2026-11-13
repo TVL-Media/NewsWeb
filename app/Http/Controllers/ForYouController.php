@@ -41,6 +41,10 @@ class ForYouController extends Controller
         return view('for-you', [
             'stories' => $stories,
             'newCount' => $new->count(),
+            // Sidebar: topic chips filter the feed; a red dot marks followed pages with new stories.
+            'topics' => $user->categories()->orderBy('sort_order')->get(),
+            'pages' => $user->followedPages()->orderBy('name')->get(),
+            'freshPageIds' => $new->pluck('page_id')->filter()->unique()->values()->all(),
             'followed' => $pageIds,
             'liked' => Like::where('user_id', $user->id)->where('likeable_type', Story::class)->whereIn('likeable_id', $ids)->pluck('likeable_id')->all(),
             'saved' => Save::where('user_id', $user->id)->whereIn('story_id', $ids)->pluck('story_id')->all(),

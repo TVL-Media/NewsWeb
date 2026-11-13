@@ -20,6 +20,8 @@
      x-data="cityPicker(@js($citiesJson), {{ $selected ?? 'null' }}, {
         noGeo: @js(__('Location is not available on this device.')),
         noMatch: @js(__('We couldn\'t get your location. Please pick a city.')),
+        denied: @js(__('Location is blocked. Allow location for this site in your browser settings, or pick your city.')),
+        insecure: @js(__('Location only works on a secure (https) connection. Please pick your city.')),
      })"
      @keydown.escape.window="open && close()">
     @if ($inputName)

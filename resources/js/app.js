@@ -162,9 +162,10 @@ document.addEventListener('alpine:init', () => {
             this.$dispatch('city-picked', { id });
         },
         locate() {
+            this.locError = '';
+            if (!window.isSecureContext) { this.locError = messages.insecure; return; }
             if (!navigator.geolocation) { this.locError = messages.noGeo; return; }
             this.locating = true;
-            this.locError = '';
             navigator.geolocation.getCurrentPosition((pos) => {
                 const { latitude: la, longitude: lo } = pos.coords;
                 let best = null;
@@ -176,10 +177,10 @@ document.addEventListener('alpine:init', () => {
                 });
                 this.locating = false;
                 if (best) this.pick(best.id);
-            }, () => {
+            }, (err) => {
                 this.locating = false;
-                this.locError = messages.noMatch;
-            }, { timeout: 8000 });
+                this.locError = err.code === 1 ? messages.denied : messages.noMatch;
+            }, { timeout: 15000, maximumAge: 600000 });
         },
     }));
 
