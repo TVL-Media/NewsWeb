@@ -18,7 +18,8 @@
                         <button type="button" @click="$dispatch('open-stories', { group: {{ $i }} })" class="flex w-[58px] flex-col items-center gap-1 text-ink"
                                 aria-label="{{ __('Stories') }}: {{ $group['label'] }}">
                             @if ($group['badge'])
-                                <span class="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-brand text-[21px] font-black text-white ring-2 ring-brand ring-offset-2">{{ $group['badge'] }}</span>
+                                {{-- Same ring as the other circles (drawn inside the box, so the scrolling row can't clip it). --}}
+                                <span class="story-ring !h-[54px] !w-[54px] !p-[2px]"><span class="flex h-full w-full items-center justify-center rounded-full bg-brand text-[20px] font-black text-white">{{ $group['badge'] }}</span></span>
                             @else
                                 <span class="story-ring !h-[54px] !w-[54px] !p-[2px]"><img src="{{ $group['avatar'] }}" alt="" @if ($i > 3) loading="lazy" @endif></span>
                             @endif
