@@ -6,6 +6,7 @@ use App\Support\Lang;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -20,6 +21,9 @@ class Story extends Model
         return [
             'is_breaking' => 'boolean',
             'published_at' => 'datetime',
+            'scheduled_at' => 'datetime',
+            'submitted_at' => 'datetime',
+            'unpublished_at' => 'datetime',
         ];
     }
 
@@ -148,5 +152,54 @@ class Story extends Model
     public function reels(): HasMany
     {
         return $this->hasMany(Reel::class);
+    }
+
+    // ── Admin panel ───────────────────────────────────────────────────────
+
+    public const STATUSES = [
+        'draft' => 'Draft', 'pending_approval' => 'In review', 'changes_requested' => 'Changes requested',
+        'scheduled' => 'Scheduled', 'published' => 'Published', 'corrected' => 'Corrected',
+        'rejected' => 'Rejected', 'removed' => 'Unpublished',
+    ];
+
+    public function isLive(): bool
+    {
+        return in_array($this->status, ['published', 'corrected'], true);
+    }
+
+    /** English headline (falls back to Hindi) for admin lists. */
+    public function title(): string
+    {
+        return $this->version('en')?->headline ?? '(untitled)';
+    }
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class, 'author_id');
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class, 'assigned_reviewer_id');
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
+    public function snapshots(): HasMany
+    {
+        return $this->hasMany(StorySnapshot::class)->latest('version_no');
+    }
+
+    public function publishLogs(): HasMany
+    {
+        return $this->hasMany(PublishLog::class)->latest('attempted_at');
+    }
+
+    public function translationJobs(): HasMany
+    {
+        return $this->hasMany(TranslationJob::class)->latest();
     }
 }

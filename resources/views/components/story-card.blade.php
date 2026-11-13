@@ -8,6 +8,9 @@
 @php
     $v = $story->version();
     $tag = $story->category?->name();
+    if ($story->is_breaking && $story->published_at?->gt(now()->subHours(12))) {
+        $tag = __('Breaking').($tag ? ' · '.$tag : ''); // set in the admin panel
+    }
     $url = route('story.show', $story);
 @endphp
 

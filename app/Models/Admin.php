@@ -2,37 +2,61 @@
 
 namespace App\Models;
 
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
-/** Newsroom staff who sign in to Filament at /admin. Roles: editor, chief, admin. */
-class Admin extends Authenticatable implements FilamentUser
+/**
+ * Newsroom staff who sign in to the admin panel at /admin (admin guard).
+ * Access comes from roles & permissions (Spatie). The old `role` column is kept for history only.
+ */
+class Admin extends Authenticatable
 {
-    use Notifiable;
+    use HasRoles, Notifiable, SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'password', 'role'];
+    protected $guard_name = 'admin';
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $guarded = ['id'];
+
+    protected $attributes = ['status' => 'active'];
+
+    protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'invite_token'];
 
     protected function casts(): array
     {
-        return ['password' => 'hashed'];
+        return [
+            'password' => 'hashed',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
+            'invite_expires_at' => 'datetime',
+            'last_login_at' => 'datetime',
+        ];
     }
 
-    public function canAccessPanel(Panel $panel): bool
+    public function isSuperAdmin(): bool
     {
-        return in_array($this->role, ['editor', 'chief', 'admin'], true);
+        return $this->hasRole('Super Admin');
     }
 
-    public function isChief(): bool
+    public function hasTwoFactor(): bool
     {
-        return in_array($this->role, ['chief', 'admin'], true);
+        return ! is_null($this->two_factor_confirmed_at);
     }
 
-    public function isAdmin(): bool
+    public function initials(): string
     {
-        return $this->role === 'admin';
+        return collect(explode(' ', trim($this->name)))->filter()->take(2)->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->join('');
+    }
+
+    public function notificationsFeed()
+    {
+        return $this->hasMany(AdminNotification::class)->latest('created_at');
+    }
+
+    public function roleNames(): string
+    {
+        return $this->roles->pluck('name')->join(', ');
     }
 }

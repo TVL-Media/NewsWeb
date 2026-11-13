@@ -35,7 +35,7 @@ class AccountController extends Controller
                 'liked' => Like::where('user_id', $user->id)->where('likeable_type', Story::class)->count(),
                 'history' => ReadingEvent::where('user_id', $user->id)->distinct()->count('story_id'),
             ],
-            'categories' => Category::orderBy('sort_order')->get(),
+            'categories' => Category::active()->orderBy('sort_order')->get(),
             'cities' => City::orderBy('id')->get(),
         ]);
     }

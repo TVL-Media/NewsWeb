@@ -4,7 +4,13 @@ namespace App\Providers;
 
 use App\Contracts\SmsSender;
 use App\Contracts\TextToSpeech;
+use App\Models\Admin;
+use App\Models\AdminNotification;
 use App\Models\Category;
+use App\Models\Poll;
+use App\Models\Report;
+use App\Models\Story;
+use App\Models\TranslationJob;
 use App\Services\Sms\LogSmsSender;
 use App\Services\Sms\Msg91Sender;
 use App\Services\Tts\FakeTts;
@@ -12,6 +18,8 @@ use App\Services\Tts\GoogleTts;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
@@ -33,6 +41,51 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::preventLazyLoading(! $this->app->isProduction());
+        // The admin panel's list screens favour simple code over eager loading everywhere,
+        // so lazy-loading is only enforced on the reader-facing site.
+        Model::handleLazyLoadingViolationUsing(function ($model, string $relation) {
+            if (app()->runningInConsole() && ! app()->runningUnitTests() || request()->is('admin', 'admin/*')) {
+                return;
+            }
+            throw new \Illuminate\Database\LazyLoadingViolationException($model, $relation);
+        });
+
+        // ── Admin panel ──
+        // Super Admin can do everything.
+        Gate::before(fn ($user) => $user instanceof Admin && $user->hasRole('Super Admin') ? true : null);
+        Paginator::defaultView('admin.partials.pager');
+        View::composer('admin.layouts.app', function ($view) {
+            $a = auth('admin')->user();
+            if (! $a) {
+                return;
+            }
+            $view->with('navCounts', [
+                'review' => $a->can('review.view') ? Story::where('status', 'pending_approval')->count() : 0,
+                'reports' => $a->can('reports.view') ? Report::whereIn('status', ['open', 'escalated'])->distinct()->get(['target_type', 'target_id'])->count() : 0,
+                'polls' => $a->can('polls.view') ? Poll::where('status', 'pending')->count() : 0,
+                'translations' => $a->can('translation.review') ? TranslationJob::where('status', 'ai_completed')->count() : 0,
+                'unread' => AdminNotification::where('admin_id', $a->id)->whereNull('read_at')->count(),
+            ]);
+            $view->with('navNotifications', AdminNotification::where('admin_id', $a->id)->latest('created_at')->limit(8)->get());
+        });
+        // Website → admin panel: tell moderators about new reports and reader polls (bell + dashboard).
+        Report::created(function (Report $r) {
+            $n = Report::where('target_type', $r->target_type)->where('target_id', $r->target_id)->whereIn('status', ['open', 'escalated'])->count();
+            if (in_array($n, [1, 5], true)) { // first report, and again when it piles up
+                \App\Support\Notify::permission('reports.handle', 'report', $n === 1 ? 'New report: '.$r->target_type : "{$n} reports on one {$r->target_type}",
+                    \Illuminate\Support\Str::limit($r->targetLabel(), 120), route('admin.reports.show', $r));
+            }
+        });
+        Poll::created(function (Poll $p) {
+            if ($p->created_by && $p->status === 'pending') {
+                \App\Support\Notify::permission('polls.manage', 'poll', 'Reader poll waiting for approval', \Illuminate\Support\Str::limit($p->question, 120), route('admin.polls.show', $p));
+            }
+        });
+
+        RateLimiter::for('admin-login', fn (Request $r) => [
+            Limit::perMinute(5)->by(strtolower((string) $r->input('email')).'|'.$r->ip()),
+            Limit::perMinute(20)->by($r->ip()),
+        ]);
 
         // Rate limits: OTP by IP and phone; engagement and comments per reader.
         RateLimiter::for('otp', fn (Request $r) => [
@@ -48,7 +101,7 @@ class AppServiceProvider extends ServiceProvider
         // (Laravel 13's cache won't unserialize objects by default).
         View::composer(['components.category-chips', 'components.site-footer'], function ($view) {
             $rows = Cache::remember('nav.categories', 600,
-                fn () => Category::orderBy('sort_order')->get()->map->getAttributes()->all());
+                fn () => Category::active()->orderBy('sort_order')->get()->map->getAttributes()->all());
             $view->with('navCategories', Category::hydrate($rows));
         });
     }

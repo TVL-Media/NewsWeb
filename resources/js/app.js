@@ -32,6 +32,11 @@ window.ngnFetch = async (url, { method = 'POST', body = null } = {}) => {
     });
     let data = null;
     try { data = await res.json(); } catch { /* empty body */ }
+    // Restricted or suspended in the admin panel: explain it, whatever the reader tried.
+    if (res.status === 403 && data?.account_status) {
+        Alpine.store('toast')?.show(data.message);
+        if (data.account_status === 'suspended') setTimeout(() => window.location.assign('/'), 1800);
+    }
     return { ok: res.ok, status: res.status, data };
 };
 

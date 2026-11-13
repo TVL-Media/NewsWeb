@@ -1,6 +1,6 @@
 # NextGenNews (website, phase 1)
 
-Inshorts-style Indian news site: 60-word cards with depth, Hindi and English, audio, Morning 5, daily quiz, streaks, polls and followable pages. Laravel 13 · PHP 8.3 · MySQL 8 · Blade + Tailwind v4 + Alpine · Livewire 3 · Filament 3.
+Inshorts-style Indian news site: 60-word cards with depth, Hindi and English, audio, Morning 5, daily quiz, streaks, polls and followable pages. Laravel 13 · PHP 8.3 · MySQL 8 · Blade + Tailwind v4 + Alpine · Livewire 3. Newsroom admin panel at `/admin` (Blade + Alpine, roles & permissions).
 
 **Status:** Milestones 1 (setup) and 2 (reading) are done. See [Milestones](#milestones).
 
@@ -50,7 +50,7 @@ Checks: `php artisan test` (Pest, in-memory SQLite) and `npm run build`.
 | Who | Login |
 |---|---|
 | Reader "Riya Sharma" (Lucknow, 12-day streak) | phone `9876543210`, OTP **`123456`**. This is the development OTP from `OTP_DEV_CODE` in `.env`; it is ignored when `APP_ENV=production`. With `OTP_DEV_CODE` empty, the OTP is written to `storage/logs/laravel.log` (look for `[OTP]`). No real SMS is sent until `SMS_DRIVER=msg91` is set. Any other 10-digit number starting 6–9 creates a new account and goes through onboarding. |
-| Newsroom admin / chief / editor | `admin@` / `chief@` / `editor@nextgennews.test`, password `password` (Filament `/admin` arrives in Milestone 5) |
+| Newsroom admin / chief / editor | `admin@` / `chief@` / `editor@nextgennews.test`, password `password` at `/admin` (Super Admin / Chief Editor / Editor) |
 
 ### Local vs production
 
@@ -100,7 +100,6 @@ Where the brief was silent, I picked the simplest option:
 - The bell is shown but does nothing (as specified). The "Get the Android app" links use `ANDROID_APP_URL` (defaults to the Play Store home).
 - Quiz questions and polls are single-language (the tables have no language column).
 - The Hindi UI chrome is translated through `lang/hi.json`, and story text comes from `story_versions`.
-- `blade-ui-kit/blade-icons` (a Filament dependency) registers its own `<x-icon>`; it is turned off in `config/blade-icons.php` so our Lucide `<x-icon>` wins.
 - Laravel 13's cache won't unserialize objects by default, so cached data is stored as plain arrays.
 - The demo stories, people, companies, films and figures are fictional. Real institutions and places appear for realism.
 
@@ -147,7 +146,7 @@ Where the brief was silent, I picked the simplest option:
   - The profanity filter covers English, romanised Hindi and Devanagari, including masked letters such as `f*ck` or `sh1t`.
   - Accounts under 24 hours old can post 3 comments a day.
   - Rate limits: 5 comments a minute and 90 engagement actions a minute per reader.
-- **Reports:** one per reader per item, with reasons spam / abusive / misinformation / other. They go to the moderation queue (Filament, Milestone 5).
+- **Reports:** one per reader per item, with reasons spam / abusive / misinformation / other. They go to the moderation queue (admin panel → Reports).
 - **Share as image:**
   - A 1080×1350 JPEG made with Intervention Image: photo, red band with the logo, tag, headline, card text and site name. Cached per story + language and rebuilt when the story changes.
   - The sheet offers WhatsApp, Download, Copy link and the phone's native share.
@@ -191,7 +190,7 @@ Where the brief was silent, I picked the simplest option:
   1. `FetchFeeds`, every 5 minutes: RSS 2.0, Atom or JSON Feed, deduplicated by URL.
   2. `ClusterItems`: same event = title similarity (Jaccard ≥ 0.45 on meaningful words) within 12 hours.
   3. `GenerateDrafts`: one story per cluster. The photo comes from the feed's image, else the category photo.
-  4. `RunChecks`, then `RouteStory`: auto-publish, or `pending_approval` plus `NotifyEditor` (Filament bell + email).
+  4. `RunChecks`, then `RouteStory`: auto-publish, or `pending_approval` plus `NotifyEditor` (admin panel bell + email).
   5. On publish: `GenerateAudio`, page-cache flush, and the `StoryPublished` event (sitemaps hook in Milestone 6).
   - `DraftQuiz` at 21:00 IST writes tomorrow's quiz from today's top 5 stories. It's approved automatically only if every source story is low-risk.
   - Manual run of the whole pipeline: `php artisan newsroom:run` (prints each new story's decision and why). Tomorrow's quiz by hand: `php artisan quiz:draft`.
@@ -209,20 +208,7 @@ Where the brief was silent, I picked the simplest option:
   - **Confidence:** the AI's confidence minus 0.15 per missing fact (max 3), minus 0.3 when over the copy threshold.
   - **Auto-publish** only when low risk, no missing facts, copy < threshold, confidence ≥ threshold, **and every source feed is marked trusted**. "Trusted" is my reading of the Feeds screen's toggle; untrusted feeds always go to an editor.
   - Every decision and its reasons are stored in `ai_checks` (new `reasons` and `risk_flags` columns) and shown in the Auto-publish log.
-- **Filament admin** at `/admin` (staff log in with email + password; `admins` table, `admin` guard):
-  - **Newsroom:**
-    - Approval queue (draft + AI checks next to the source reports; Approve / Edit then publish / Reject with reason).
-    - Stories (both language versions, photo upload, Publish / Unpublish, correction label, "Write a story").
-    - Auto-publish log; Feeds (add, toggle active/trusted, Fetch now).
-  - **Daily:** Morning 5 (pick and reorder 5 stories; saving rebuilds the audio) and Daily quiz (edit questions, approve drafts).
-  - **Moderation:**
-    - Comments (reported first; hide/restore keeps the story's comment count right).
-    - Polls (approve reader polls, keeping their chosen run length from approval; reject; close; editorial polls).
-    - Reports (take down or dismiss).
-  - **Site:** Pages and Categories (full CRUD, uploads, result strip, Upcoming tiles).
-  - **Settings:** Auto-publish settings (sensitive categories, keywords, thresholds).
-  - **Roles:** editor = Newsroom (except Feeds), Daily and Moderation; chief = + Feeds and Auto-publish settings; admin = + Pages and Categories.
-- **Filament note:** table closures must name their argument `$query` (Filament injects by name).
+- **Admin panel** at `/admin`: see [Admin panel](#admin-panel) below. (It replaced the Filament screens; everything they did is in the panel.)
 
 ## Reels (short vertical news videos)
 
@@ -254,7 +240,7 @@ Check it with `ffmpeg -version`. The build needs `libx264` and `aac`; the packag
   - **Video:** one FFmpeg run applies a slow zoom/pan to the story photo, shows each overlay for exactly as long as its segment is spoken, adds the end card, and outputs 720×1280 (~1.5 Mbps) and 480×854 (~700 kbps) H.264/AAC MP4s with `+faststart`.
   - **Storage:** files go to the media disk under `reels/{id}/` with a fresh random prefix on every build, so CloudFront never serves a stale file.
 - **Length 20–45 s:** if the voice-over runs long, trailing key points are dropped (the headline and point 1 always stay). If it runs short, the end card is held longer.
-- **Uploads:** `ProcessUploadedReel` turns an editor upload into the same two MP4s plus a thumbnail. The video is fitted over a blurred copy of itself, so landscape agency footage isn't cropped. A silent track is added if the upload has no audio. Uploads longer than `REEL_MAX_SECONDS` fail with a clear message. The Filament upload form comes in Reels Milestone 2.
+- **Uploads:** `ProcessUploadedReel` turns an editor upload into the same two MP4s plus a thumbnail. The video is fitted over a blurred copy of itself, so landscape agency footage isn't cropped. A silent track is added if the upload has no audio. Uploads longer than `REEL_MAX_SECONDS` fail with a clear message. The upload form in the `/admin` Reels section comes in Reels Milestone 2.
 - **Status:** a low-risk story → `published`; a sensitive story (`ai_checks.risk_level = sensitive`) or any upload → `pending_approval`; an error → `failed`, with the FFmpeg/FFprobe message in `error_message`. Editor alerts and the review screens come in Reels Milestone 2.
 - **Re-runs:** a story that is published again with the same headline, key points and photo doesn't re-render (`source_hash`). Pass `force: true` to rebuild anyway.
 - **Engagement:** likes (already polymorphic) and reports (`target_type = reel`) needed no schema change. Comments, saves and shares got a nullable `reel_id` next to `story_id`.
@@ -274,13 +260,13 @@ Check it with `ffmpeg -version`. The build needs `libx264` and `aac`; the packag
 2. ✅ **Reading:** Home (full, desktop + mobile), Story (3 tabs, language switch, Listen mini player with fake audio, SEO), Topic page, Explore, Search, static pages.
 3. ✅ **Accounts:** OTP login sheet, onboarding, account page, For You, likes, reactions, saves, follows, comments, reports, share image.
 4. ✅ **Habit features:** Briefing page with the Morning 5 player, daily quiz, streaks (with freezes), polls (vote, create, results), scheduled jobs.
-5. ✅ **Newsroom:** feeds, clustering, AI drafts (Claude), fact/copy/sensitivity checks, auto-publish routing, approval queue, Filament admin, scheduler.
+5. ✅ **Newsroom:** feeds, clustering, AI drafts (Claude), fact/copy/sensitivity checks, auto-publish routing, approval queue, admin panel, scheduler.
 6. Launch prep: SEO/sitemaps, caching, GA4/Sentry, accessibility, tests, final README.
 
 **Reels:**
 
 1. ✅ Database, reel generation and video processing (FFmpeg), sample reels (10 stories × English + Hindi).
-2. Filament admin, auto-publish rules + editor alerts, the `/api/v1` endpoints. **Waiting on the admin work from the other developer.** `ReelResource` is already shaped for the API.
+2. Reels section in the `/admin` panel (see "Admin panel" below), auto-publish rules + editor alerts, the `/api/v1` endpoints. `ReelResource` is already shaped for the API.
 3. ✅ Website pages:
    - `/reels` and `/reels/{slug}` (mobile snap-scroll, desktop centred player, comments and share sheets, SEO + VideoObject JSON-LD)
    - Reels in the header and the 5-item bottom nav
@@ -294,3 +280,36 @@ Check it with `ffmpeg -version`. The build needs `libx264` and `aac`; the packag
 - **Views:** a view is counted when the reader leaves a reel after watching at least 1 second (`sendBeacon`).
 - **Shares:** guests can share; shares are counted but not gated.
 - **Burned-in text:** it stays out of the right 140 px and a 58 px side margin. On tall phones, `object-fit: cover` trims the sides, and the like/comment column covers the right edge.
+
+## Admin panel
+
+The newsroom admin panel at `/admin` runs on this app's own tables. Staff sign in with email + password (`admins` table, `admin` guard); readers never can.
+
+**Screens**
+
+| Area | What it does |
+|---|---|
+| Dashboard | Stories published (auto vs editor), approval queue, reads, active readers, likes/comments/shares, poll votes, streaks, open reports, the newsroom pipeline, and a "needs your attention" list (failed publishing, reader polls to approve, translations to review, live stories without Hindi, today's Morning 5, tomorrow's quiz, stale feeds). |
+| Approval queue | AI drafts that failed a check and stories submitted by writers. AI checks and the source reports sit next to the English and Hindi draft. Approve, approve and schedule, request changes, reject (reason kept in `approvals`). Assign / take, SLA highlight, no self-approval (override is password-confirmed and audit-logged). |
+| Stories | Every story with status tabs and filters (category, page, writer, AI vs editor, breaking, no Hindi yet). The editor has English, हिंदी, Photo & source, and AI checks tabs: 60-word card check, 3 key points, why it matters, explain simply, full story, photo upload or media library, correction label, page/city/importance/read time, tags. Save, submit, publish now, schedule. Live edits rebuild the audio and clear page caches. Version history with restore, preview in both languages, bulk actions, permanent delete (type DELETE + password). |
+| Schedule | Calendar (drag to reschedule) and list. `stories:publish-due` runs every minute, retries 3 times, then tells editors. |
+| Feeds & auto-publish | Feeds (add, trusted/active, fetch now), sources, auto-publish rules (sensitive categories and keywords, thresholds) and the auto-publish log with one-click unpublish. |
+| Translations | AI translation English ↔ Hindi using the newsroom's Claude key. The text waits for review and is only written to the story when an editor approves it. Side-by-side review, re-run one field, glossary, monthly cap, "translate recent stories into Hindi". |
+| Daily | Morning 5 (pick or reorder five stories, rebuild audio, "pick today's now") and daily quiz (write/edit questions, approve drafts, "draft tomorrow's now"). |
+| Polls | Editorial polls and reader polls. Approve / reject reader polls (they keep their chosen run length), close, duplicate, results with percentages that add to 100, votes over time, CSV, low-participation flag. |
+| Categories, Pages, Tags | Bilingual categories (photo tile or icon, colour, hidden/shown, sensitive), followable pages (result strip, upcoming tiles, avatar/cover), tags. |
+| Readers | Search and filters (activity, engagement, language, city), masked phone numbers, reads/comments/likes, this week's streak, restrict (with an end date) / suspend / reinstate with a reason, streak recalculation and extra freeze, data export (JSON), erasure. The website enforces these on the reader's next request (`EnforceReaderStatus`). |
+| Comments, Reports | Reported comments first, hide/restore (keeps comment counts right). Reports grouped per item: take down, take down + restrict/suspend the author, dismiss, escalate; repeat-offender warning; decision log with CSV. |
+| Streaks | Reads per day and freezes per month (used by `StreakService` on the website), leaderboards, distribution. |
+| Analytics | Stories, Newsroom & AI, Readers, Polls/quiz/streaks, Moderation: charts, comparisons with the previous period or last year, CSV export. Computed from `reading_events`, likes, comments, shares, poll votes, quiz attempts, reports and `ai_checks`. |
+| Administration | Admin team (invites, two-factor, deactivate), roles & permissions editor, settings (general, date & time, stories, editorial, security), audit log, profile, notifications, Ctrl+K search. |
+
+**Roles** (seeded by `PermissionSeeder`; editable in the panel): Super Admin (everything), Chief Editor (newsroom + feeds + auto-publish rules + delete + readers), Editor (newsroom, daily, polls, moderation), Writer (write and submit own stories), Community Moderator, Analyst. Staff who existed before the panel get Super Admin / Chief Editor / Editor from their old `role` (migration `2026_11_10_110000`).
+
+**Database:** the panel only adds columns and tables (`2026_11_10_100000_add_admin_panel_tables`); status columns on `stories`, `polls`, `reports` and `approvals.action` became strings so the workflow can add `changes_requested` and `scheduled`. Nothing the website reads was renamed.
+
+**Local demo:** two-factor is not forced for the seeded demo staff (Settings → Security turns it back on).
+
+**Tests:** `tests/Feature/AdminPanelTest.php` opens every admin screen and covers the workflow (write → submit → approve → live on the site, self-approval block, scheduling, version restore, unpublish, delete), translation approval, reader restrictions, report take-down, category hiding and streak rules.
+
+**Not carried over from the standalone admin panel** (the website has no screens that would use them yet): content formats other than stories (video, podcast, web-story slides, image posts), languages other than English and Hindi, badges & achievements, featured placements / collections / trending, announcements and notification categories, the mobile-app API, and "duplicate as new version" (live stories are edited in place and every change is kept in version history).

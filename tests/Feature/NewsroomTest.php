@@ -1,8 +1,6 @@
 <?php
 
 use App\Exceptions\AiWriterException;
-use App\Filament\Resources\ApprovalQueueResource\Pages\ViewApprovalQueue;
-use App\Filament\Resources\PollResource\Pages\ManagePolls;
 use App\Jobs\DraftQuiz;
 use App\Jobs\FetchFeeds;
 use App\Models\Admin;
@@ -25,7 +23,6 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Sleep;
-use Livewire\Livewire;
 
 beforeEach(function () {
     $this->seed(DatabaseSeeder::class);
@@ -160,7 +157,7 @@ describe('pipeline routing', function () {
 
         expect(Story::count())->toBe($before)
             ->and(FeedItem::where('processed', false)->count())->toBe(0)
-            ->and($this->admin->notifications()->count())->toBeGreaterThan(0);
+            ->and(\App\Models\AdminNotification::where('admin_id', $this->admin->id)->where('type', 'ai_failed')->count())->toBeGreaterThan(0);
     });
 });
 
@@ -269,11 +266,11 @@ describe('daily quiz drafting', function () {
 });
 
 describe('admin panel', function () {
-    it('lets newsroom staff open every screen', function (string $url) {
+    it('lets newsroom staff open every newsroom screen', function (string $url) {
         $this->actingAs($this->admin, 'admin')->get($url)->assertOk();
     })->with([
-        '/admin', '/admin/approval-queues', '/admin/stories', '/admin/stories/create', '/admin/auto-publish-log',
-        '/admin/feed-sources', '/admin/auto-publish-settings', '/admin/briefings', '/admin/quizzes',
+        '/admin', '/admin/review', '/admin/stories', '/admin/stories/new', '/admin/newsroom/log',
+        '/admin/newsroom/feeds', '/admin/newsroom/auto-publish', '/admin/daily/briefings', '/admin/daily/quizzes',
         '/admin/comments', '/admin/polls', '/admin/reports', '/admin/pages', '/admin/categories',
     ]);
 
@@ -281,15 +278,13 @@ describe('admin panel', function () {
         $story = Story::first();
         $story->update(['status' => 'pending_approval']);
 
-        $this->actingAs($this->admin, 'admin')->get("/admin/stories/{$story->slug}/edit")->assertOk()->assertSee($story->version('en')->headline);
-        $this->get("/admin/approval-queues/{$story->slug}")->assertOk()->assertSee('AI checks')->assertSee('Sources');
+        $this->actingAs($this->admin, 'admin')->get("/admin/stories/{$story->id}/edit")->assertOk()->assertSee($story->version('en')->headline);
+        $this->get("/admin/review/{$story->id}")->assertOk()->assertSee('AI checks')->assertSee('Sources');
     });
 
     it('limits feeds and settings to chiefs and admins, pages and categories to admins', function () {
         $editor = Admin::where('role', 'editor')->first();
         $chief = Admin::where('role', 'chief')->first();
-
-        // A fresh session per user (Filament's AuthenticateSession pins the session to one admin).
         $as = function (Admin $who) {
             $this->flushSession();
             app('auth')->forgetGuards();
@@ -297,11 +292,11 @@ describe('admin panel', function () {
             return $this->actingAs($who, 'admin');
         };
 
-        $as($editor)->get('/admin/approval-queues')->assertOk();
-        $as($editor)->get('/admin/feed-sources')->assertForbidden();
-        $as($editor)->get('/admin/auto-publish-settings')->assertForbidden();
-        $as($chief)->get('/admin/feed-sources')->assertOk();
-        $as($chief)->get('/admin/categories')->assertForbidden();
+        $as($editor)->get('/admin/review')->assertOk();
+        $as($editor)->get('/admin/newsroom/feeds')->assertForbidden();
+        $as($editor)->get('/admin/newsroom/auto-publish')->assertForbidden();
+        $as($chief)->get('/admin/newsroom/feeds')->assertOk();
+        $as($chief)->get('/admin/pages')->assertForbidden();
     });
 
     it('keeps readers out of /admin', function () {
@@ -315,18 +310,18 @@ describe('admin panel', function () {
         $a->update(['status' => 'pending_approval']);
         $b->update(['status' => 'pending_approval']);
 
-        Livewire::test(ViewApprovalQueue::class, ['record' => $a->getRouteKey()])->callAction('approve');
+        $this->post("/admin/review/{$a->id}/decide", ['decision' => 'approve'])->assertRedirect();
         expect($a->fresh()->status)->toBe('published')->and($a->approvals()->value('action'))->toBe('approved');
 
-        Livewire::test(ViewApprovalQueue::class, ['record' => $b->getRouteKey()])->callAction('reject', ['reason' => 'Unverified claim']);
-        expect($b->fresh()->status)->toBe('rejected')->and($b->approvals()->value('reason'))->toBe('Unverified claim');
+        $this->post("/admin/review/{$b->id}/decide", ['decision' => 'reject', 'reason' => 'Unverified claim', 'comment' => 'No second source'])->assertRedirect();
+        expect($b->fresh()->status)->toBe('rejected')->and($b->approvals()->value('reason'))->toContain('Unverified claim');
     });
 
     it('approves a reader poll', function () {
         $this->actingAs($this->admin, 'admin');
         $poll = Poll::create(['question' => 'Should winter school hours change?', 'status' => 'pending', 'created_by' => User::first()->id, 'ends_at' => now()->addDays(3)]);
 
-        Livewire::test(ManagePolls::class)->callTableAction('approve', $poll);
+        $this->post("/admin/polls/{$poll->id}/approve")->assertRedirect();
 
         expect($poll->fresh()->status)->toBe('live')->and($poll->fresh()->ends_at->isFuture())->toBeTrue();
     });

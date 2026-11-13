@@ -119,7 +119,7 @@ class EngagementController extends Controller
         $readToday = ReadingEvent::where('user_id', $request->user()->id)->whereDate('read_on', $today)->count();
 
         // 3 reads in an IST day count toward the streak.
-        [$streak, $increased] = $readToday >= StreakService::READS_PER_DAY
+        [$streak, $increased] = $readToday >= StreakService::readsPerDay()
             ? $streaks->recordActivity($request->user())
             : [null, false];
 

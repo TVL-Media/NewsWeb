@@ -55,6 +55,13 @@ class StoryPublisher
         return $story;
     }
 
+    /** A live story was edited: rebuild its audio and clear the cached pages. */
+    public function refreshLive(Story $story): void
+    {
+        GenerateAudio::dispatch($story->id);
+        PageCache::flush();
+    }
+
     /** One-click unpublish: the story disappears from the site (status "removed"). */
     public function unpublish(Story $story): Story
     {

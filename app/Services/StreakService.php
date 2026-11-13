@@ -16,8 +16,18 @@ use Carbon\CarbonImmutable;
  */
 class StreakService
 {
-    public const READS_PER_DAY = 3;
+    public const READS_PER_DAY = 3;      // defaults; the admin panel can change them
     public const FREEZES_PER_MONTH = 2;
+
+    public static function readsPerDay(): int
+    {
+        return max(1, (int) setting('streaks.reads_per_day', self::READS_PER_DAY));
+    }
+
+    public static function freezesPerMonth(): int
+    {
+        return max(0, (int) setting('streaks.freezes_per_month', self::FREEZES_PER_MONTH));
+    }
 
     public static function today(): CarbonImmutable
     {
@@ -52,7 +62,7 @@ class StreakService
         $date = $day->toDateString();
 
         $reads = ReadingEvent::where('user_id', $user->id)->whereDate('read_on', $date)->count();
-        if ($reads >= self::READS_PER_DAY) {
+        if ($reads >= self::readsPerDay()) {
             return true;
         }
 
@@ -111,7 +121,7 @@ class StreakService
             return [
                 'date' => $date,
                 'label' => $day->translatedFormat('D'),
-                'done' => ($readDays[$date] ?? 0) >= self::READS_PER_DAY || isset($quizDays[$date]),
+                'done' => ($readDays[$date] ?? 0) >= self::readsPerDay() || isset($quizDays[$date]),
                 'today' => $day->isSameDay($today),
             ];
         })->all();
@@ -120,7 +130,7 @@ class StreakService
     public function streakFor(User $user): Streak
     {
         $streak = Streak::firstOrNew(['user_id' => $user->id], [
-            'current' => 0, 'longest' => 0, 'freezes_left' => self::FREEZES_PER_MONTH,
+            'current' => 0, 'longest' => 0, 'freezes_left' => self::freezesPerMonth(),
         ]);
         $this->resetFreezesIfNewMonth($streak);
 
@@ -132,7 +142,33 @@ class StreakService
         $month = self::today()->format('Y-m');
         if ($streak->freezes_month !== $month) {
             $streak->freezes_month = $month;
-            $streak->freezes_left = self::FREEZES_PER_MONTH;
+            $streak->freezes_left = self::freezesPerMonth();
         }
+    }
+
+    /**
+     * Support fix (admin panel): rebuild the current streak from the reader's reads and quizzes,
+     * counting back from today (or yesterday when today doesn't count yet). Freezes are not replayed.
+     */
+    public function recalculate(User $user): Streak
+    {
+        $streak = $this->streakFor($user);
+        $day = self::today();
+        if (! $this->dayCounts($user, $day)) {
+            $day = $day->subDay();
+        }
+        $n = 0;
+        $last = null;
+        while ($n < 3650 && $this->dayCounts($user, $day)) {
+            $last ??= $day;
+            $n++;
+            $day = $day->subDay();
+        }
+        $streak->current = $n;
+        $streak->longest = max($streak->longest, $n);
+        $streak->last_day = $last?->toDateString() ?? $streak->last_day;
+        $streak->save();
+
+        return $streak;
     }
 }

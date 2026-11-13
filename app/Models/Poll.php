@@ -55,6 +55,21 @@ class Poll extends Model
         return $this->belongsTo(Story::class);
     }
 
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function isEditorial(): bool
+    {
+        return $this->created_by === null;
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

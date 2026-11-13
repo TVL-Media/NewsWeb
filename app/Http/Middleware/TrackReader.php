@@ -16,7 +16,11 @@ class TrackReader
 
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
+        if ($request->is('admin', 'admin/*')) {
+            return $next($request); // the newsroom panel has its own guard
+        }
+
+        $user = $request->user('web');
 
         if ($user) {
             if (! $user->last_active_at || $user->last_active_at->lt(now()->subMinutes(5))) {

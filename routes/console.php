@@ -81,3 +81,19 @@ Artisan::command('briefing:audio {date?}', function (?string $date = null) {
     BuildBriefingAudio::dispatchSync($briefing->id);
     $this->info('Briefing audio rebuilt.');
 })->purpose('Rebuild the joined Morning 5 audio for a date');
+
+// ── Admin panel ──────────────────────────────────────────────────────────
+Artisan::command('stories:publish-due', function () {
+    $n = app(\App\Services\Newsroom\StoryWorkflow::class)->publishDue();
+    if ($n) {
+        $this->info("Published {$n} scheduled stories.");
+    }
+})->purpose('Publish stories whose scheduled time has come (3 tries, then editors are told)');
+
+Artisan::command('admin:purge-retention', function () {
+    $n = \App\Models\AdminLoginLog::where('created_at', '<', now()->subMonths((int) setting('retention.login_logs_months', 12)))->delete();
+    $this->info("Removed {$n} old staff sign-in records.");
+})->purpose('Delete staff sign-in records older than the retention setting');
+
+Schedule::command('stories:publish-due')->everyMinute()->name('publish-due')->withoutOverlapping()->onOneServer();
+Schedule::command('admin:purge-retention')->dailyAt('03:10')->timezone(config('app.timezone'))->name('admin-retention')->onOneServer();

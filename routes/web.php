@@ -100,3 +100,6 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/briefing', BriefingController::class)->name('briefing');
+
+// ── Newsroom admin panel (/admin) ─────────────────────────────────────────
+require __DIR__.'/admin.php';

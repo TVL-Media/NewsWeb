@@ -57,7 +57,10 @@ class HomeController extends Controller
             'trending' => Rails::trending(),
             'pagesToFollow' => Rails::pagesToFollow($user, 4),
             'followed' => $followed,
-            'poll' => Poll::live()->with('options')->whereNull('created_by')->latest()->first(),
+            // Newest live editorial poll; on a category page, one set to that category (admin → Polls) comes first.
+            'poll' => Poll::live()->with('options')->whereNull('created_by')
+                ->when($category, fn ($q) => $q->orderByRaw('CASE WHEN category_id = ? THEN 0 ELSE 1 END', [$category->id]))
+                ->latest()->first(),
             'reels' => config('reels.enabled')
                 ? ReelFeed::query($user, null, ['category' => $category?->slug])->limit(10)->get()
                 : collect(),
@@ -96,7 +99,7 @@ class HomeController extends Controller
         $chosen = $user ? $user->categories()->orderBy('sort_order')->limit($room)->get() : collect();
         $categories = $chosen->isNotEmpty()
             ? $chosen
-            : Category::orderBy('sort_order')->limit(min(6, $room))->get();
+            : Category::active()->orderBy('sort_order')->limit(min(6, $room))->get();
 
         return ['viewer' => $viewer, 'categories' => $categories];
     }

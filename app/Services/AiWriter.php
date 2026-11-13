@@ -118,6 +118,34 @@ class AiWriter
             ->all();
     }
 
+    /**
+     * Translate story fields between English and Hindi (admin panel → AI translation).
+     *
+     * @param  array<string,string>  $fields  e.g. headline, card_text, key_point_0…, full_text
+     * @param  array<int,array{source_term:string,target_term:?string,do_not_translate:bool}>  $glossary
+     * @return array<string,string> the same keys, translated
+     */
+    public function translate(array $fields, string $from, string $to, array $glossary = [], string $style = ''): array
+    {
+        $names = ['en' => 'English', 'hi' => 'Hindi (Devanagari script)'];
+        $gloss = collect($glossary)->map(fn ($g) => $g['do_not_translate']
+            ? "- Keep \"{$g['source_term']}\" as it is"
+            : "- \"{$g['source_term']}\" → \"{$g['target_term']}\"")->implode("\n");
+        $system = 'You translate Indian news copy from '.($names[$from] ?? $from).' to '.($names[$to] ?? $to).'. '
+            .'Keep every fact, name, number, date and direct quote exactly. Do not add or drop information. '
+            .'Keep the card text within 60 words. Keep blank lines between paragraphs. '.$style
+            .($gloss ? "\nGlossary (must follow):\n{$gloss}" : '');
+        $schema = [
+            'type' => 'object',
+            'properties' => collect($fields)->map(fn () => ['type' => 'string'])->all(),
+            'required' => array_keys($fields),
+            'additionalProperties' => false,
+        ];
+        $out = $this->call($system, json_encode($fields, JSON_UNESCAPED_UNICODE), $schema);
+
+        return array_map(fn ($v) => is_string($v) ? $v : '', array_intersect_key($out + $fields, $fields));
+    }
+
     /** One Messages API call with a JSON-schema response format; returns the decoded JSON. */
     private function call(string $system, string $user, array $schema): array
     {

@@ -14,12 +14,25 @@ class Category extends Model
 
     protected function casts(): array
     {
-        return ['is_sensitive' => 'boolean'];
+        return ['is_sensitive' => 'boolean', 'is_active' => 'boolean'];
     }
 
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /** Icon or photo for the admin list (falls back to the photo). */
+    public function visualUrl(): ?string
+    {
+        $p = $this->visual_type === 'icon' && $this->icon_path ? $this->icon_path : $this->image_path;
+
+        return $p ? Storage::disk(config('filesystems.media'))->url($p) : null;
     }
 
     public function name(?string $lang = null): string

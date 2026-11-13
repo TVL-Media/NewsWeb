@@ -160,9 +160,9 @@
                             </li>
                         @endforeach
                     </ol>
-                    <p class="meta mt-3">{{ __('Read 3 stories or finish the quiz to keep your streak. 2 freezes a month cover missed days.') }}</p>
+                    <p class="meta mt-3">{{ __('Read :reads stories or finish the quiz to keep your streak. :freezes freezes a month cover missed days.', ['reads' => \App\Services\StreakService::readsPerDay(), 'freezes' => \App\Services\StreakService::freezesPerMonth()]) }}</p>
                 @else
-                    <p class="mt-3 text-[14px] text-muted">{{ __('Log in to start a daily streak: read 3 stories or finish the quiz each day.') }}</p>
+                    <p class="mt-3 text-[14px] text-muted">{{ __('Log in to start a daily streak: read :reads stories or finish the quiz each day.', ['reads' => \App\Services\StreakService::readsPerDay()]) }}</p>
                     <button type="button" class="btn-primary mt-3 text-sm" @click="$store.auth.show()">{{ __('Log in') }}</button>
                 @endif
             </section>
