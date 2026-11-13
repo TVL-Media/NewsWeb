@@ -50,7 +50,7 @@
     @livewireStyles
     {{ $head ?? '' }}
 
-    <script>window.NGN = { loggedIn: @json(auth()->check()), lang: @json(app()->getLocale()), noReplay: @json((bool) $noReplay) };</script>
+    <script>window.NGN = { loggedIn: @json(auth()->check()), lang: @json(app()->getLocale()), noReplay: @json((bool) $noReplay), live: @json(\App\Support\LiveVersion::current()), autoRefresh: @json(! $immersive && ! $bare) };</script>
 
     @if (config('app.ga4_id'))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('app.ga4_id') }}"></script>

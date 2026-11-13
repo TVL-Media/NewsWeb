@@ -29,6 +29,8 @@ Route::get('/story/{story:slug}', [StoryController::class, 'show'])->name('story
 Route::get('/page/{page:slug}', [PageController::class, 'show'])->name('page.show');
 Route::get('/stories/{story:id}/comments', [CommentController::class, 'index'])->name('comments.index');
 Route::get('/notifications', NotificationController::class)->name('notifications');
+Route::get('/live', fn () => response()->json(['v' => \App\Support\LiveVersion::current()])->header('Cache-Control', 'no-store'))
+    ->middleware('throttle:30,1')->name('live');
 
 Route::post('/preferences/language', LanguageController::class)->middleware('throttle:30,1')->name('preferences.language');
 

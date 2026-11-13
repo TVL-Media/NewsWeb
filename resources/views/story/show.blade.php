@@ -44,9 +44,9 @@
             liked: @js($liked), likes: {{ (int) $story->likes_count }},
             saved: @js($saved),
             reaction: @js($reaction),
+            headlines: @js(['en' => $versions['en']?->headline, 'hi' => $versions['hi']?->headline]),
             @if (config('services.audio.enabled'))
             audio: @js(['en' => $versions['en']?->audioUrl(), 'hi' => $versions['hi']?->audioUrl()]),
-            headlines: @js(['en' => $versions['en']?->headline, 'hi' => $versions['hi']?->headline]),
             listen() { $dispatch('ngn-listen', { src: this.audio[this.lang], title: this.headlines[this.lang] }); },
             @endif
             async like() {

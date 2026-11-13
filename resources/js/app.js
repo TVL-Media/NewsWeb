@@ -551,4 +551,41 @@ document.addEventListener('alpine:initialized', () => {
     setTimeout(() => window.dispatchEvent(new CustomEvent('ngn-replay', { detail: pending })), 50);
 });
 
+/**
+ * Auto-refresh: every 10 s ask GET /live whether anything on the site changed; if it did, reload and
+ * keep the scroll position. Never while the reader is typing, has a sheet/dialog open or the tab is
+ * hidden; never on the reels player or full-screen flows (window.NGN.autoRefresh = false there).
+ */
+const LIVE_EVERY = 10000;
+const SCROLL_KEY = 'ngn.scrollRestore';
+try {
+    const saved = JSON.parse(sessionStorage.getItem(SCROLL_KEY) || 'null');
+    sessionStorage.removeItem(SCROLL_KEY);
+    if (saved && saved.path === location.pathname + location.search) {
+        window.addEventListener('load', () => window.scrollTo(0, saved.y));
+    }
+} catch { /* private mode */ }
+
+const readerIsBusy = () => {
+    const el = document.activeElement;
+    if (el && (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable) && (el.value || el.isContentEditable)) return true;
+    if (window.Alpine?.store('auth')?.open) return true;
+    // Visible = has layout boxes (empty when it or any ancestor is display:none, works for position:fixed too).
+    return [...document.querySelectorAll('[role=dialog], [aria-modal=true]')].some((d) => d.getClientRects().length > 0);
+};
+
+if (window.NGN?.autoRefresh && window.NGN.live) {
+    setInterval(async () => {
+        if (document.hidden) return;
+        try {
+            const res = await fetch('/live', { headers: { Accept: 'application/json' }, credentials: 'same-origin', cache: 'no-store' });
+            if (!res.ok) return;
+            const { v } = await res.json();
+            if (!v || v === window.NGN.live || readerIsBusy()) return;
+            try { sessionStorage.setItem(SCROLL_KEY, JSON.stringify({ path: location.pathname + location.search, y: window.scrollY })); } catch { /* private mode */ }
+            window.location.reload();
+        } catch { /* offline: try again next time */ }
+    }, LIVE_EVERY);
+}
+
 Livewire.start();
