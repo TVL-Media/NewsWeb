@@ -13,6 +13,7 @@ use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\ForYouController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ReportController;
@@ -27,6 +28,7 @@ Route::get('/search', SearchController::class)->middleware('throttle:60,1')->nam
 Route::get('/story/{story:slug}', [StoryController::class, 'show'])->name('story.show');
 Route::get('/page/{page:slug}', [PageController::class, 'show'])->name('page.show');
 Route::get('/stories/{story:id}/comments', [CommentController::class, 'index'])->name('comments.index');
+Route::get('/notifications', NotificationController::class)->name('notifications');
 
 Route::post('/preferences/language', LanguageController::class)->middleware('throttle:30,1')->name('preferences.language');
 

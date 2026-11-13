@@ -1,6 +1,9 @@
 @props(['active' => null])
 @php
     $user = auth()->user();
+    // Red dot: something newer than the last visit to /notifications.
+    $unseen = ! request()->routeIs('notifications')
+        && \App\Support\ReaderNotifications::hasUnseen($user, (int) request()->cookie(\App\Http\Controllers\NotificationController::SEEN_COOKIE) ?: null);
     $lang = app()->getLocale();
     $nav = [
         'home' => ['label' => __('Home'), 'url' => route('home')],
@@ -40,11 +43,11 @@
 
         <x-lang-toggle />
 
-        {{-- Shown in phase 1 but not wired up yet (no notifications until a later phase). --}}
-        <span class="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-ink" role="img" aria-label="{{ __('Notifications') }}">
+        <a href="{{ route('notifications') }}" class="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-ink no-underline hover:bg-chip hover:text-ink {{ request()->routeIs('notifications') ? 'bg-brand-tint !text-brand' : '' }}"
+           aria-label="{{ __('Notifications') }}{{ $unseen ? ' · '.__('New') : '' }}">
             <x-icon name="bell" size="22" />
-            <span class="absolute right-[11px] top-[10px] h-2 w-2 rounded-full bg-brand ring-2 ring-white"></span>
-        </span>
+            @if ($unseen)<span class="absolute right-[11px] top-[10px] h-2 w-2 rounded-full bg-brand ring-2 ring-white"></span>@endif
+        </a>
 
         @auth
             <a href="{{ route('account') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-[12px] bg-brand text-base font-extrabold text-white no-underline hover:text-white" aria-label="{{ __('Your account') }}">
@@ -63,6 +66,10 @@
         <x-lang-toggle compact />
         <a href="{{ route('search') }}" class="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink" aria-label="{{ __('Search') }}">
             <x-icon name="search" size="21" />
+        </a>
+        <a href="{{ route('notifications') }}" class="relative inline-flex h-11 w-10 items-center justify-center rounded-full text-ink no-underline hover:text-ink" aria-label="{{ __('Notifications') }}{{ $unseen ? ' · '.__('New') : '' }}">
+            <x-icon name="bell" size="21" />
+            @if ($unseen)<span class="absolute right-[9px] top-[10px] h-2 w-2 rounded-full bg-brand ring-2 ring-white"></span>@endif
         </a>
         @auth
             <a href="{{ route('account') }}" class="inline-flex h-9 w-9 items-center justify-center rounded-[11px] bg-brand text-sm font-extrabold text-white no-underline hover:text-white" aria-label="{{ __('Your account') }}">

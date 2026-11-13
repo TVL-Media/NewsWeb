@@ -10,6 +10,7 @@ use App\Models\Briefing;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Comment;
+use App\Models\Like;
 use App\Models\Page;
 use App\Models\PageStory;
 use App\Models\Poll;
@@ -88,7 +89,17 @@ class DemoActivitySeeder extends Seeder
         ] as $i => $body) {
             Comment::create(['story_id' => $top->id, 'user_id' => $commenters[$i]->id, 'body' => $body, 'likes_count' => 12 - $i * 4]);
         }
-        $top->update(['comments_count' => 3]);
+
+        // Riya's own comment, with replies and likes → "replied to your comment" / "liked your comment"
+        // on her notifications page.
+        $mine = Comment::create(['story_id' => $top->id, 'user_id' => $reader->id, 'body' => 'Proud moment! The young spinners deserve a long run in the side.', 'created_at' => now()->subHours(3)]);
+        Comment::create(['story_id' => $top->id, 'user_id' => $commenters[0]->id, 'parent_id' => $mine->id, 'body' => 'Agreed, they bowled with real control on a tough pitch.', 'created_at' => now()->subHours(2)]);
+        Comment::create(['story_id' => $top->id, 'user_id' => $commenters[1]->id, 'parent_id' => $mine->id, 'body' => 'Hope the selectors keep faith in them for the tour.', 'created_at' => now()->subMinutes(40)]);
+        foreach ($commenters->take(3) as $i => $fan) {
+            Like::create(['user_id' => $fan->id, 'likeable_type' => Comment::class, 'likeable_id' => $mine->id, 'created_at' => now()->subMinutes(90 - $i * 20)]);
+        }
+        $mine->update(['likes_count' => 3]);
+        $top->update(['comments_count' => 6]);
 
         // Today's Morning 5 (same ranking as the 06:00 job) with its joined EN/HI audio.
         $briefing = Briefing::create([

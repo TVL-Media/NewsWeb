@@ -327,5 +327,20 @@
     "Detected from your location. Tap to try again.": "आपकी लोकेशन से पता चला। दोबारा कोशिश के लिए टैप करें।",
     "The latest stories in this topic": "इस विषय की ताज़ा ख़बरें",
     "No new stories in :topic this week.": "इस हफ़्ते :topic में कोई नई ख़बर नहीं है।",
-    "React to this story": "इस ख़बर पर प्रतिक्रिया दें"
+    "React to this story": "इस ख़बर पर प्रतिक्रिया दें",
+    "Breaking news": "ब्रेकिंग न्यूज़",
+    "Today's quiz is ready": "आज का क्विज़ तैयार है",
+    "5 questions on today's news. Keep your streak going.": "आज की ख़बरों पर 5 सवाल। अपनी स्ट्रीक जारी रखें।",
+    "Keep your :n-day streak": "अपनी :n दिन की स्ट्रीक बनाए रखें",
+    "Read :count more story today.|Read :count more stories today.": "आज :count और ख़बर पढ़ें।|आज :count और ख़बरें पढ़ें।",
+    "New from :page": ":page से नया",
+    ":name replied to your comment": ":name ने आपके कमेंट का जवाब दिया",
+    "A reader": "एक पाठक",
+    ":count person liked your comment|:count people liked your comment": ":count व्यक्ति को आपका कमेंट पसंद आया|:count लोगों को आपका कमेंट पसंद आया",
+    "Poll results are in": "पोल के नतीजे आ गए",
+    "Breaking news, your pages, replies and reminders.": "ब्रेकिंग न्यूज़, आपके पेज, जवाब और रिमाइंडर।",
+    "Log in to see replies to your comments, likes, poll results and new stories from pages you follow.": "अपने कमेंट के जवाब, लाइक, पोल नतीजे और फ़ॉलो किए गए पेजों की नई ख़बरें देखने के लिए लॉग इन करें।",
+    "Today": "आज",
+    "Follow pages and join the conversation to get updates here.": "यहाँ अपडेट पाने के लिए पेज फ़ॉलो करें और चर्चा में शामिल हों।",
+    "Explore pages": "पेज देखें"
 }
