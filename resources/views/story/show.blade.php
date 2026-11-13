@@ -204,16 +204,6 @@
                                 <p class="reading-text text-[16px] leading-[1.7] text-ink-2 md:text-[17px]">{{ $para }}</p>
                             @endforeach
                         </section>
-
-                        @if ($ver->why_it_matters)
-                            <aside class="why-box mt-4" aria-label="{{ __('Why it matters') }}">
-                                <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand text-[15px] font-black text-white" aria-hidden="true">i</span>
-                                <div>
-                                    <h4>{{ $l === 'hi' ? 'यह क्यों मायने रखता है' : 'Why it matters' }}</h4>
-                                    <p class="mt-1 text-[15px] leading-relaxed text-ink">{{ $ver->why_it_matters }}</p>
-                                </div>
-                            </aside>
-                        @endif
                     </div>
                 @endforeach
 

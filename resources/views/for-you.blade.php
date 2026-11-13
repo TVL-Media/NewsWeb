@@ -1,6 +1,6 @@
 {{--
     For You: stories from the reader's topics and followed pages only.
-    Desktop: sidebar (topic chips that filter the feed, followed pages) + a list of horizontal story cards.
+    Desktop: sidebar (every topic as a chip → ?topic=slug, followed pages filter in place) + horizontal story cards.
     J / K (or ↓ / ↑) move between cards; the current one has a red outline. Mobile: chips on top, stacked cards.
 --}}
 @php $lang = app()->getLocale(); @endphp
@@ -35,14 +35,13 @@
                 <div class="sticky top-[84px] space-y-4">
                     <section class="card p-4" aria-labelledby="fy-topics">
                         <h2 id="fy-topics" class="text-[14px] font-black">{{ __('Your topics') }}</h2>
-                        <div class="mt-3 flex flex-wrap gap-1.5">
-                            <button type="button" @click="setFilter(null)" :class="!filter ? 'chip-active' : 'chip hover:bg-line'" :aria-pressed="(!filter).toString()">{{ __('All') }}</button>
-                            @foreach ($topics as $topic)
-                                <button type="button" @click="setFilter({ type: 'cat', id: {{ $topic->id }} })"
-                                        :class="filter?.type === 'cat' && filter.id === {{ $topic->id }} ? 'chip-active' : 'chip hover:bg-line'"
-                                        :aria-pressed="(filter?.type === 'cat' && filter.id === {{ $topic->id }}).toString()">{{ $topic->name() }}</button>
+                        {{-- Every topic: one of the reader's own, or any other, loads that topic's latest stories. --}}
+                        <nav class="mt-3 flex flex-wrap gap-1.5" aria-label="{{ __('Your topics') }}">
+                            <a href="{{ route('for-you') }}" class="{{ $topic ? 'chip hover:bg-line' : 'chip-active' }}" @unless ($topic) aria-current="page" @endunless>{{ __('All') }}</a>
+                            @foreach ($topics as $cat)
+                                <a href="{{ route('for-you', ['topic' => $cat->slug]) }}" class="{{ $topic?->is($cat) ? 'chip-active' : 'chip hover:bg-line' }}" @if ($topic?->is($cat)) aria-current="page" @endif>{{ $cat->name() }}</a>
                             @endforeach
-                        </div>
+                        </nav>
                         <a href="{{ route('account') }}" class="mt-3 inline-flex items-center gap-0.5 text-[13px] font-bold text-brand no-underline hover:text-brand-dark">{{ __('Edit topics') }} <x-icon name="chevron-right" size="14" /></a>
                     </section>
 
@@ -71,24 +70,22 @@
 
             {{-- ===== Feed ===== --}}
             <div class="min-w-0 flex-1">
-                <div class="flex items-end justify-between gap-4">
-                    <div>
-                        <h1 class="text-[26px] font-black leading-tight tracking-[-0.6px] md:text-[30px]">{{ __('For You') }}</h1>
-                        <p class="mt-0.5 text-[13.5px] text-muted">{{ __('From your topics and the pages you follow') }}</p>
-                    </div>
-                    <p class="hidden shrink-0 text-[12px] text-muted-2 lg:block">
-                        {{ __('Press') }} <kbd class="rounded border border-line-2 bg-white px-1.5 font-sans text-[11px] font-bold text-ink">J</kbd> /
-                        <kbd class="rounded border border-line-2 bg-white px-1.5 font-sans text-[11px] font-bold text-ink">K</kbd> {{ __('for next / previous') }}
-                    </p>
+                <div>
+                    <h1 class="text-[26px] font-black leading-tight tracking-[-0.6px] md:text-[30px]">{{ $topic ? $topic->name() : __('For You') }}</h1>
+                    <p class="mt-0.5 text-[13.5px] text-muted">{{ $topic ? __('The latest stories in this topic') : __('From your topics and the pages you follow') }}</p>
                 </div>
 
                 {{-- Mobile: topic chips --}}
-                <div class="no-scrollbar -mx-4 mt-3 flex gap-1.5 overflow-x-auto px-4 md:hidden">
-                    <button type="button" @click="setFilter(null)" :class="!filter ? 'chip-active' : 'chip'">{{ __('All') }}</button>
-                    @foreach ($topics as $topic)
-                        <button type="button" @click="setFilter({ type: 'cat', id: {{ $topic->id }} })" :class="filter?.type === 'cat' && filter.id === {{ $topic->id }} ? 'chip-active' : 'chip'">{{ $topic->name() }}</button>
+                <nav class="no-scrollbar -mx-4 mt-3 flex gap-1.5 overflow-x-auto px-4 md:hidden" aria-label="{{ __('Your topics') }}">
+                    <a href="{{ route('for-you') }}" class="{{ $topic ? 'chip' : 'chip-active' }}">{{ __('All') }}</a>
+                    @foreach ($topics as $cat)
+                        <a href="{{ route('for-you', ['topic' => $cat->slug]) }}" class="{{ $topic?->is($cat) ? 'chip-active' : 'chip' }}">{{ $cat->name() }}</a>
                     @endforeach
-                </div>
+                </nav>
+
+                @if ($topic && $stories->isEmpty())
+                    <div class="card mt-5 p-8 text-center text-muted">{{ __('No new stories in :topic this week.', ['topic' => $topic->name()]) }}</div>
+                @endif
 
                 @if (! $hasTopics)
                     <div class="card mt-5 p-8 text-center">

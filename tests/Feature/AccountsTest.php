@@ -297,22 +297,33 @@ describe('account', function () {
     });
 });
 
-it('shows the For You sidebar: topic filters, followed pages with new-story dots, and the J / K hint', function () {
+it('shows the For You sidebar: every topic, followed pages with new-story dots, no J / K hint', function () {
     $user = User::where('phone', '9876543210')->first();
-    $topics = $user->categories()->get();
     $pages = $user->followedPages()->get();
 
     $res = $this->actingAs($user)->get('/for-you')->assertOk()
         ->assertSee('Your topics')->assertSee('Edit topics')
         ->assertSee('Pages you follow')
-        ->assertSee('for next / previous')
+        ->assertDontSee('for next / previous')
         ->assertSee('data-card', false);
 
-    foreach ($topics as $topic) {
-        $res->assertSee("type: 'cat', id: {$topic->id}", false);
+    // Every active topic is listed, not only the reader's own.
+    foreach (\App\Models\Category::active()->get() as $cat) {
+        $res->assertSee(route('for-you', ['topic' => $cat->slug]), false);
     }
     foreach ($pages as $page) {
         $res->assertSee($page->name());
     }
     $res->assertDontSee('ngn-listen', false); // audio is off by default
+});
+
+it('loads any topic in For You, even one the reader has not chosen', function () {
+    $user = User::where('phone', '9876543210')->first();
+    $other = \App\Models\Category::active()->whereNotIn('id', $user->categories()->pluck('categories.id'))
+        ->whereHas('stories', fn ($q) => $q->published()->where('published_at', '>=', now()->subDays(7)))->firstOrFail();
+    $story = \App\Models\Story::published()->where('category_id', $other->id)->latest('published_at')->first();
+
+    $this->actingAs($user)->get('/for-you?topic='.$other->slug)->assertOk()
+        ->assertSee($story->version('en')->headline)
+        ->assertSee(route('for-you', ['topic' => $other->slug]).'" class="chip-active"', false);
 });

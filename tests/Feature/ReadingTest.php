@@ -85,7 +85,7 @@ describe('home', function () {
 });
 
 describe('story page', function () {
-    it('renders all three tabs, why it matters, comments and the rail', function () {
+    it('renders all three tabs, comments and the rail (no Why it matters box)', function () {
         $en = $this->top->version('en');
 
         $this->get(route('story.show', $this->top))
@@ -94,7 +94,7 @@ describe('story page', function () {
             ->assertSee($en->key_points[0])
             ->assertSee($en->simple_text)
             ->assertSee($en->paragraphs()[0])
-            ->assertSee($en->why_it_matters)
+            ->assertDontSee($en->why_it_matters)->assertDontSee('Why it matters')
             ->assertSee('What a finish to the series')
             ->assertSee('Log in to comment')
             ->assertSee('Related stories')

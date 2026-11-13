@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Like;
 use App\Models\ReadingEvent;
 use App\Models\Save;
@@ -26,9 +27,14 @@ class ForYouController extends Controller
         $pageIds = Rails::followedPageIds($user);
         $readIds = ReadingEvent::where('user_id', $user->id)->pluck('story_id')->unique()->all();
 
+        // ?topic=slug: that topic's latest stories, whether or not it is one of the reader's topics.
+        $topic = $request->filled('topic') ? Category::active()->where('slug', $request->string('topic'))->first() : null;
+
         $base = fn () => Story::published()
             ->with(['versions', 'category', 'source', 'page'])
-            ->where(fn ($q) => $q->whereIn('category_id', $categoryIds ?: [0])->orWhereIn('page_id', $pageIds ?: [0]))
+            ->when($topic,
+                fn ($q) => $q->where('category_id', $topic->id),
+                fn ($q) => $q->where(fn ($q) => $q->whereIn('category_id', $categoryIds ?: [0])->orWhereIn('page_id', $pageIds ?: [0])))
             ->where('published_at', '>=', now()->subDays(7))
             ->latest('published_at');
 
@@ -42,13 +48,14 @@ class ForYouController extends Controller
             'stories' => $stories,
             'newCount' => $new->count(),
             // Sidebar: topic chips filter the feed; a red dot marks followed pages with new stories.
-            'topics' => $user->categories()->orderBy('sort_order')->get(),
+            'topics' => Category::active()->orderBy('sort_order')->get(),
+            'topic' => $topic,
             'pages' => $user->followedPages()->orderBy('name')->get(),
             'freshPageIds' => $new->pluck('page_id')->filter()->unique()->values()->all(),
             'followed' => $pageIds,
             'liked' => Like::where('user_id', $user->id)->where('likeable_type', Story::class)->whereIn('likeable_id', $ids)->pluck('likeable_id')->all(),
             'saved' => Save::where('user_id', $user->id)->whereIn('story_id', $ids)->pluck('story_id')->all(),
-            'hasTopics' => ! empty($categoryIds) || ! empty($pageIds),
+            'hasTopics' => $topic || ! empty($categoryIds) || ! empty($pageIds),
         ]);
     }
 }
