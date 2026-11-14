@@ -21,7 +21,8 @@
                                 {{-- Same ring as the other circles (drawn inside the box, so the scrolling row can't clip it). --}}
                                 <span class="story-ring !h-[54px] !w-[54px] !p-[2px]"><span class="flex h-full w-full items-center justify-center rounded-full bg-brand text-[20px] font-black text-white">{{ $group['badge'] }}</span></span>
                             @else
-                                <span class="story-ring !h-[54px] !w-[54px] !p-[2px]"><img src="{{ $group['avatar'] }}" alt="" @if ($i > 3) loading="lazy" @endif></span>
+                                {{-- Grey ring: nothing new in this category right now (its card says so). --}}
+                                <span class="story-ring !h-[54px] !w-[54px] !p-[2px] {{ !empty($group['empty']) ? '!border-line-2' : '' }}"><img src="{{ $group['avatar'] }}" alt="" @if ($i > 3) loading="lazy" @endif class="{{ !empty($group['empty']) ? 'opacity-70' : '' }}"></span>
                             @endif
                             <span class="w-full truncate text-center text-[11px] font-semibold">{{ $group['label'] }}</span>
                         </button>
@@ -41,6 +42,20 @@
             @if ($hero)
                 <div class="min-w-0" style="flex: 999 1 640px">
                     <x-hero-card :story="$hero" class="h-full" />
+                </div>
+            @elseif ($category)
+                {{-- A category with no posts yet: say so instead of an empty space. --}}
+                <div class="min-w-0" style="flex: 999 1 640px">
+                    <section class="hero-card flex h-full min-h-[260px] items-end bg-ink md:min-h-[420px]" aria-labelledby="empty-cat-title">
+                        @if ($category->imageUrl())<img src="{{ $category->imageUrl() }}" alt="" class="absolute inset-0 h-full w-full object-cover opacity-60">@endif
+                        <span class="scrim"></span>
+                        <div class="relative p-6 text-white md:p-8">
+                            <span class="chip-red h-7 text-[12px]">{{ $category->name() }}</span>
+                            <h2 id="empty-cat-title" class="mt-3 text-[24px] font-black leading-tight md:text-[32px]">{{ __('No posts in this category right now') }}</h2>
+                            <p class="mt-1.5 text-[14.5px] text-white/85">{{ __('New stories in :category will show up here.', ['category' => $category->name()]) }}</p>
+                            <a href="{{ route('home') }}" class="btn mt-4 rounded-full bg-white px-5 text-ink no-underline hover:bg-white/90 hover:text-ink">{{ __('See all news') }}</a>
+                        </div>
+                    </section>
                 </div>
             @endif
             <div class="hidden min-w-0 grow basis-[300px] flex-col gap-4 md:flex md:max-w-[340px]">
@@ -73,7 +88,7 @@
                 </div>
 
                 @if ($latest->isEmpty())
-                    <div class="card mt-3 p-6 text-center text-muted">{{ __('No stories here yet.') }}</div>
+                    <div class="card mt-3 p-6 text-center text-muted">{{ $category ? __('No posts in this category right now') : __('No stories here yet.') }}</div>
                 @else
                     <div x-ref="list" class="mt-3 grid gap-3 md:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] md:gap-4" aria-live="polite">
                         @include('partials.latest-cards', ['stories' => $latest])

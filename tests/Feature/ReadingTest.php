@@ -50,14 +50,25 @@ describe('home', function () {
             ->assertSee('keeps your 12-day streak');
     });
 
-    it('shows the reader\'s own topics as story circles', function () {
+    it('shows every category as a circle, the reader\'s own topics first', function () {
         $user = User::factory()->create();
         $user->categories()->attach(\App\Models\Category::whereIn('slug', ['business', 'tech'])->pluck('id'));
 
-        $this->actingAs($user)->get('/')
-            ->assertSee('Stories: Business', false)
-            ->assertSee('Stories: Tech', false)
-            ->assertDontSee('Stories: Cricket', false);
+        $html = $this->actingAs($user)->get('/')->assertOk()->getContent();
+
+        foreach (\App\Models\Category::active()->get() as $cat) {
+            expect($html)->toContain('Stories: '.$cat->name_en);
+        }
+        expect(strpos($html, 'Stories: Tech'))->toBeLessThan(strpos($html, 'Stories: India'));
+    });
+
+    it('keeps an empty category visible with a "no posts right now" message', function () {
+        \App\Models\Category::create(['name_en' => 'Medicines', 'name_hi' => 'दवाइयाँ', 'slug' => 'medicines', 'is_active' => true, 'sort_order' => 99]);
+
+        $this->get('/')->assertSee('Stories: Medicines', false)->assertSee('No posts in Medicines right now');
+        $this->get('/?category=medicines')->assertOk()
+            ->assertSee('No posts in this category right now')
+            ->assertSee('New stories in Medicines will show up here.');
     });
 
     it('still shows topic circles once every followed page story has expired', function () {

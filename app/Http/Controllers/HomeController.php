@@ -49,6 +49,7 @@ class HomeController extends Controller
             'greeting' => $user ? Lang::greeting().($user->name ? ', '.$user->firstName() : '') : __('Today\'s top news'),
             'today' => now(config('app.timezone')),
             'activeChip' => $category?->slug ?? 'all',
+            'category' => $category,
             'hero' => $hero,
             'latest' => $latest,
             'circles' => $this->circles($user, $followed),
@@ -65,8 +66,6 @@ class HomeController extends Controller
                 : collect(),
         ]);
     }
-
-    public const MAX_CIRCLES = 8;
 
     public const CATEGORY_SLIDES = 6;
 
@@ -115,9 +114,11 @@ class HomeController extends Controller
             }
         }
 
-        $room = max(0, self::MAX_CIRCLES - count($groups) + 1);
-        $chosen = $user ? $user->categories()->orderBy('sort_order')->get() : collect();
-        $categories = ($chosen->isNotEmpty() ? $chosen : Category::active()->orderBy('sort_order')->get());
+        // Every active category always has a circle (the reader's own topics first). One with no
+        // story in the last 3 days shows a single "No posts in this category right now" card.
+        $all = Category::active()->orderBy('sort_order')->get();
+        $chosenIds = $user ? $user->categories()->pluck('categories.id')->all() : [];
+        $categories = $all->sortBy(fn ($c) => in_array($c->id, $chosenIds, true) ? 0 : 1, SORT_NUMERIC, false)->values();
 
         $recent = Story::published()->with('versions')
             ->whereIn('category_id', $categories->pluck('id'))
@@ -127,18 +128,18 @@ class HomeController extends Controller
             ->groupBy('category_id');
 
         foreach ($categories as $category) {
-            if ($room <= 0) {
-                break;
-            }
-            $stories = $recent->get($category->id);
-            if (! $stories || $stories->isEmpty()) {
-                continue;
-            }
+            $stories = $recent->get($category->id, collect());
             $groups[] = [
                 'kind' => 'category', 'label' => $category->name(), 'avatar' => $category->imageUrl(), 'badge' => null,
-                'slides' => $stories->take(self::CATEGORY_SLIDES)->map($slide)->values()->all(),
+                'empty' => $stories->isEmpty(),
+                'slides' => $stories->isNotEmpty()
+                    ? $stories->take(self::CATEGORY_SLIDES)->map($slide)->values()->all()
+                    : [[
+                        'image' => $category->imageUrl(), 'empty' => true,
+                        'headline' => __('No posts in :category right now', ['category' => $category->name()]),
+                        'url' => route('home', ['category' => $category->slug]), 'ago' => '',
+                    ]],
             ];
-            $room--;
         }
 
         return array_values(array_filter($groups, fn ($g) => ! empty($g['slides'])));

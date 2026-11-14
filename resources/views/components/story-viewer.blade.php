@@ -34,7 +34,7 @@
         },
         close() { clearInterval(this.timer); this.open = false; },
         touchStart(e) { this.startY = e.touches[0].clientY; },
-        touchEnd(e) { if (this.startY !== null && this.startY - e.changedTouches[0].clientY > 70) window.location = this.slide.url; this.startY = null; },
+        touchEnd(e) { if (!this.slide.empty && this.startY !== null && this.startY - e.changedTouches[0].clientY > 70) window.location = this.slide.url; this.startY = null; },
      }"
      @open-stories.window="show($event.detail.group)"
      @keydown.window.escape="open && close()"
@@ -79,7 +79,8 @@
         {{-- Headline + open --}}
         <div class="absolute inset-x-0 bottom-0 p-5 text-white">
             <p class="text-[22px] font-black leading-tight" x-text="slide.headline"></p>
-            <a :href="slide.url" class="mt-4 flex flex-col items-center gap-0.5 text-[13px] font-bold text-white no-underline hover:text-white">
+            <p x-show="slide.empty" class="mt-2 text-[14px] text-white/80">{{ __('Check back soon. Tap to see the next stories.') }}</p>
+            <a x-show="!slide.empty" :href="slide.url" class="mt-4 flex flex-col items-center gap-0.5 text-[13px] font-bold text-white no-underline hover:text-white">
                 <x-icon name="chevron-down" size="20" class="rotate-180" />
                 {{ __('Swipe up to read') }}
             </a>
