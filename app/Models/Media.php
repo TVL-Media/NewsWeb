@@ -47,10 +47,15 @@ class Media extends Model
         return null;
     }
 
-    /** Stories whose photo is this file. */
+    /** Stories whose photo is this file (stories.photo_path = media.path). */
+    public function usages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Story::class, 'photo_path', 'path');
+    }
+
     public function usageCount(): int
     {
-        return $this->path ? Story::where('photo_path', $this->path)->count() : 0;
+        return $this->path ? $this->usages()->count() : 0;
     }
 
     public function humanSize(): string
