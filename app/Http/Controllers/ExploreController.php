@@ -19,7 +19,8 @@ class ExploreController extends Controller
         return view('explore', [
             'categories' => $categories,
             'trending' => Rails::trending(),
-            'pages' => Rails::pagesToFollow($user, 8),
+            // Every page the reader doesn't follow yet (most followed first), so new pages show up too.
+            'pages' => Rails::pagesToFollow($user, 100),
             'followed' => Rails::followedPageIds($user),
         ]);
     }

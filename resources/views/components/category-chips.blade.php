@@ -1,7 +1,8 @@
-{{-- All · India · World · Business · Cricket · Tech · Health · {user city} · Good News --}}
+{{-- All · every active category in the admin's sort order, with the reader's city chip after the 6th. --}}
 @props(['active' => 'all'])
 @php
-    $order = ['india', 'world', 'business', 'cricket', 'tech', 'health', '__city', 'good-news'];
+    $order = $navCategories->pluck('slug')->all();
+    array_splice($order, min(6, count($order)), 0, ['__city']);
     $bySlug = $navCategories->keyBy('slug');
     $city = auth()->user()?->city;
     $cityPage = $city?->page;

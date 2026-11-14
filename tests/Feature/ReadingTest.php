@@ -251,3 +251,13 @@ it('serves the static pages, with grievance officer contact details', function (
 
     $this->get('/grievance-officer')->assertOk()->assertSee('grievance@nextgennews.in');
 });
+
+it('shows categories and pages added in the admin: chips, footer and Explore', function () {
+    $category = \App\Models\Category::create(['name_en' => 'Medicines', 'name_hi' => 'दवाइयाँ', 'slug' => 'medicines', 'is_active' => true, 'sort_order' => 99]);
+    $page = \App\Models\Page::create(['name' => 'Medicines Desk', 'slug' => 'medicines-desk', 'type' => 'topic', 'category_id' => $category->id]);
+    \Illuminate\Support\Facades\Cache::forget('nav.categories');
+
+    $this->get('/')->assertOk()->assertSee('?category=medicines', false)->assertSee('?category=entertainment', false);
+    $this->get('/explore')->assertOk()->assertSee('Medicines')->assertSee(route('page.show', $page), false);
+    $this->get(route('page.show', $page))->assertOk()->assertSee('Medicines Desk');
+});
