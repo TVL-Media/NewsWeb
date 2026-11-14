@@ -16,6 +16,24 @@ class Story extends Model
 {
     protected $guarded = [];
 
+    protected static function booted(): void
+    {
+        // A live story given (or moved to) a page, or given a new photo, keeps its page circle in step.
+        static::updated(function (Story $story) {
+            if (! $story->wasChanged(['page_id', 'photo_path', 'status'])) {
+                return;
+            }
+            // Keep a circle only for a live story with a page and a photo (and only on its current page).
+            $keep = $story->isLive() && $story->page_id && $story->photo_path;
+            PageStory::where('story_id', $story->id)
+                ->when($keep, fn ($q) => $q->where('page_id', '!=', $story->page_id))
+                ->delete();
+            if ($keep) {
+                \App\Listeners\CreatePageStory::sync($story);
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [

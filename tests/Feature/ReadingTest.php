@@ -80,6 +80,47 @@ describe('home', function () {
             ->and($circle->expires_at->isFuture())->toBeTrue();
     });
 
+    it('gives a story its circle when the page and photo are added after publishing', function () {
+        // As in the admin: published first without a page or photo, both added a few minutes later.
+        $story = Story::published()->whereNotNull('page_id')->whereNotNull('photo_path')->first();
+        [$page, $photo] = [$story->page_id, $story->photo_path];
+        $story->update(['page_id' => null, 'photo_path' => null, 'published_at' => now()->subMinutes(3)]);
+        expect(\App\Models\PageStory::where('story_id', $story->id)->exists())->toBeFalse();
+
+        $story->update(['page_id' => $page, 'photo_path' => $photo]);
+
+        $circle = \App\Models\PageStory::active()->where('story_id', $story->id)->sole();
+        expect($circle->page_id)->toBe($page)
+            ->and($circle->expires_at->timestamp)->toBe($story->published_at->copy()->addHours(24)->timestamp);
+
+        $follower = User::factory()->create();
+        $follower->followedPages()->attach($page);
+        $this->actingAs($follower)->get('/')->assertSee('Stories: '.$story->page->name(), false);
+    });
+
+    it('moves the circle when the page changes and removes it when the story is unpublished', function () {
+        $story = Story::published()->whereNotNull('page_id')->whereNotNull('photo_path')->first();
+        $story->update(['published_at' => now()->subHour()]);
+        \App\Listeners\CreatePageStory::sync($story);
+        $other = \App\Models\Page::whereKeyNot($story->page_id)->first();
+
+        $story->update(['page_id' => $other->id]);
+        expect(\App\Models\PageStory::where('story_id', $story->id)->pluck('page_id')->all())->toBe([$other->id]);
+
+        $story->update(['status' => 'removed']);
+        expect(\App\Models\PageStory::where('story_id', $story->id)->exists())->toBeFalse();
+    });
+
+    it('does not give an old story a circle when it is edited more than 24 hours after publishing', function () {
+        $story = Story::published()->whereNotNull('page_id')->whereNotNull('photo_path')->first();
+        \App\Models\PageStory::where('story_id', $story->id)->delete();
+        $story->update(['published_at' => now()->subDays(2)]);
+
+        $story->update(['photo_path' => 'stories/new-photo.jpg']);
+
+        expect(\App\Models\PageStory::where('story_id', $story->id)->exists())->toBeFalse();
+    });
+
     it('never deletes a story photo when its circle expires', function () {
         $story = Story::published()->whereNotNull('photo_path')->first();
         \App\Models\PageStory::create(['page_id' => $story->page_id, 'story_id' => $story->id, 'image_path' => $story->photo_path, 'expires_at' => now()->subMinute()]);
