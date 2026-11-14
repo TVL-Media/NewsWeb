@@ -5,6 +5,10 @@ return [
     // Off = no reel jobs are queued and (Milestone 3) every Reels link and page is hidden.
     'enabled' => (bool) env('REELS_ENABLED', false),
 
+    // Make a reel automatically from every published story. Off: reels come only from videos
+    // uploaded in the admin panel (Reels → Upload video).
+    'auto_from_stories' => (bool) env('REELS_AUTO_FROM_STORIES', false),
+
     // Full path to the ffmpeg binary. ffprobe is expected next to it unless FFPROBE_PATH is set.
     'ffmpeg' => env('FFMPEG_PATH', 'ffmpeg'),
     'ffprobe' => env('FFPROBE_PATH'),

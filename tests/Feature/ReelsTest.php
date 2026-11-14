@@ -48,8 +48,8 @@ it('lets comments, saves, shares, likes and reports belong to a reel', function 
         ->toThrow(\Illuminate\Database\QueryException::class);
 });
 
-it('queues one reel per language when a story is published and reels are enabled', function () {
-    config(['reels.enabled' => true]);
+it('queues one reel per language when a story is published and auto reels are on', function () {
+    config(['reels.enabled' => true, 'reels.auto_from_stories' => true]);
     Queue::fake();
     $story = lowRiskStory();
 
@@ -57,6 +57,15 @@ it('queues one reel per language when a story is published and reels are enabled
 
     Queue::assertPushed(GenerateReel::class, 2);
     Queue::assertPushed(GenerateReel::class, fn ($job) => $job->storyId === $story->id && $job->language === 'hi');
+});
+
+it('does not turn published stories into reels by default (auto reels off)', function () {
+    config(['reels.enabled' => true]);
+    Queue::fake();
+
+    StoryPublished::dispatch(lowRiskStory());
+
+    Queue::assertNotPushed(GenerateReel::class);
 });
 
 it('queues nothing when reels are disabled', function () {

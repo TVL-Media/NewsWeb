@@ -220,7 +220,7 @@ Where the brief was silent, I picked the simplest option:
 
 ## Reels (short vertical news videos)
 
-Settings in `.env`: `REELS_ENABLED`, `FFMPEG_PATH`, `REEL_MAX_SECONDS` (default 60, a hard cap for every reel). Details in `config/reels.php`.
+Settings in `.env`: `REELS_ENABLED`, `REELS_AUTO_FROM_STORIES`, `FFMPEG_PATH`, `REEL_MAX_SECONDS` (default 60, a hard cap for every reel). Details in `config/reels.php`.
 
 ### Install FFmpeg (the only extra tool)
 
@@ -242,7 +242,7 @@ Check it with `ffmpeg -version`. The build needs `libx264` and `aac`; the packag
 
 ### How a reel is made
 
-- **Auto reels:** `StoryPublished` → `QueueStoryReels` → `GenerateReel` (queued, once per language version) → `App\Services\Reels\ReelBuilder`.
+- **Auto reels (off by default, `REELS_AUTO_FROM_STORIES=false`):** publishing a story does not create a reel; reels come from videos uploaded in the admin. With the setting on: `StoryPublished` → `QueueStoryReels` → `GenerateReel` (queued, once per language version) → `App\Services\Reels\ReelBuilder`.
   - **Voice-over:** our TTS reads each segment in turn: headline, key point 1, 2, 3, then "Read the full story on NextGenNews". FFprobe measures each clip.
   - **Stills:** `ReelSlides` draws them at 720×1280 with GD/Intervention, using the same fonts as the share card (Inter / Noto Sans Devanagari). There is one transparent overlay per segment (logo, dark fade, red #D7141E accent bar, label pill, big white text), plus the end card and a JPG thumbnail.
   - **Video:** one FFmpeg run applies a slow zoom/pan to the story photo, shows each overlay for exactly as long as its segment is spoken, adds the end card, and outputs 720×1280 (~1.5 Mbps) and 480×854 (~700 kbps) H.264/AAC MP4s with `+faststart`.
