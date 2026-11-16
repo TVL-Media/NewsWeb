@@ -89,10 +89,13 @@ class StoryWorkflow
                 'headline' => trim((string) ($v['headline'] ?? '')),
                 'card_text' => trim((string) ($v['card_text'] ?? '')),
                 'key_points' => array_values(array_map('trim', array_filter($v['key_points'] ?? [], 'filled'))),
-                'why_it_matters' => $v['why_it_matters'] ?? null,
                 'simple_text' => $v['simple_text'] ?? null,
                 'full_text' => $v['full_text'] ?? null,
             ];
+            // "Why it matters" is no longer in the editor: only touch it when a value is sent (keeps stored text).
+            if (array_key_exists('why_it_matters', $v)) {
+                $row['why_it_matters'] = $v['why_it_matters'];
+            }
             $existing = $story->versions()->where('language', $lang)->first();
             if ($existing) {
                 $existing->fill($row);

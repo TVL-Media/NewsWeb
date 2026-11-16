@@ -41,7 +41,6 @@
           <h2 style="font-size:20px;margin:0 0 8px">{{ $v->headline }}</h2>
           <p style="font-weight:500">{{ $v->card_text }} <span class="xsmall muted">({{ count(preg_split('/\s+/u', trim($v->card_text))) }} words)</span></p>
           @if($v->key_points)<ul>@foreach($v->key_points as $p)<li>{{ $p }}</li>@endforeach</ul>@endif
-          @if($v->why_it_matters)<p><strong>Why it matters:</strong> {{ $v->why_it_matters }}</p>@endif
           @if($v->full_text)<details><summary class="small">Full story</summary><div class="pv-body mt-2">@foreach($v->paragraphs() as $p)<p>{{ $p }}</p>@endforeach</div></details>@endif
         @endif
       </div>

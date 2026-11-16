@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
  */
 class TranslationManager
 {
-    public const FIELDS = ['headline', 'card_text', 'key_point_0', 'key_point_1', 'key_point_2', 'why_it_matters', 'simple_text', 'full_text'];
+    public const FIELDS = ['headline', 'card_text', 'key_point_0', 'key_point_1', 'key_point_2', 'simple_text', 'full_text'];
 
     public function driver(): TranslationDriver
     {
@@ -51,7 +51,7 @@ class TranslationManager
         foreach (array_values($v->key_points ?? []) as $i => $p) {
             $out["key_point_{$i}"] = $p;
         }
-        $out += ['why_it_matters' => $v->why_it_matters, 'simple_text' => $v->simple_text, 'full_text' => $v->full_text];
+        $out += ['simple_text' => $v->simple_text, 'full_text' => $v->full_text];
 
         return array_filter(array_map(fn ($x) => (string) $x, $out), fn ($x) => $x !== '');
     }
@@ -119,7 +119,6 @@ class TranslationManager
             'headline' => (string) ($r['headline'] ?? ''),
             'card_text' => (string) ($r['card_text'] ?? ''),
             'key_points' => array_values(array_filter([$r['key_point_0'] ?? '', $r['key_point_1'] ?? '', $r['key_point_2'] ?? ''], 'filled')),
-            'why_it_matters' => $r['why_it_matters'] ?? null,
             'simple_text' => $r['simple_text'] ?? null,
             'full_text' => $r['full_text'] ?? null,
             'ai_assisted' => true,

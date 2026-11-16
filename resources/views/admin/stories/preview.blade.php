@@ -16,7 +16,6 @@
       <div class="pv-body">
         <p>{{ $v?->card_text }}</p>
         @if($v && $v->key_points)<ul>@foreach($v->key_points as $p)<li>{{ $p }}</li>@endforeach</ul>@endif
-        @if($v?->why_it_matters)<div class="alert red"><span class="t">{{ $lang === 'hi' ? 'यह क्यों मायने रखता है' : 'Why it matters' }}</span>{{ $v->why_it_matters }}</div>@endif
         @foreach($v?->paragraphs() ?? [] as $p)<p>{{ $p }}</p>@endforeach
       </div>
       @if($lang === 'hi' && ! $s->versions->firstWhere('language', 'hi'))<div class="alert amber">No Hindi version yet: Hindi readers see the English text.</div>@endif

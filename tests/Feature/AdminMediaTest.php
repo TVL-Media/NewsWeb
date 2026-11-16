@@ -24,3 +24,22 @@ it('opens the media library when it has files, marking used and unused ones', fu
     expect($used->usages()->pluck('id')->all())->toContain($story->id)
         ->and($unused->usageCount())->toBe(0);
 });
+
+it('has no "Why it matters" field in the story editor and keeps any stored value when saving', function () {
+    $story = Story::published()->with('versions')->first();
+    $stored = $story->version('en')->why_it_matters;
+    expect($stored)->not->toBeEmpty();
+
+    $this->actingAs($this->admin, 'admin');
+    $this->get("/admin/stories/{$story->id}/edit")->assertOk()->assertDontSee('Why it matters')->assertDontSee('[why_it_matters]', false);
+    $this->get('/admin/stories/new')->assertOk()->assertDontSee('Why it matters');
+
+    $en = $story->version('en');
+    $this->put("/admin/stories/{$story->id}", [
+        'en' => ['headline' => $en->headline.' (edited)', 'card_text' => $en->card_text, 'key_points' => $en->key_points, 'simple_text' => $en->simple_text, 'full_text' => $en->full_text],
+        'category_id' => $story->category_id, 'importance' => $story->importance, 'read_minutes' => $story->read_minutes,
+    ])->assertRedirect();
+
+    $fresh = $story->fresh()->version('en');
+    expect($fresh->headline)->toEndWith('(edited)')->and($fresh->why_it_matters)->toBe($stored);
+});

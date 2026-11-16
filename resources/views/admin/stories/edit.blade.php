@@ -86,7 +86,6 @@
           @endfor
           <div class="help">Exactly three short points, shown under the card on the story page.</div>
         </div>
-        <x-admin.field label="Why it matters" :name="$lang.'.why_it_matters'"><textarea name="{{ $lang }}[why_it_matters]" rows="2" lang="{{ $lang }}">{{ $val($lang, 'why_it_matters') }}</textarea></x-admin.field>
         <x-admin.field label="Explain simply" :name="$lang.'.simple_text'" help="The “Simple” tab on the story page."><textarea name="{{ $lang }}[simple_text]" rows="4" lang="{{ $lang }}">{{ $val($lang, 'simple_text') }}</textarea></x-admin.field>
         <x-admin.field label="Full story" :name="$lang.'.full_text'" help="Leave a blank line between paragraphs."><textarea name="{{ $lang }}[full_text]" rows="12" lang="{{ $lang }}">{{ $val($lang, 'full_text') }}</textarea></x-admin.field>
       </div>
