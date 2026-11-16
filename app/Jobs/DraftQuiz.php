@@ -30,11 +30,17 @@ class DraftQuiz implements ShouldQueue
             return;
         }
 
-        $stories = Story::published()
-            ->with(['versions', 'page', 'aiCheck'])
-            ->where('published_at', '>=', now()->subDay())
-            ->orderByDesc('importance')->orderByDesc('likes_count')
-            ->limit(5)->get();
+        // Top stories of the last day; on a quiet news day widen to 3, then 7 days so a quiz can still be made.
+        foreach ([1, 3, 7] as $days) {
+            $stories = Story::published()
+                ->with(['versions', 'page', 'aiCheck'])
+                ->where('published_at', '>=', now()->subDays($days))
+                ->orderByDesc('importance')->orderByDesc('likes_count')
+                ->limit(5)->get();
+            if ($stories->count() >= 3) {
+                break;
+            }
+        }
 
         if ($stories->count() < 3) {
             return;
@@ -65,7 +71,8 @@ class DraftQuiz implements ShouldQueue
         });
 
         if ($quiz->status === 'draft') {
-            Notify::permission('quiz.manage', 'quiz', "Tomorrow's quiz needs approval", 'One or more source stories are sensitive.', route('admin.daily.quizzes'));
+            $day = $quiz->date->isToday() ? "Today's" : "Tomorrow's";
+            Notify::permission('quiz.manage', 'quiz', "{$day} quiz needs approval", 'One or more source stories are sensitive.', route('admin.daily.quizzes'));
         }
     }
 }

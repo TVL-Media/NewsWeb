@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\Schedule;
 // Newsroom
 Schedule::job(new FetchFeeds)->everyFiveMinutes()->name('fetch-feeds')->withoutOverlapping()->onOneServer();
 Schedule::job(new DraftQuiz)->dailyAt('21:00')->timezone(config('app.timezone'))->name('draft-quiz')->onOneServer();
+// Catch-up: a missed 21:00 run (server/laptop off) never leaves a day without a quiz.
+Schedule::command('quiz:catch-up')->everyFiveMinutes()->name('quiz-catch-up')->withoutOverlapping()->onOneServer();
 
 // Habit features
 Schedule::job(new PickMorning5)->dailyAt('06:00')->timezone(config('app.timezone'))->name('pick-morning5')->onOneServer();
@@ -64,6 +66,20 @@ Artisan::command('demo:page-stories', function () {
     }
     $this->info("{$made} page story circles are live for the next 24 hours.");
 })->purpose('Demo: give every page a fresh 24-hour story circle from its latest story');
+
+Artisan::command('quiz:catch-up', function () {
+    $now = now(config('app.timezone'));
+    $drafted = [];
+    foreach (array_filter([$now->toDateString(), $now->hour >= 21 ? $now->copy()->addDay()->toDateString() : null]) as $date) {
+        if (! \App\Models\Quiz::whereDate('date', $date)->exists()) {
+            DraftQuiz::dispatchSync($date);
+            if (\App\Models\Quiz::whereDate('date', $date)->exists()) {
+                $drafted[] = $date;
+            }
+        }
+    }
+    $this->info($drafted ? 'Drafted quiz for '.implode(', ', $drafted).'.' : 'Nothing to catch up.');
+})->purpose("Draft today's quiz if it is missing (and tomorrow's after 21:00), e.g. after the 21:00 run was missed");
 
 Artisan::command('quiz:draft {date?}', function (?string $date = null) {
     DraftQuiz::dispatchSync($date);
