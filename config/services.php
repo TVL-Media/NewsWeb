@@ -35,10 +35,17 @@ return [
         'effort' => env('ANTHROPIC_EFFORT', 'medium'), // low | medium | high | xhigh | max
     ],
 
-    // Text-to-speech (App\Contracts\TextToSpeech): fake | google
+    // Text-to-speech (App\Contracts\TextToSpeech): fake | google | azure  (fake = silent test audio, development only)
     'tts' => [
         'driver' => env('TTS_DRIVER', 'fake'),
         'google_key' => env('GOOGLE_TTS_KEY'),
+        'azure_key' => env('AZURE_SPEECH_KEY'),
+        'azure_region' => env('AZURE_SPEECH_REGION'),
+    ],
+
+    // Firebase web app config (JSON from the Firebase console). Empty = Firebase Analytics is not loaded.
+    'firebase' => [
+        'web_config' => env('FIREBASE_WEB_CONFIG'),
     ],
 
     // Audio on the website (Listen buttons, the docked player, the Morning 5 player on /briefing).

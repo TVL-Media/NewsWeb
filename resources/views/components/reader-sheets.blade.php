@@ -27,7 +27,8 @@
         </form>
     </div>
 
-    {{-- Create poll (goes to editors as "pending") --}}
+    {{-- Create poll (goes to editors as "pending"). Hidden when Polls is switched off. --}}
+    @if (feature('polls'))
     <div x-data="{
             open: false, busy: false, error: '',
             question: '', options: ['', ''], days: 1,
@@ -81,6 +82,7 @@
             <button type="submit" class="btn-primary-lg mt-5" :disabled="!valid || busy" :class="(!valid || busy) && 'opacity-60'">{{ __('Send for review') }}</button>
         </form>
     </div>
+    @endif
 
     {{-- Share as image --}}
     <div x-data="shareSheet" @ngn-share.window="show($event.detail)" x-show="open" x-cloak
@@ -99,7 +101,7 @@
             </div>
             <div class="mt-5 grid grid-cols-2 gap-2">
                 <a :href="whatsapp" target="_blank" rel="noopener" class="btn-primary text-[14px]"><x-icon name="send" size="17" /> WhatsApp</a>
-                <a :href="image" download="nextgennews.jpg" class="btn-ghost text-[14px]" :class="!image && 'pointer-events-none opacity-50'"><x-icon name="image" size="17" /> {{ __('Download') }}</a>
+                <a :href="image" download="{{ \Illuminate\Support\Str::slug(site_name()) }}.jpg" class="btn-ghost text-[14px]" :class="!image && 'pointer-events-none opacity-50'"><x-icon name="image" size="17" /> {{ __('Download') }}</a>
                 <button type="button" @click="copy()" class="btn-ghost text-[14px]">
                     <x-icon name="share" size="17" /> <span x-text="copied ? '{{ __('Copied') }}' : '{{ __('Copy link') }}'"></span>
                 </button>

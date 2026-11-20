@@ -5,21 +5,63 @@ namespace Database\Seeders\Support;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Copies demo photos from storage/app/demo/{name}.jpg onto the media disk.
- * When a file is missing it draws a plain placeholder with GD instead, so seeding never
- * depends on the network. Drop real photos into storage/app/demo/ with the same names to replace them.
+ * Sample-data pictures. For each name it uses, in order:
+ *  1. storage/app/demo/{name}.jpg: your own photos, if you put any there (not shipped);
+ *  2. database/seeders/demo-photos/{name}.jpg: public-domain / CC0 photos shipped with the product
+ *     (sources and authors in database/seeders/demo-photos/credits.json and CREDITS.md);
+ *  3. a plain placeholder drawn with GD, so seeding never depends on the network.
  */
 class DemoMedia
 {
     public static function put(string $name, string $targetDir, int $w = 1200, int $h = 800): string
     {
         $target = trim($targetDir, '/').'/'.$name.'.jpg';
-        $source = storage_path('app/demo/'.$name.'.jpg');
+        $source = self::source($name);
         $disk = Storage::disk(config('filesystems.media'));
 
-        $disk->put($target, is_file($source) ? file_get_contents($source) : self::placeholder($name, $w, $h));
+        $disk->put($target, $source ? file_get_contents($source) : self::placeholder($name, $w, $h));
 
         return $target;
+    }
+
+    /** Photo credit shown under a sample story. */
+    public static function credit(string $name): string
+    {
+        if (is_file(storage_path('app/demo/'.$name.'.jpg'))) {
+            return 'Sample photo';
+        }
+        $c = self::credits()[$name] ?? null;
+        if ($c && is_file(self::shipped($name))) {
+            $who = trim((string) ($c['creator'] ?? '')) ?: 'Unknown photographer';
+
+            return $who.' · '.($c['license'] === 'cc0' ? 'CC0' : 'Public domain');
+        }
+
+        return 'Sample image';
+    }
+
+    private static function source(string $name): ?string
+    {
+        foreach ([storage_path('app/demo/'.$name.'.jpg'), self::shipped($name)] as $path) {
+            if (is_file($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    private static function shipped(string $name): string
+    {
+        return database_path('seeders/demo-photos/'.$name.'.jpg');
+    }
+
+    /** @return array<string, array{creator: ?string, license: string, source_url: string}> */
+    private static function credits(): array
+    {
+        static $credits = null;
+
+        return $credits ??= (json_decode((string) @file_get_contents(database_path('seeders/demo-photos/credits.json')), true) ?: []);
     }
 
     private static function placeholder(string $name, int $w, int $h): string

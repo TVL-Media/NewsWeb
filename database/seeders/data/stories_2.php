@@ -241,7 +241,7 @@ return [
         'category' => 'business',
         'page' => 'markets',
         'city' => null,
-        'source' => 'NextGenNews Desk',
+        'source' => 'Newsroom Desk',
         'is_breaking' => false,
         'importance' => 5,
         'read_minutes' => 3,

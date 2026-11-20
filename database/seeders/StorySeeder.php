@@ -43,7 +43,7 @@ class StorySeeder extends Seeder
                 'importance' => $data['importance'],
                 'read_minutes' => $data['read_minutes'],
                 'photo_path' => DemoMedia::put(pathinfo($data['photo'], PATHINFO_FILENAME), 'stories'),
-                'photo_credit' => 'Picsum / Unsplash (demo)',
+                'photo_credit' => DemoMedia::credit(pathinfo($data['photo'], PATHINFO_FILENAME)),
                 'likes_count' => 40 + ($i * 37) % 900,
                 'comments_count' => 0,
                 'shares_count' => 10 + ($i * 13) % 200,

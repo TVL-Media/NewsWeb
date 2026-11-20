@@ -5,6 +5,7 @@
     Expects $poll with `options` loaded. $votedOptionId = the signed-in user's choice, if any.
 --}}
 @props(['poll', 'votedOptionId' => null, 'showCreate' => true, 'title' => null, 'results' => false])
+@if (feature('polls'))
 @php
     $state = [
         'id' => $poll->id,
@@ -83,3 +84,4 @@
         @endif
     </p>
 </section>
+@endif

@@ -22,30 +22,13 @@ use App\Models\User;
 use Database\Seeders\Support\DemoMedia;
 use Illuminate\Database\Seeder;
 
-/** Admins, demo readers, today's Morning 5 and quiz, 3 polls, page story circles and settings. */
+/** Sample data: demo readers, today's Morning 5 and quiz, 3 polls and page story circles. */
 class DemoActivitySeeder extends Seeder
 {
     public function run(): void
     {
         $tz = config('app.timezone');
         $today = now($tz)->toDateString();
-
-        // Newsroom staff (admin panel at /admin). Local demo passwords: "password".
-        Admin::create(['name' => 'Site Admin', 'email' => 'admin@nextgennews.test', 'password' => 'password', 'role' => 'admin'])->assignRole('Super Admin');
-        Admin::create(['name' => 'Chief Editor', 'email' => 'chief@nextgennews.test', 'password' => 'password', 'role' => 'chief'])->assignRole('Chief Editor');
-        Admin::create(['name' => 'Desk Editor', 'email' => 'editor@nextgennews.test', 'password' => 'password', 'role' => 'editor'])->assignRole('Editor');
-        // Demo only: don't force two-factor on these local accounts. Turn it back on in Settings → Security.
-        \App\Support\Settings::set('security.enforce_2fa_roles', []);
-
-        AutoPublishSetting::create([
-            'sensitive_categories' => Category::where('is_sensitive', true)->pluck('slug')->all(),
-            'sensitive_keywords' => [
-                'election', 'poll body', 'arrested', 'court', 'verdict', 'riot', 'communal', 'temple', 'mosque',
-                'killed', 'dead', 'death toll', 'disaster', 'earthquake', 'flood', 'child', 'minor', 'alleged', 'accused', 'cure',
-            ],
-            'confidence_threshold' => 0.85,
-            'copy_threshold' => 0.15,
-        ]);
 
         // Demo reader (log in with phone 9876543210 once OTP login lands in Milestone 3).
         $lucknow = City::where('name_en', 'Lucknow')->first();

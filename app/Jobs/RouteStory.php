@@ -24,7 +24,8 @@ class RouteStory implements ShouldQueue
             return;
         }
 
-        if ($story->aiCheck->decision === 'auto') {
+        // Auto-publish only while "AI auto-publishing" is on (Admin → Settings → Features).
+        if ($story->aiCheck->decision === 'auto' && \App\Support\Features::on('ai_autopublish')) {
             $publisher->publish($story, 'auto');
 
             return;

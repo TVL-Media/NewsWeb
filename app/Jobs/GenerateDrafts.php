@@ -32,6 +32,10 @@ class GenerateDrafts implements ShouldQueue
 
     public function handle(AiWriter $ai): void
     {
+        // No Claude key on a live site: no drafts are written (no sample text). Editors write stories themselves.
+        if (! \App\Support\Features::aiReady()) {
+            return;
+        }
         $cluster = StoryCluster::with('items.feedSource')->find($this->clusterId);
         if (! $cluster || $cluster->story_id || $cluster->items->isEmpty()) {
             return;

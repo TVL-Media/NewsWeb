@@ -49,7 +49,7 @@ class ReelBuilder
             foreach ($points as $i => $point) {
                 $segments[] = ['kind' => 'point', 'text' => $point, 'label' => ($hi ? 'मुख्य बात ' : 'KEY POINT ').($i + 1).'/'.count($points)];
             }
-            $end = $hi ? 'पूरी ख़बर NextGenNews पर पढ़ें।' : 'Read the full story on NextGenNews.';
+            $end = $hi ? 'पूरी ख़बर '.site_name().' पर पढ़ें।' : 'Read the full story on '.site_name().'.';
 
             foreach ([...$segments, ['text' => $end]] as $i => $segment) {
                 $voice[$i] = $this->voice($segment['text'], $lang, $dir, "seg{$i}");
@@ -75,7 +75,7 @@ class ReelBuilder
             foreach ($segments as $i => $segment) {
                 File::put("$dir/ov{$i}.png", $this->slides->overlay($segment['text'], $lang, $segment['kind'], $segment['label']));
             }
-            $host = parse_url(config('app.url'), PHP_URL_HOST) ?: 'nextgennews.in';
+            $host = parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost';
             File::put("$dir/end.png", $this->slides->endCard($lang, $host));
             File::put("$dir/thumb.jpg", $this->slides->thumbnail($photo, File::get("$dir/ov0.png")));
 

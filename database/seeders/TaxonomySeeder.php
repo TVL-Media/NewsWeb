@@ -45,7 +45,7 @@ class TaxonomySeeder extends Seeder
             ['ANI', 'https://www.aninews.in'],
             ['IANS', 'https://ians.in'],
             ['Reuters', 'https://www.reuters.com'],
-            ['NextGenNews Desk', null],
+            ['Newsroom Desk', null],
         ] as [$name, $url]) {
             Source::create(['name' => $name, 'url' => $url]);
         }

@@ -182,9 +182,11 @@
                                         <x-icon name="heart" size="19" x-bind:class="liked && 'fill-current'" />
                                         <span x-text="likes.toLocaleString('en-IN')"></span><span class="sr-only">{{ __('likes') }}</span>
                                     </button>
+                                    @if (feature('comments'))
                                     <a href="{{ route('story.show', $story) }}#comments-title" class="inline-flex h-9 items-center gap-1.5 rounded-full px-2 text-[13px] font-bold text-ink no-underline">
                                         <x-icon name="message-circle" size="19" /> {{ number_format($story->comments_count) }}<span class="sr-only">{{ __('Comments') }}</span>
                                     </a>
+                                    @endif
                                     <button type="button" @click.stop="$dispatch('ngn-share', { id, url: @js(route('story.show', $story)), title: t.headline, lang })"
                                             class="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink hover:bg-chip" aria-label="{{ __('Share') }}">
                                         <x-icon name="share" size="18" />

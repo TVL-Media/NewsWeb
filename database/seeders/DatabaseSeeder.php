@@ -3,9 +3,12 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Development and tests: base data + demo staff accounts + sample content (`php artisan db:seed`).
+ * A real install uses the installer instead, which runs InstallSeeder and, if ticked, SampleDataSeeder.
+ */
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
@@ -17,13 +20,9 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call([
-            PermissionSeeder::class,
-            TaxonomySeeder::class,
-            StorySeeder::class,
-            DemoActivitySeeder::class,
-            ReelSeeder::class,
+            InstallSeeder::class,
+            DemoAccountsSeeder::class,
+            SampleDataSeeder::class,
         ]);
-
-        Cache::forget('nav.categories');
     }
 }

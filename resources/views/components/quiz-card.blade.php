@@ -1,5 +1,6 @@
 {{-- Black Daily quiz card: yellow "?" tile, streak line, white Start pill (login required). --}}
 @props(['streak' => 0, 'button' => null])
+@if (feature('quiz'))
 <section {{ $attributes->merge(['class' => 'card-dark flex items-center gap-3 px-4 py-3.5']) }} aria-labelledby="quiz-card-title">
     <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px] bg-dark-card text-[22px] font-black text-quiz-yellow" aria-hidden="true">?</span>
     <div class="min-w-0 flex-1">
@@ -19,3 +20,4 @@
         {{ $button ?? __('Start') }}
     </a>
 </section>
+@endif

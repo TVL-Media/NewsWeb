@@ -29,7 +29,7 @@ class FetchFeeds implements ShouldQueue
         foreach ($sources as $source) {
             try {
                 $response = Http::timeout(20)->retry(2, 1000, throw: false)
-                    ->withHeaders(['User-Agent' => 'NextGenNewsBot/1.0 (+'.config('app.url').')'])
+                    ->withHeaders(['User-Agent' => (\Illuminate\Support\Str::studly(site_name()) ?: 'News').'Bot/1.0 (+'.config('app.url').')'])
                     ->get($source->url);
 
                 if (! $response->successful()) {

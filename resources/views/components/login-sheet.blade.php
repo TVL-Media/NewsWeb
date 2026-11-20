@@ -33,6 +33,7 @@
             </button>
         </div>
 
+        @if (feature('otp_login'))
         {{-- Step 1: phone --}}
         <form x-show="step === 'phone'" @submit.prevent="sendOtp()" class="mt-2" novalidate>
             <p class="text-[15px] leading-relaxed text-muted">
@@ -115,6 +116,11 @@
                 {{ __('Verify') }}
             </button>
         </form>
+        @else
+        {{-- Phone OTP login is switched off, or no SMS provider is set up yet (Admin → Settings). --}}
+        <p class="mt-2 text-[15px] leading-relaxed text-muted">{{ __('Logging in is not available right now. You can keep reading every story without an account.') }}</p>
+        <button type="button" @click="$store.auth.close()" class="btn-primary mt-6 w-full">{{ __('OK') }}</button>
+        @endif
     </div>
 </div>
 @endguest

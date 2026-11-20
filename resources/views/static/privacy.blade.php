@@ -1,7 +1,12 @@
-<x-static-page title="Privacy policy" description="What personal data NextGenNews collects, why we use it, who we share it with and your rights under the DPDP Act, 2023." updated="5 November 2026">
+@if (filled(setting('legal.privacy_html')))
+<x-static-page title="Privacy policy" description="What personal data {{ site_name() }} collects, why we use it, who we share it with and your rights under the DPDP Act, 2023.">
+    {!! clean(setting('legal.privacy_html')) !!}
+</x-static-page>
+@else
+<x-static-page title="Privacy policy" description="What personal data {{ site_name() }} collects, why we use it, who we share it with and your rights under the DPDP Act, 2023." updated="5 November 2026">
     <h2>Summary</h2>
-    <p>NextGenNews collects only the data we need to run the service. We do not sell your personal data. You can read the news without an account. If you create one, you can see, correct or delete your data at any time.</p>
-    <p>This policy explains how we handle your personal data under the Digital Personal Data Protection Act, 2023 (DPDP Act), the Information Technology Act, 2000 and related rules. In this policy, "we" and "us" mean NextGenNews, which acts as the Data Fiduciary for your data.</p>
+    <p>{{ site_name() }} collects only the data we need to run the service. We do not sell your personal data. You can read the news without an account. If you create one, you can see, correct or delete your data at any time.</p>
+    <p>This policy explains how we handle your personal data under the Digital Personal Data Protection Act, 2023 (DPDP Act), the Information Technology Act, 2000 and related rules. In this policy, "we" and "us" mean {{ site_name() }}, which acts as the Data Fiduciary for your data.</p>
 
     <h2>Data we collect</h2>
     <h3>When you create an account</h3>
@@ -21,7 +26,7 @@
     <ul>
         <li><strong>Device and log data</strong> – such as IP address, browser and device type, operating system, pages viewed and the time of each request.</li>
         <li><strong>Cookies</strong> – a session cookie that keeps you logged in and protects forms, and a language cookie that remembers whether you read in Hindi or English. These are needed for the site to work.</li>
-        <li><strong>Analytics</strong> – we use Google Analytics 4 to understand how people use NextGenNews, such as which sections are popular. It uses its own cookies and identifiers.</li>
+        <li><strong>Analytics</strong> – we use Google Analytics 4 to understand how people use {{ site_name() }}, such as which sections are popular. It uses its own cookies and identifiers.</li>
         <li><strong>Error data</strong> – we use Sentry to find and fix crashes. When something breaks, it may record technical details such as the page, browser, device and the error itself.</li>
     </ul>
 
@@ -42,7 +47,7 @@
     <p>You can withdraw your consent at any time by deleting your account or writing to our Grievance Officer. Withdrawing consent does not affect processing already done. Some features will stop working without the data they need.</p>
 
     <h2>Who we share data with</h2>
-    <p>We share personal data only with service providers who help us run NextGenNews, and only what they need to do their job:</p>
+    <p>We share personal data only with service providers who help us run {{ site_name() }}, and only what they need to do their job:</p>
     <ul>
         <li><strong>SMS provider</strong> – to send your OTP to your mobile number.</li>
         <li><strong>Cloud hosting and storage providers</strong> – to run our servers and store data.</li>
@@ -76,7 +81,7 @@
     <p>You can delete your account from your profile settings, or by asking our Grievance Officer. Once deleted, your profile, follows, saves, streaks and quiz history are removed. Your comments are removed or anonymised.</p>
 
     <h2>Children</h2>
-    <p>NextGenNews is not directed at children under 18. Under the DPDP Act, we do not knowingly create accounts for anyone under 18 without verifiable consent from a parent or lawful guardian. We do not track or target advertising at children. If you believe a child has created an account without such consent, please contact us and we will delete it.</p>
+    <p>{{ site_name() }} is not directed at children under 18. Under the DPDP Act, we do not knowingly create accounts for anyone under 18 without verifiable consent from a parent or lawful guardian. We do not track or target advertising at children. If you believe a child has created an account without such consent, please contact us and we will delete it.</p>
 
     <h2>Security</h2>
     <p>We use reasonable security safeguards to protect your data, including encrypted connections (HTTPS), hashed OTPs, access controls and limited staff access. No system is perfectly secure. If a personal data breach happens, we will inform affected users and the Data Protection Board of India as the law requires.</p>
@@ -87,3 +92,4 @@
     <h2>Contact</h2>
     <p>For questions or requests about your data, contact our <a href="{{ route('grievance') }}">Grievance Officer</a>. See also our <a href="{{ route('terms') }}">Terms of use</a>.</p>
 </x-static-page>
+@endif

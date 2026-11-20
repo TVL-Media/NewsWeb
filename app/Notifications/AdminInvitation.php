@@ -17,7 +17,7 @@ class AdminInvitation extends Notification
     public function toMail($n): MailMessage
     {
         return (new MailMessage)
-            ->subject('You have been invited to '.setting('general.platform_name', 'Newsroom').' Admin')
+            ->subject('You have been invited to '.panel_name().' Admin')
             ->line("{$this->inviter} invited you to join the admin panel as {$n->roleNames()}.")
             ->action('Set up your account', $this->url)
             ->line('This link expires in 48 hours.');

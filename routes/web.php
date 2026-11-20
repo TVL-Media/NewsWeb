@@ -27,7 +27,7 @@ Route::get('/explore', ExploreController::class)->name('explore');
 Route::get('/search', SearchController::class)->middleware('throttle:60,1')->name('search');
 Route::get('/story/{story:slug}', [StoryController::class, 'show'])->name('story.show');
 Route::get('/page/{page:slug}', [PageController::class, 'show'])->name('page.show');
-Route::get('/stories/{story:id}/comments', [CommentController::class, 'index'])->name('comments.index');
+Route::get('/stories/{story:id}/comments', [CommentController::class, 'index'])->middleware('feature:comments')->name('comments.index');
 Route::get('/notifications', NotificationController::class)->name('notifications');
 Route::get('/live', fn () => response()->json(['v' => \App\Support\LiveVersion::current()])->header('Cache-Control', 'no-store'))
     ->middleware('throttle:30,1')->name('live');
@@ -46,14 +46,14 @@ Route::middleware(EnsureReelsEnabled::class)->group(function () {
     Route::get('/reels', [ReelController::class, 'index'])->name('reels');
     Route::get('/reels/feed', [ReelController::class, 'feed'])->middleware('throttle:60,1')->name('reels.feed');
     Route::get('/reels/{reel:id}/data', [ReelController::class, 'data'])->whereNumber('reel')->middleware('throttle:60,1')->name('reels.data');
-    Route::get('/reels/{reel:id}/comments', [CommentController::class, 'indexReel'])->whereNumber('reel')->name('reels.comments.index');
+    Route::get('/reels/{reel:id}/comments', [CommentController::class, 'indexReel'])->whereNumber('reel')->middleware('feature:comments')->name('reels.comments.index');
     Route::post('/reels/{reel:id}/view', [ReelController::class, 'view'])->whereNumber('reel')->middleware('throttle:120,1')->name('reels.view');
     Route::post('/reels/{reel:id}/share', [ReelController::class, 'share'])->whereNumber('reel')->middleware('throttle:engage')->name('reels.share');
 
     Route::middleware(['auth', 'throttle:engage'])->group(function () {
         Route::match(['post', 'delete'], '/reels/{reel:id}/like', [ReelController::class, 'like'])->name('reels.like');
         Route::match(['post', 'delete'], '/reels/{reel:id}/save', [ReelController::class, 'save'])->name('reels.save');
-        Route::post('/reels/{reel:id}/comments', [CommentController::class, 'storeReel'])->middleware('throttle:comments')->name('reels.comments.store');
+        Route::post('/reels/{reel:id}/comments', [CommentController::class, 'storeReel'])->middleware(['throttle:comments', 'feature:comments'])->name('reels.comments.store');
     });
 
     Route::get('/reels/{reel:slug}', [ReelController::class, 'show'])->name('reels.show');
@@ -65,7 +65,7 @@ Route::view('/videos', 'coming-soon', ['title' => __('Videos'), 'icon' => 'video
 Route::view('/podcast', 'coming-soon', ['title' => __('Podcast'), 'icon' => 'mic', 'description' => __('An audio podcast is coming in a later phase.')])->name('podcast');
 
 // ── Login (phone + OTP) ───────────────────────────────────────────────────
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', 'feature:otp_login'])->group(function () {
     Route::post('/auth/otp/send', [OtpController::class, 'send'])->middleware('throttle:otp')->name('otp.send');
     Route::post('/auth/otp/verify', [OtpController::class, 'verify'])->middleware('throttle:otp-verify')->name('otp.verify');
 });
@@ -89,18 +89,22 @@ Route::middleware('auth')->group(function () {
         Route::match(['post', 'delete'], '/stories/{story:id}/save', [EngagementController::class, 'save'])->name('stories.save');
         Route::post('/stories/{story:id}/share', [EngagementController::class, 'share'])->name('stories.share');
         Route::post('/stories/{story:id}/read', [EngagementController::class, 'read'])->name('stories.read');
-        Route::post('/stories/{story:id}/comments', [CommentController::class, 'store'])->middleware('throttle:comments')->name('comments.store');
-        Route::match(['post', 'delete'], '/comments/{comment}/like', [EngagementController::class, 'likeComment'])->name('comments.like');
+        Route::post('/stories/{story:id}/comments', [CommentController::class, 'store'])->middleware(['throttle:comments', 'feature:comments'])->name('comments.store');
+        Route::match(['post', 'delete'], '/comments/{comment}/like', [EngagementController::class, 'likeComment'])->middleware('feature:comments')->name('comments.like');
         Route::match(['post', 'delete'], '/pages/{page:slug}/follow', [EngagementController::class, 'follow'])->name('pages.follow');
         Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
     });
 
     // Habit features
-    Route::get('/quiz', [QuizController::class, 'show'])->name('quiz');
-    Route::post('/quiz/answers', [QuizController::class, 'answer'])->middleware('throttle:60,1')->name('quiz.answer');
-    Route::post('/quiz/share', [QuizController::class, 'share'])->middleware('throttle:10,1')->name('quiz.share');
-    Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->middleware('throttle:engage')->name('polls.vote');
-    Route::post('/polls', [PollController::class, 'store'])->middleware('throttle:10,1')->name('polls.store');
+    Route::middleware('feature:quiz')->group(function () {
+        Route::get('/quiz', [QuizController::class, 'show'])->name('quiz');
+        Route::post('/quiz/answers', [QuizController::class, 'answer'])->middleware('throttle:60,1')->name('quiz.answer');
+        Route::post('/quiz/share', [QuizController::class, 'share'])->middleware('throttle:10,1')->name('quiz.share');
+    });
+    Route::middleware('feature:polls')->group(function () {
+        Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->middleware('throttle:engage')->name('polls.vote');
+        Route::post('/polls', [PollController::class, 'store'])->middleware('throttle:10,1')->name('polls.store');
+    });
 });
 
 Route::get('/briefing', BriefingController::class)->name('briefing');

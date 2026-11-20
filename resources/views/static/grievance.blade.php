@@ -1,29 +1,31 @@
-<x-static-page title="Grievance officer" description="How to contact the NextGenNews Grievance Officer and how we handle complaints under the IT Rules, 2021." updated="5 November 2026">
-    <p><strong>Note: the officer details below are placeholders and will be replaced with the appointed officer's details before launch.</strong></p>
+<x-static-page title="Grievance officer" description="How to contact the {{ site_name() }} Grievance Officer and how we handle complaints under the IT Rules, 2021." updated="5 November 2026">
+    @if (setting('legal.grievance_email') === 'grievance@nextgennews.in')
+    <p><strong>Note: the officer details below are placeholders. Add the appointed officer's details in Admin → Settings → Legal.</strong></p>
+    @endif
 
     <h2>Who handles complaints</h2>
-    <p>Under the Information Technology Act, 2000 and the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021 – including Rule 3(2) and the grievance redressal mechanism for digital news publishers under Part III (Rule 11) – NextGenNews has a Grievance Officer. You can contact the officer about our news content, comments and polls posted by users, or how we handle your personal data.</p>
+    <p>Under the Information Technology Act, 2000 and the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021 – including Rule 3(2) and the grievance redressal mechanism for digital news publishers under Part III (Rule 11) – {{ site_name() }} has a Grievance Officer. You can contact the officer about our news content, comments and polls posted by users, or how we handle your personal data.</p>
 
     <table>
         <tr>
             <th>Name</th>
-            <td>Grievance Officer (to be appointed)</td>
+            <td>{{ setting('legal.grievance_name') }}</td>
         </tr>
         <tr>
             <th>Designation</th>
-            <td>Grievance Officer, NextGenNews</td>
+            <td>Grievance Officer, {{ site_name() }}</td>
         </tr>
         <tr>
             <th>Email</th>
-            <td><a href="mailto:grievance@nextgennews.in">grievance@nextgennews.in</a></td>
+            <td><a href="mailto:{{ setting('legal.grievance_email') }}">{{ setting('legal.grievance_email') }}</a></td>
         </tr>
         <tr>
             <th>Phone</th>
-            <td>+91 522 400 0000 (Mon–Fri, 10:00–18:00 IST)</td>
+            <td>{{ setting('legal.grievance_phone') }}</td>
         </tr>
         <tr>
             <th>Address</th>
-            <td>NextGenNews, 3rd Floor, Placeholder House, Hazratganj, Lucknow, Uttar Pradesh 226001, India</td>
+            <td>{{ site_name() }}, {{ setting('legal.grievance_address') }}</td>
         </tr>
     </table>
 
@@ -67,6 +69,6 @@
         <li><a href="{{ route('privacy') }}">Privacy policy</a></li>
         <li><a href="{{ route('terms') }}">Terms of use</a></li>
         <li><a href="{{ route('community') }}">Community rules</a></li>
-        <li><a href="{{ route('about') }}">About NextGenNews</a></li>
+        <li><a href="{{ route('about') }}">About {{ site_name() }}</a></li>
     </ul>
 </x-static-page>

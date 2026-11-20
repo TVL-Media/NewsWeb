@@ -23,8 +23,8 @@
         'inLanguage' => $v->language === 'hi' ? 'hi-IN' : 'en-IN',
         'articleSection' => $story->category?->name_en,
         'mainEntityOfPage' => $url,
-        'author' => ['@type' => 'Organization', 'name' => 'NextGenNews'],
-        'publisher' => ['@type' => 'Organization', 'name' => 'NextGenNews', 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo.svg')]],
+        'author' => ['@type' => 'Organization', 'name' => site_name()],
+        'publisher' => ['@type' => 'Organization', 'name' => site_name(), 'logo' => ['@type' => 'ImageObject', 'url' => site_logo_url() ?? asset('images/logo.svg')]],
     ];
 @endphp
 <x-layouts.app :title="$v->headline" :description="$v->card_text" :canonical="$url"
@@ -246,6 +246,7 @@
                     </div>
                 </div>
 
+                @if (feature('comments'))
                 {{-- Comments (live: post, reply, like, report) --}}
                 <section class="card mt-6 p-5 md:p-6" aria-labelledby="comments-title"
                          x-data="{
@@ -329,6 +330,7 @@
                         </template>
                     </ul>
                 </section>
+                @endif
                 <p class="meta mt-5 leading-relaxed">
                     {{ __('Summary by our editors, AI-assisted.') }}
                     @if ($story->source) {{ __('Source') }}: {{ $story->source->name }} · @endif

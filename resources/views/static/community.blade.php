@@ -1,4 +1,4 @@
-<x-static-page title="Community rules" description="Simple do's and don'ts for comments and user polls on NextGenNews, and how reporting and moderation work." updated="5 November 2026">
+<x-static-page title="Community rules" description="Simple do's and don'ts for comments and user polls on {{ site_name() }}, and how reporting and moderation work." updated="5 November 2026">
     <h2>The short version</h2>
     <p>Discuss the news, not the person. Disagree politely. Keep it legal. These rules apply to comments and to polls you create.</p>
 
@@ -17,7 +17,7 @@
         <li><strong>No misinformation.</strong> Do not post content you know is false or misleading.</li>
         <li><strong>No personal data or doxxing.</strong> Do not share anyone's phone number, address, documents or other private details – including your own.</li>
         <li><strong>No spam or promotions.</strong> No ads, referral links, repeated posts or self-promotion.</li>
-        <li><strong>No impersonation.</strong> Do not pretend to be another person, a public figure, an organisation or NextGenNews staff.</li>
+        <li><strong>No impersonation.</strong> Do not pretend to be another person, a public figure, an organisation or {{ site_name() }} staff.</li>
         <li><strong>No sexual content.</strong> No obscene or sexually explicit text or links.</li>
         <li><strong>Nothing illegal.</strong> Nothing that breaks Indian law, encourages violence or harms children.</li>
     </ul>

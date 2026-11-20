@@ -3,7 +3,7 @@
     $chips = ['latest' => __('Latest'), 'explainers' => __('Explainers')];
     if ($page->pinned_text) { $chips['live'] = __('Live scores'); }
     if (config('reels.enabled')) { $chips['reels'] = __('Reels'); }
-    $chips['polls'] = __('Polls');
+    if (feature('polls')) { $chips['polls'] = __('Polls'); }
     $updated = $updatedAt ? \App\Support\Lang::ago(\Illuminate\Support\Carbon::parse($updatedAt)) : null;
 @endphp
 <x-layouts.app :title="$page->name()" :description="$page->description" :og-image="$page->coverUrl() ? url($page->coverUrl()) : null">

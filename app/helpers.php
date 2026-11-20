@@ -11,6 +11,66 @@ if (! function_exists('setting')) {
     }
 }
 
+if (! function_exists('site_name')) {
+    /** Website name (Admin → Settings → General). Default "NextGenNews". */
+    function site_name(): string
+    {
+        return (string) (config('app.name') ?: 'NextGenNews');
+    }
+}
+
+if (! function_exists('panel_name')) {
+    /** Admin panel name (Settings → General). Default "<site name> Newsroom". */
+    function panel_name(): string
+    {
+        return (string) (setting('general.platform_name') ?: site_name().' Newsroom');
+    }
+}
+
+if (! function_exists('site_tagline')) {
+    function site_tagline(): string
+    {
+        return (string) (setting('site.tagline') ?: __('Short news with depth, in Hindi and English'));
+    }
+}
+
+if (! function_exists('site_color')) {
+    /** Brand colour as #RRGGBB. Default red #D7141E. */
+    function site_color(): string
+    {
+        $c = (string) setting('site.brand_color', '#D7141E');
+
+        return preg_match('/^#[0-9a-fA-F]{6}$/', $c) ? strtoupper($c) : '#D7141E';
+    }
+}
+
+if (! function_exists('site_logo_url')) {
+    /** Uploaded logo, or null for the built-in red "N" mark. */
+    function site_logo_url(): ?string
+    {
+        $p = setting('site.logo');
+
+        return $p ? asset('storage/'.$p) : null;
+    }
+}
+
+if (! function_exists('site_favicon_url')) {
+    function site_favicon_url(): string
+    {
+        $p = setting('site.favicon');
+
+        return $p ? asset('storage/'.$p) : asset('images/logo.svg');
+    }
+}
+
+if (! function_exists('feature')) {
+    /** Is this reader feature switched on and set up? See App\Support\Features. */
+    function feature(string $name): bool
+    {
+        return \App\Support\Features::on($name);
+    }
+}
+
 if (! function_exists('ptz')) {
     /** Platform timezone name. */
     function ptz(): string

@@ -25,6 +25,9 @@ class DraftQuiz implements ShouldQueue
 
     public function handle(AiWriter $ai): void
     {
+        if (! \App\Support\Features::enabled('quiz')) {
+            return; // switched off in Admin → Settings → Features
+        }
         $date = $this->date ?? now(config('app.timezone'))->addDay()->toDateString();
         if (Quiz::whereDate('date', $date)->exists()) {
             return;

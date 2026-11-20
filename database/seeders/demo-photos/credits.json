@@ -1,0 +1,578 @@
+{
+    "avatar-cricket": {
+        "title": "BRAC All-Female Cricket Match, Mar 2015",
+        "creator": "U.S. Embassy Dhaka",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/89616529@N03/16715961930",
+        "openverse_id": "381aa669-c09e-43ee-beea-c28489e2c975"
+    },
+    "avatar-delhi": {
+        "title": "Delhi red fort 1",
+        "creator": "Turjo19",
+        "license": "cc0",
+        "source": "wikimedia",
+        "source_url": "https://commons.wikimedia.org/w/index.php?curid=144562993",
+        "openverse_id": "17fef3c3-a599-42f5-b294-163edee2baa5"
+    },
+    "avatar-good-news-daily": {
+        "title": "Wind turbine",
+        "creator": "sarangib",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/39818063@N06/29839080564",
+        "openverse_id": "ae61faed-8299-4dad-a00c-35860c013efd"
+    },
+    "avatar-health-watch": {
+        "title": "Stethoscope Medical",
+        "creator": "Negative Space",
+        "license": "cc0",
+        "source": "stocksnap",
+        "source_url": "https://stocksnap.io/photo/stethoscope-medical-9M1HWW2JFV",
+        "openverse_id": "e7d58d39-6f6e-454a-a195-e82dfa5a6f79"
+    },
+    "avatar-india-now": {
+        "title": "Mumbai Festive Night",
+        "creator": "Vidur Malhotra",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/111661024@N07/29590940042",
+        "openverse_id": "7a2f807d-ed47-44cf-954e-67df58aaecbf"
+    },
+    "avatar-lucknow": {
+        "title": "Tunde Kabab Aliganj Lucknow India",
+        "creator": null,
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://live.staticflickr.com/4396/36445625196_3715b3efa9_b.jpg",
+        "openverse_id": "f88bb039-98e0-4998-b26a-3779b3b7cd5a"
+    },
+    "avatar-markets": {
+        "title": "Cap Campbell.At Port Lyttleton NZ.",
+        "creator": "Bernard Spragg",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/88123769@N02/10149932725",
+        "openverse_id": "bd4a2199-6548-40db-b7ab-fec12e4c8989"
+    },
+    "avatar-screen-stage": {
+        "title": "Microphone",
+        "creator": "Photo Cindy",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/13631562@N00/4946114680",
+        "openverse_id": "71bd13a5-6afd-4b8d-9b00-8eaa29b8ebc6"
+    },
+    "avatar-tech-today": {
+        "title": "Laptop Computer",
+        "creator": "Kamil Kisiela",
+        "license": "cc0",
+        "source": "stocksnap",
+        "source_url": "https://stocksnap.io/photo/laptop-computer-7NX0N5EDZ6",
+        "openverse_id": "7a28edac-6e84-4067-a815-7300ab3848b9"
+    },
+    "avatar-world-brief": {
+        "title": "mini planet2",
+        "creator": "Burnt Pineapple Productions",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/51686021@N07/41061465340",
+        "openverse_id": "af16d30c-4a62-4234-894f-bbf5ddc9212f"
+    },
+    "business-1": {
+        "title": "No Known Restrictions: New York Stock Exchange Floor by Thomas J. O'Halloran, 1963 (LOC)",
+        "creator": "pingnews.com",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/39735679@N00/508717757",
+        "openverse_id": "bbcdbdd3-3102-4ffb-9933-fcb6caeb3b6e"
+    },
+    "business-2": {
+        "title": "'Hermes' Container ship.",
+        "creator": "Bernard Spragg",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/88123769@N02/12808767834",
+        "openverse_id": "03aa67fb-a310-4067-88df-2b761af2a18b"
+    },
+    "business-3": {
+        "title": "No Known Restrictions: NY Stock Exchange by Underhill ca. 1921 (LOC)",
+        "creator": "pingnews.com",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/39735679@N00/2891817449",
+        "openverse_id": "1863e7e5-3abf-4997-b83c-437c74ca33ec"
+    },
+    "business-4": {
+        "title": "SPIRIT OF CANTERBURY Container Ship .",
+        "creator": "Bernard Spragg",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/88123769@N02/34163555514",
+        "openverse_id": "319c5a7c-b3d2-4d62-bf0c-935241a133d6"
+    },
+    "business-5": {
+        "title": "Aerial view shipping-container port Miami",
+        "creator": "Carol M Highsmith",
+        "license": "cc0",
+        "source": "rawpixel",
+        "source_url": "https://www.rawpixel.com/image/8069979/photo-image-public-domain-united-states",
+        "openverse_id": "951ae93f-b13b-425a-bf94-0b8ccb476e2f"
+    },
+    "category-business": {
+        "title": "No Known Restrictions: New Stock Exchange, from steps of Sub-Treasury, New York City by H.C. White, 1906 (LOC)",
+        "creator": "pingnews.com",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/39735679@N00/2883393965",
+        "openverse_id": "995ddaa1-7aba-48a4-a9cd-e02a4e0ce42b"
+    },
+    "category-cricket": {
+        "title": "Postcard: Brockton Point Cricket Grounds, Stanley Park, c.1910s",
+        "creator": "blizzy63",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/45379817@N08/16287821154",
+        "openverse_id": "8fceea32-ec59-4b28-b786-23f5936f7d79"
+    },
+    "category-entertainment": {
+        "title": "Lecture Lecture",
+        "creator": "cogdogblog",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/37996646802@N01/6288971",
+        "openverse_id": "8048d1da-7e28-4529-a294-2bc98dfe561f"
+    },
+    "category-good-news": {
+        "title": "Wind turbine",
+        "creator": "sarangib",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/39818063@N06/29837059113",
+        "openverse_id": "3e4c714b-4356-4d8c-8e72-db070878634f"
+    },
+    "category-health": {
+        "title": "Dale and Betty Bumpers Vaccine Research Center",
+        "creator": "National Institutes of Health (NIH)",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/132318516@N08/35406793185",
+        "openverse_id": "0efdfc46-2a41-48b9-a9e5-cdf6be4e12d0"
+    },
+    "category-india": {
+        "title": "Vibrant Evening Mumbai",
+        "creator": "Vidur Malhotra",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/111661024@N07/25696977716",
+        "openverse_id": "9ba61b26-35aa-47e3-a1b1-80c570c682fb"
+    },
+    "category-tech": {
+        "title": "Fire damaged circuit board",
+        "creator": "joncutrer",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/47121680@N00/49958684786",
+        "openverse_id": "296b477a-f038-4a08-ae63-75b27846f164"
+    },
+    "category-world": {
+        "title": "Map Travel",
+        "creator": "World Maps",
+        "license": "cc0",
+        "source": "stocksnap",
+        "source_url": "https://stocksnap.io/photo/map-travel-EJAXI7R4TB",
+        "openverse_id": "1905415b-85ab-4c26-b4a2-686aea8b84b7"
+    },
+    "cover-cricket": {
+        "title": "BRAC All-Female Cricket Match, Mar 2015",
+        "creator": "U.S. Embassy Dhaka",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/89616529@N03/16902202642",
+        "openverse_id": "2b29680b-71c9-466c-9084-d5ec35be7f82"
+    },
+    "cover-delhi": {
+        "title": "India Gate",
+        "creator": "Gary Lee Todd, Ph.D.",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/101561334@N08/22776182167",
+        "openverse_id": "03a8fc1d-c55d-4f45-98ef-50d0330f026e"
+    },
+    "cover-good-news-daily": {
+        "title": "Wind Turbines",
+        "creator": "Fermion",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/80569752@N00/27370595294",
+        "openverse_id": "a0775622-9c6e-46e3-bd4c-6d23d72d23a2"
+    },
+    "cover-health-watch": {
+        "title": "20150627-FFAS-LSC-0107",
+        "creator": "USDAgov",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/41284017@N08/19047618349",
+        "openverse_id": "3d80847b-c622-4ee2-844e-18ef66a0e592"
+    },
+    "cover-india-now": {
+        "title": "Mumbai Night City",
+        "creator": "Vidur Malhotra",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/111661024@N07/18219784390",
+        "openverse_id": "23d232f3-3c1b-44c2-a177-242f47d8c4e1"
+    },
+    "cover-lucknow": {
+        "title": "[Rumi Darwaza, Lucknow, India]",
+        "creator": null,
+        "license": "cc0",
+        "source": "rawpixel",
+        "source_url": "https://www.rawpixel.com/",
+        "openverse_id": "c3612d70-b395-4f19-8545-f18f879c98f7"
+    },
+    "cover-markets": {
+        "title": "Shipping. Port Lyttleton. NZ",
+        "creator": "Bernard Spragg",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/88123769@N02/25599548561",
+        "openverse_id": "57004c9f-44df-4e42-b929-e8a84312ea78"
+    },
+    "cover-screen-stage": {
+        "title": "Suddenly Last Summer",
+        "creator": "lisascenic",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/46814563@N00/148422613",
+        "openverse_id": "0a9897c8-e84b-4f31-834c-4c894bca96d8"
+    },
+    "cover-tech-today": {
+        "title": "Atlas V 551 AEHF-4 Rocket Launch October 16, 2018",
+        "creator": "Henrique Vicente",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/51314820@N00/31058703407",
+        "openverse_id": "8dc7fc4b-43ba-4411-b243-ea3481c75043"
+    },
+    "cover-world-brief": {
+        "title": "Channel Islands National Park, Cliffs of Santa Cruz Island",
+        "creator": "moonjazz",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/8398907@N02/4191266441",
+        "openverse_id": "3d6ae56a-9ed5-4d40-8c3f-a1b3fcbf62f1"
+    },
+    "cricket-1": {
+        "title": "Rajgir International Cricket Stadium",
+        "creator": "Skrsingh009",
+        "license": "cc0",
+        "source": "wikimedia",
+        "source_url": "https://commons.wikimedia.org/w/index.php?curid=176070382",
+        "openverse_id": "826f1313-1d15-4fb5-9afc-8ea824f9acd2"
+    },
+    "cricket-2": {
+        "title": "BRAC All-Female Cricket Match, Mar 2015",
+        "creator": "U.S. Embassy Dhaka",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/89616529@N03/16902038972",
+        "openverse_id": "32ed1fc5-9a94-490d-b0f9-08e289e4faf6"
+    },
+    "cricket-3": {
+        "title": "The photo shows a vibrant cricket stadium with a well-maintained green field. In the background, there is a red-roofed pavilion with domed towers. Snow-capped mountains rise majestically behind the stadium under a cloudy sky, creating a striking contrast with the lush green field.",
+        "creator": "Mayur",
+        "license": "cc0",
+        "source": "wordpress",
+        "source_url": "https://wordpress.org/photos/photo/82468466a9/",
+        "openverse_id": "eb41cfce-feaf-45fb-b679-b174fb00bf0a"
+    },
+    "cricket-4": {
+        "title": "St. Leonard's Church and Hythe Cricket Ground",
+        "creator": "barry.marsh1944",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/126409951@N04/52382912767",
+        "openverse_id": "541c5534-2b73-4cb6-9a9c-594508b060a8"
+    },
+    "cricket-5": {
+        "title": "BRAC All-Female Cricket Match, Mar 2015",
+        "creator": "U.S. Embassy Dhaka",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/89616529@N03/16902153342",
+        "openverse_id": "c878005b-8406-42af-8dee-cb8072e5a33e"
+    },
+    "cricket-6": {
+        "title": "Cricket match in New Guinea - circa 1905",
+        "creator": "Aussie~mobs",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/70994841@N07/49969573087",
+        "openverse_id": "2d1c0e78-eeb6-464b-85b7-e712e4032e65"
+    },
+    "entertainment-1": {
+        "title": "Concert",
+        "creator": "freestocks.org",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/135396164@N05/25545258533",
+        "openverse_id": "b3c8c826-180d-4557-9efa-2d3666194218"
+    },
+    "entertainment-2": {
+        "title": "Massimo Ranieri Concert Taormina - Creative Commons by gnuckx",
+        "creator": "gnuckx",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/34409164@N06/5031722430",
+        "openverse_id": "6246c107-a688-45c3-8117-92eb17a87dc4"
+    },
+    "entertainment-3": {
+        "title": "Massimo Ranieri Concert Taormina - Creative Commons by gnuckx",
+        "creator": "gnuckx",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/34409164@N06/5031016973",
+        "openverse_id": "9accda89-064b-4505-b04e-7d319fca1199"
+    },
+    "good-news-1": {
+        "title": "AMOB recently delivered a turnkey Roll Forming Line to a major solar panel installation company",
+        "creator": "AMOB SA",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/61904787@N06/23917123658",
+        "openverse_id": "d4f7ed8e-bb2c-4237-9034-f5faf0001045"
+    },
+    "good-news-2": {
+        "title": "Arlington National Cemetery horticulture department conducts a tree planting ceremony in Section 30",
+        "creator": "Arlington National Cemetery",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/60564189@N06/41023445744",
+        "openverse_id": "3f2a3a85-6b8b-47c3-b77d-ba246e37f737"
+    },
+    "good-news-3": {
+        "title": "Mapping the Nation's Wind Turbines",
+        "creator": "U.S. Geological Survey",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/27784370@N05/12634138734",
+        "openverse_id": "5d7c4b38-7283-4ffd-a153-1ded6a5278b7"
+    },
+    "good-news-4": {
+        "title": "Solar panels at Long Island Visitor Center",
+        "creator": "U. S. Fish and Wildlife Service - Northeast Region",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/43322816@N08/13912422474",
+        "openverse_id": "5e9f0a7a-8dbe-4944-be12-54da7abe2e04"
+    },
+    "health-1": {
+        "title": "Blood pressure measuring. Doctor and patient. Health care.",
+        "creator": "agilemktg1",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/68716695@N06/29095583293",
+        "openverse_id": "65507113-ae9a-4928-9f62-48259312dfc9"
+    },
+    "health-2": {
+        "title": "Universal Influenza Vaccine Clinical Trial",
+        "creator": "National Institutes of Health (NIH)",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/132318516@N08/46628342315",
+        "openverse_id": "17539b84-1510-4c0b-b5c1-7d5ab8aec58d"
+    },
+    "health-3": {
+        "title": "Free doctor's stethoscope image",
+        "creator": null,
+        "license": "cc0",
+        "source": "rawpixel",
+        "source_url": "https://www.rawpixel.com/image/5902526/photo-image-public-domain-doctor-free",
+        "openverse_id": "a3d2ef6f-47ab-4369-9f9a-49b084528e00"
+    },
+    "health-4": {
+        "title": "20120106-OC-AMW-0731",
+        "creator": "USDAgov",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/41284017@N08/7880829380",
+        "openverse_id": "14071466-761e-48d7-9bc3-54d9b01dfb7f"
+    },
+    "india-1": {
+        "title": "Little India - Spices is a must in all Indian cooking",
+        "creator": "GeorgeTan",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/171425013@N02/48609216063",
+        "openverse_id": "a4f3bbe0-a16c-41b7-8ff4-70a62e65850c"
+    },
+    "india-2": {
+        "title": "പതിമൂന്നു കണ്ണറ പാലം/pathimoonnu Kannara Bridge/ 13 arch rail bridge @Kollam- Shenkottai Railway,Kerala.",
+        "creator": "Mathew S Thomas",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/144598114@N02/48104503451",
+        "openverse_id": "f8305936-b2a6-4894-9e37-5d1dcb801a66"
+    },
+    "india-3": {
+        "title": "Mumbai Independence Day",
+        "creator": "Vidur Malhotra",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/111661024@N07/28697653420",
+        "openverse_id": "e0a68943-e3c8-47de-b5dd-9d1402fe3245"
+    },
+    "india-4": {
+        "title": "Aam Aadmi",
+        "creator": "saurabhs0373",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/148999574@N08/41366376384",
+        "openverse_id": "d5368ad4-df05-4543-9b25-3baac73eea37"
+    },
+    "india-5": {
+        "title": "Mumbai Skyline Wide",
+        "creator": "Vidur Malhotra",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/111661024@N07/27838170755",
+        "openverse_id": "7a3830c4-b41f-44a3-a4bf-375e022c2abc"
+    },
+    "india-6": {
+        "title": "Indian Railway Train Station Time Clock",
+        "creator": "Raju Alam",
+        "license": "cc0",
+        "source": "wordpress",
+        "source_url": "https://wordpress.org/photos/photo/976679c83f/",
+        "openverse_id": "21ca25e2-d1c9-4e2b-ae9d-2b96cccb6116"
+    },
+    "pagestory-1": {
+        "title": "Entrance of the Red Fort, Delhi",
+        "creator": "MyStockPhotos",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/136375272@N05/32322747157",
+        "openverse_id": "6b555570-cafd-4b39-9da7-cbb5cd3c38ce"
+    },
+    "pagestory-2": {
+        "title": "India Gate",
+        "creator": "Gary Lee Todd, Ph.D.",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/101561334@N08/22802135689",
+        "openverse_id": "1bf556e6-89a0-4779-bd22-c742406073d6"
+    },
+    "pagestory-3": {
+        "title": "Mumbai Rising",
+        "creator": "Vidur Malhotra",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/111661024@N07/18356808621",
+        "openverse_id": "8e9f0d3d-384d-4bf7-8f48-681fefa07487"
+    },
+    "pagestory-4": {
+        "title": "Halloween Wishes",
+        "creator": "Philippe Vieux-Jeanton",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/11234074@N05/22628138165",
+        "openverse_id": "9dd9d2a0-fa4f-4781-bb22-4e74468713e6"
+    },
+    "pagestory-5": {
+        "title": "Mapping the Nation's Wind Turbines",
+        "creator": "U.S. Geological Survey",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/27784370@N05/12634138734",
+        "openverse_id": "5d7c4b38-7283-4ffd-a153-1ded6a5278b7"
+    },
+    "pagestory-6": {
+        "title": "Spirit of Independence.",
+        "creator": "Bernard Spragg",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/88123769@N02/15419409753",
+        "openverse_id": "b08a6134-ca5c-4ab6-9bf7-671cb97ed108"
+    },
+    "tech-1": {
+        "title": "Macro shot of a circuit board",
+        "creator": "D Coetzee",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/29507259@N02/3777753546",
+        "openverse_id": "364a2011-1813-44bb-9f0b-aa1c898d7121"
+    },
+    "tech-2": {
+        "title": "Front of server racks at NERSC data center",
+        "creator": "D Coetzee",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/29507259@N02/6271688786",
+        "openverse_id": "91bb51f3-5e8a-436b-bce0-19fee07f96fc"
+    },
+    "tech-3": {
+        "title": "Atlas V Rocket Launches NOAA's GOES-T",
+        "creator": "NOAASatellites",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/125201706@N06/51914580910",
+        "openverse_id": "8898f44d-ef25-4360-abf0-1b9fd3ae6cc1"
+    },
+    "tech-4": {
+        "title": "apple-iphone-smartphone-desk-1",
+        "creator": "pixellaphoto",
+        "license": "cc0",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/137643065@N06/24217686692",
+        "openverse_id": "a36ca77b-733a-4cc0-8247-885a36972dd5"
+    },
+    "tech-5": {
+        "title": "Laptop Computer",
+        "creator": "Tomasz Bazylinski",
+        "license": "cc0",
+        "source": "stocksnap",
+        "source_url": "https://stocksnap.io/photo/laptop-computer-S6L2DPGXUW",
+        "openverse_id": "517123f1-5740-4422-893f-62e61f1bce3a"
+    },
+    "world-1": {
+        "title": "Australia Cartography",
+        "creator": "World Maps",
+        "license": "cc0",
+        "source": "stocksnap",
+        "source_url": "https://stocksnap.io/photo/australia-cartography-UCUGU3RQYJ",
+        "openverse_id": "0d251a8f-bd81-4d43-bc00-8decddc9b06b"
+    },
+    "world-2": {
+        "title": "Global Map",
+        "creator": "World Maps",
+        "license": "cc0",
+        "source": "stocksnap",
+        "source_url": "https://stocksnap.io/photo/global-map-ZZBUGRU9DD",
+        "openverse_id": "59697434-0e46-4242-893e-d37621843d80"
+    },
+    "world-3": {
+        "title": "2015_07_31_Mombasa_Port_JPEG_RESIZED_0021",
+        "creator": "makeitkenya",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/132740829@N02/20759079250",
+        "openverse_id": "a79ff3d8-ef60-4ba5-bab6-fa3cde9d3171"
+    },
+    "world-4": {
+        "title": "Free container ship dock image",
+        "creator": null,
+        "license": "cc0",
+        "source": "rawpixel",
+        "source_url": "https://www.rawpixel.com/image/5912363/image-background-public-domain-ocean",
+        "openverse_id": "9f13fa3a-83c3-4e4b-b9b5-5c5407a1a738"
+    },
+    "world-5": {
+        "title": "2015_07_31_Mombasa_Port_JPEG_RESIZED_0008",
+        "creator": "Ministry of East African Affairs, Commerce & Touri",
+        "license": "pdm",
+        "source": "flickr",
+        "source_url": "https://www.flickr.com/photos/132371669@N04/19720062324",
+        "openverse_id": "84d3aeab-dd99-4ad7-8e6f-0ca32025eb81"
+    }
+}

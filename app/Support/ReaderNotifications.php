@@ -110,7 +110,7 @@ class ReaderNotifications
         }
 
         // Results of polls the reader voted in that have closed (last 7 days)
-        $voted = PollVote::where('user_id', $user->id)->pluck('poll_id');
+        $voted = feature('polls') ? PollVote::where('user_id', $user->id)->pluck('poll_id') : collect();
         if ($voted->isNotEmpty()) {
             Poll::with('story')->whereIn('id', $voted)->where('status', 'closed')
                 ->where('ends_at', '>=', now()->subDays(7))->latest('ends_at')->limit(5)->get()
@@ -128,7 +128,7 @@ class ReaderNotifications
     {
         // Every page shows the bell, so the newest item's time is cached briefly.
         $latest = Cache::remember('notifications.latest.'.($user?->id ?? 'guest'), 120,
-            fn () => self::for($user)->first()['at']?->getTimestamp() ?? 0);
+            fn () => (self::for($user)->first()['at'] ?? null)?->getTimestamp() ?? 0); // no items yet → no red dot
 
         return $latest > 0 && (! $seenAt || $latest > $seenAt);
     }

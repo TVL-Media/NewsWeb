@@ -238,8 +238,8 @@ describe('admin → website', function () {
 
 describe('sign in', function () {
     it('signs staff in with email and password and records it', function () {
-        $this->post('/admin/login', ['email' => 'chief@nextgennews.test', 'password' => 'password'])->assertRedirect('/admin');
+        $this->post('/admin/login', ['email' => 'chief@example.test', 'password' => 'password'])->assertRedirect('/admin');
         $this->assertAuthenticated('admin');
-        expect(\App\Models\AdminLoginLog::where('email', 'chief@nextgennews.test')->exists())->toBeTrue();
+        expect(\App\Models\AdminLoginLog::where('email', 'chief@example.test')->exists())->toBeTrue();
     });
 });

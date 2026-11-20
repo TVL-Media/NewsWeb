@@ -1,6 +1,11 @@
-<x-static-page title="About" description="NextGenNews brings you the day's news in 60-word cards, in Hindi and English, written by editors with AI assistance." updated="5 November 2026">
-    <h2>What NextGenNews is</h2>
-    <p>NextGenNews is a short-news service for India. Every story is a card of about 60 words, so you can catch up on the day in a few minutes. You can read in Hindi or English, and switch any time.</p>
+@if (filled(setting('legal.about_html')))
+<x-static-page title="About" description="{{ site_name() }} brings you the day's news in 60-word cards, in Hindi and English, written by editors with AI assistance.">
+    {!! clean(setting('legal.about_html')) !!}
+</x-static-page>
+@else
+<x-static-page title="About" description="{{ site_name() }} brings you the day's news in 60-word cards, in Hindi and English, written by editors with AI assistance." updated="5 November 2026">
+    <h2>What {{ site_name() }} is</h2>
+    <p>{{ site_name() }} is a short-news service for India. Every story is a card of about 60 words, so you can catch up on the day in a few minutes. You can read in Hindi or English, and switch any time.</p>
     <p>Each card gives you more than one way to read:</p>
     <ul>
         <li><strong>Key Points</strong> – the main facts in a few lines.</li>
@@ -36,5 +41,6 @@
     </ul>
 
     <h2>Contact us</h2>
-    <p>For feedback, partnerships or general questions, write to <a href="mailto:hello@nextgennews.in">hello@nextgennews.in</a>. For complaints about content or your data, please use the <a href="{{ route('grievance') }}">Grievance officer</a> page so your complaint is tracked and answered on time.</p>
+    <p>For feedback, partnerships or general questions, write to <a href="mailto:{{ setting('site.contact_email') }}">{{ setting('site.contact_email') }}</a>. For complaints about content or your data, please use the <a href="{{ route('grievance') }}">Grievance officer</a> page so your complaint is tracked and answered on time.</p>
 </x-static-page>
+@endif

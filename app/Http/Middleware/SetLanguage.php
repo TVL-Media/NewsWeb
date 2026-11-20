@@ -14,7 +14,9 @@ class SetLanguage
     {
         $lang = $request->user()?->language ?? $request->cookie('lang');
 
-        App::setLocale(in_array($lang, Lang::SUPPORTED, true) ? $lang : 'en');
+        // New visitors get the site's default language (Admin → Settings → General).
+        $default = in_array(config('app.locale'), Lang::SUPPORTED, true) ? config('app.locale') : 'en';
+        App::setLocale(in_array($lang, Lang::SUPPORTED, true) ? $lang : $default);
 
         return $next($request);
     }

@@ -16,7 +16,7 @@
     'immersive' => false,    // reels: dark page, no footer; mobile also hides the header (bottom nav stays)
 ])
 @php
-    $pageTitle = $title ? $title.' · NextGenNews' : 'NextGenNews · '.__('Short news with depth, in Hindi and English');
+    $pageTitle = $title ? $title.' · '.site_name() : site_name().' · '.site_tagline();
     $metaDescription = $description ?? (config('services.audio.enabled')
         ? __('India\'s news in 60 words, with key points, simple explainers and audio. In Hindi and English.')
         : __('India\'s news in 60 words, with key points and simple explainers. In Hindi and English.'));
@@ -27,20 +27,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#D7141E">
+    <meta name="theme-color" content="{{ site_color() }}">
     <title>{{ $pageTitle }}</title>
     <meta name="description" content="{{ $metaDescription }}">
     <link rel="canonical" href="{{ $canonical ?? url()->current() }}">
-    <meta property="og:site_name" content="NextGenNews">
+    <meta property="og:site_name" content="{{ site_name() }}">
     <meta property="og:type" content="{{ $ogType }}">
-    <meta property="og:title" content="{{ $title ?? 'NextGenNews' }}">
+    <meta property="og:title" content="{{ $title ?? site_name() }}">
     <meta property="og:description" content="{{ $metaDescription }}">
     <meta property="og:url" content="{{ $canonical ?? url()->current() }}">
     @if ($ogImage)
         <meta property="og:image" content="{{ $ogImage }}">
         <meta name="twitter:card" content="summary_large_image">
     @endif
-    <link rel="icon" href="{{ asset('images/logo.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ site_favicon_url() }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +48,10 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    @if (site_color() !== '#D7141E')
+        {{-- Brand colour from Admin → Settings → General (the theme's reds are derived from it). --}}
+        <style>:root{--color-brand:{{ site_color() }};--color-brand-dark:color-mix(in srgb,{{ site_color() }} 78%,#000);--color-brand-deep:color-mix(in srgb,{{ site_color() }} 66%,#000);--color-brand-glow:color-mix(in srgb,{{ site_color() }} 92%,#fff);--color-brand-night:color-mix(in srgb,{{ site_color() }} 27%,#000);--color-brand-tint:color-mix(in srgb,{{ site_color() }} 6%,#fff);--color-brand-tint-2:color-mix(in srgb,{{ site_color() }} 4%,#fff);--color-brand-soft:color-mix(in srgb,{{ site_color() }} 25%,#fff);--color-brand-wave:color-mix(in srgb,{{ site_color() }} 60%,#fff);--color-brand-pink-text:color-mix(in srgb,{{ site_color() }} 25%,#fff)}</style>
+    @endif
     {{ $head ?? '' }}
 
     <script>window.NGN = { loggedIn: @json(auth()->check()), lang: @json(app()->getLocale()), noReplay: @json((bool) $noReplay), live: @json(\App\Support\LiveVersion::current()), autoRefresh: @json(! $immersive && ! $bare) };</script>
@@ -59,6 +63,14 @@
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', @json(config('app.ga4_id')));
+        </script>
+    @endif
+    @php $firebase = json_decode((string) config('services.firebase.web_config'), true); @endphp
+    @if (is_array($firebase) && ! empty($firebase['apiKey']) && ! empty($firebase['measurementId']))
+        <script type="module">
+            import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+            import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
+            getAnalytics(initializeApp(@json($firebase)));
         </script>
     @endif
 </head>

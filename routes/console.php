@@ -68,6 +68,9 @@ Artisan::command('demo:page-stories', function () {
 })->purpose('Demo: give every page a fresh 24-hour story circle from its latest story');
 
 Artisan::command('quiz:catch-up', function () {
+    if (! \App\Support\Features::enabled('quiz')) {
+        return $this->info('The daily quiz is switched off.');
+    }
     $now = now(config('app.timezone'));
     $drafted = [];
     foreach (array_filter([$now->toDateString(), $now->hour >= 21 ? $now->copy()->addDay()->toDateString() : null]) as $date) {

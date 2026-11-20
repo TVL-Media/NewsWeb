@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>@yield('title', 'Admin') · {{ setting('general.platform_name', 'NextGenNews Newsroom') }}</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23D7141E'/%3E%3C/svg%3E">
+<title>@yield('title', 'Admin') · {{ panel_name() }}</title>
+<link rel="icon" href="{{ site_favicon_url() }}">
 <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=4">
 @stack('head')
 <script defer src="{{ asset('vendor/alpine.min.js') }}"></script>
@@ -54,13 +54,14 @@
       ['admin.roles.index', 'Roles & permissions', 'key-round', 'roles.manage', 'admin.roles.*'],
       ['admin.settings', 'Platform settings', 'settings', 'settings.manage', 'admin.settings*'],
       ['admin.audit.index', 'Audit log', 'scroll-text', 'audit.view', 'admin.audit.*'],
+      ['admin.system.update', 'System update', 'refresh-cw', 'settings.manage', 'admin.system.*'],
     ],
   ];
   $canAny = fn ($perm) => collect(explode('|', $perm))->contains(fn ($p) => $me->can($p));
 @endphp
 <div class="app">
   <aside class="side" :class="side && 'open'">
-    <div class="brand"><span class="brand-mark"></span><div>{{ setting('general.platform_name', 'Newsroom') }}<small>Admin</small></div></div>
+    <div class="brand"><span class="brand-mark"></span><div>{{ panel_name() }}<small>Admin</small></div></div>
     <nav class="nav" aria-label="Main">
       @foreach($nav as $group => $items)
         @php $visible = array_filter($items, fn ($i) => $canAny($i[3])); @endphp

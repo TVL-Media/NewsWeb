@@ -301,7 +301,8 @@
     "Watch reel": "रील देखें",
     "No reels on this page yet.": "इस पेज पर अभी कोई रील नहीं है।",
     "New": "नया",
-    "Short video news from NextGenNews, in Hindi and English.": "NextGenNews की छोटी वीडियो ख़बरें, हिंदी और अंग्रेज़ी में।",
+    "Short video news from :site, in Hindi and English.": ":site की छोटी वीडियो ख़बरें, हिंदी और अंग्रेज़ी में।",
+    ":site home": ":site होम",
     "Breaking": "ब्रेकिंग",
     "Your account is suspended. Contact the grievance officer if you think this is a mistake.": "आपका खाता निलंबित है। अगर आपको लगता है कि यह ग़लती है, तो शिकायत अधिकारी से संपर्क करें।",
     "Your account is restricted": "आपका खाता सीमित है",
@@ -347,5 +348,7 @@
     "No posts in this category right now": "इस कैटेगरी में अभी कोई पोस्ट नहीं है",
     "New stories in :category will show up here.": ":category की नई ख़बरें यहाँ दिखेंगी।",
     "See all news": "सभी ख़बरें देखें",
-    "Check back soon. Tap to see the next stories.": "जल्द दोबारा देखें। अगली ख़बरों के लिए टैप करें।"
+    "Check back soon. Tap to see the next stories.": "जल्द दोबारा देखें। अगली ख़बरों के लिए टैप करें।",
+    "Logging in is not available right now. You can keep reading every story without an account.": "अभी लॉग इन उपलब्ध नहीं है। आप बिना अकाउंट के हर ख़बर पढ़ते रह सकते हैं।",
+    "OK": "ठीक है"
 }

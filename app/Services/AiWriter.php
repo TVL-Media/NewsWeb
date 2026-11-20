@@ -55,7 +55,7 @@ class AiWriter
 
         $draft = $this->call(
             system: $this->draftSystemPrompt($options),
-            user: "Write one NextGenNews story from these source reports about the same event.\n\n{$sources}",
+            user: "Write one ".site_name()." story from these source reports about the same event.\n\n{$sources}",
             schema: $this->draftSchema($options),
         );
 
@@ -80,7 +80,7 @@ class AiWriter
         ))->implode("\n\n");
 
         $result = $this->call(
-            system: "You write the NextGenNews daily news quiz for Indian readers. Write exactly one question per story, "
+            system: "You write the ".site_name()." daily news quiz for Indian readers. Write exactly one question per story, "
                 ."answerable only from the story text given. Four short options, exactly one correct, plausible distractors, "
                 ."no trick questions, no questions about deaths, crime victims or allegations. The explanation is one sentence "
                 .'citing the fact from the story.',
@@ -208,8 +208,10 @@ class AiWriter
 
     private function draftSystemPrompt(array $options): string
     {
+        $site = site_name();
+
         return <<<PROMPT
-        You are a senior editor at NextGenNews, an Indian news service that publishes short, accurate
+        You are a senior editor at {$site}, an Indian news service that publishes short, accurate
         news cards in English and Hindi for readers on their phones.
 
         Write the story in our own words. Never copy a sentence or a distinctive phrase from the sources:
@@ -331,7 +333,7 @@ class AiWriter
 
             return [
                 'story_id' => $story->id,
-                'question' => 'Which NextGenNews page covered: “'.$story->version('en')?->headline.'”?',
+                'question' => 'Which '.site_name().' page covered: “'.$story->version('en')?->headline.'”?',
                 'options' => array_slice($options, 0, 4),
                 'correct_index' => $correct,
                 'explanation' => (string) $story->version('en')?->why_it_matters,

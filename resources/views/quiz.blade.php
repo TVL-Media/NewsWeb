@@ -63,7 +63,7 @@
                         if (r.ok) this.shareImage = r.data.image_url;
                     },
                     get whatsapp() {
-                        return 'https://wa.me/?text=' + encodeURIComponent(`I scored ${this.done.score}/${this.done.total} in today's NextGenNews quiz. Can you beat me? {{ route('quiz') }}`);
+                        return 'https://wa.me/?text=' + encodeURIComponent(`I scored ${this.done.score}/${this.done.total} in today's ${@js(site_name())} quiz. Can you beat me? {{ route('quiz') }}`);
                     },
                     pendingDone: null,
                  }">
@@ -148,7 +148,7 @@
                             <img :src="shareImage" alt="{{ __('Your quiz result image') }}" class="mx-auto aspect-[4/5] w-full max-w-[260px] rounded-[16px] object-cover">
                             <div class="mt-3 grid grid-cols-2 gap-2">
                                 <a :href="whatsapp" target="_blank" rel="noopener" class="btn-primary text-[14px]"><x-icon name="send" size="16" /> WhatsApp</a>
-                                <a :href="shareImage" download="nextgennews-quiz.jpg" class="btn-ghost text-[14px]"><x-icon name="image" size="16" /> {{ __('Download') }}</a>
+                                <a :href="shareImage" download="{{ \Illuminate\Support\Str::slug(site_name()) }}-quiz.jpg" class="btn-ghost text-[14px]"><x-icon name="image" size="16" /> {{ __('Download') }}</a>
                             </div>
                         </div>
                     </div>

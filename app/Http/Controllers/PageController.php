@@ -18,7 +18,7 @@ class PageController extends Controller
     {
         $page->loadCount('followers')->load('pinnedStory');
         $tab = in_array($request->query('tab'), self::TABS, true) ? $request->query('tab') : 'latest';
-        if ($tab === 'reels' && ! config('reels.enabled')) {
+        if ($tab === 'reels' && ! config('reels.enabled') || $tab === 'polls' && ! feature('polls')) {
             $tab = 'latest';
         }
         $user = $request->user();

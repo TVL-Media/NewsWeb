@@ -16,7 +16,7 @@
 <header class="sticky top-0 z-40 border-b border-line bg-white">
     {{-- Desktop (≥ 768px) --}}
     <div class="mx-auto hidden h-[64px] max-w-[1280px] items-center gap-3 px-6 md:flex">
-        <a href="{{ route('home') }}" class="no-underline" aria-label="NextGenNews home">
+        <a href="{{ route('home') }}" class="shrink-0 no-underline" aria-label="{{ __(':site home', ['site' => site_name()]) }}">
             <x-logo />
         </a>
 
@@ -60,7 +60,7 @@
 
     {{-- Mobile web (< 768px) --}}
     <div class="flex h-[58px] items-center gap-1.5 px-4 md:hidden">
-        <a href="{{ route('home') }}" class="mr-auto no-underline" aria-label="NextGenNews home">
+        <a href="{{ route('home') }}" class="mr-auto no-underline" aria-label="{{ __(':site home', ['site' => site_name()]) }}">
             <x-logo :size="24" text="text-[18px]" />
         </a>
         <x-lang-toggle compact />

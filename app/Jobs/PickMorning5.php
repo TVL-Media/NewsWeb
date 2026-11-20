@@ -21,6 +21,9 @@ class PickMorning5 implements ShouldQueue
 
     public function handle(): void
     {
+        if (! \App\Support\Features::enabled('morning5')) {
+            return; // switched off in Admin → Settings → Features
+        }
         $date = $this->date ?? now(config('app.timezone'))->toDateString();
 
         $briefing = Briefing::whereDate('date', $date)->first();

@@ -50,3 +50,11 @@ it('marks everything as seen: the red dot goes until something new arrives', fun
     $this->withCookie(NotificationController::SEEN_COOKIE, (string) now()->addMinute()->getTimestamp())
         ->get('/')->assertDontSee('Notifications · New', false);
 });
+
+it('still opens pages when there is nothing new to notify about (quiet news days)', function () {
+    Story::query()->update(['published_at' => now()->subDays(10)]);
+    \Illuminate\Support\Facades\Cache::flush();
+
+    $this->get('/')->assertOk();
+    $this->get('/privacy')->assertOk();
+});

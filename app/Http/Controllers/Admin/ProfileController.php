@@ -25,7 +25,7 @@ class ProfileController extends Controller
         $qr = null;
         $secret = $r->session()->get('2fa.pending_secret');
         if ($secret) {
-            $url = (new Google2FA)->getQRCodeUrl(setting('general.platform_name', 'Newsroom').' Admin', $a->email, $secret);
+            $url = (new Google2FA)->getQRCodeUrl(panel_name().' Admin', $a->email, $secret);
             $qr = (new Writer(new ImageRenderer(new RendererStyle(180, 1), new SvgImageBackEnd)))->writeString($url);
         }
 

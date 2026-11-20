@@ -58,7 +58,7 @@ class ShareImage
         }
 
         // Red band with the logo mark and wordmark
-        $img->drawRectangle(fn ($r) => $r->at(0, 560)->size(self::W, 80)->background('#D7141E'));
+        $img->drawRectangle(fn ($r) => $r->at(0, 560)->size(self::W, 80)->background(site_color()));
         $img->drawPolygon(function ($p) {
             // logo.svg path (28×24 viewBox), scaled ×2 and placed in the band
             foreach ([[2, 22], [8, 2], [13, 2], [18, 15], [22, 2], [27, 2], [21, 22], [16, 22], [11, 9], [7, 22]] as [$x, $y]) {
@@ -66,7 +66,7 @@ class ShareImage
             }
             $p->background('#FFFFFF');
         });
-        $img->text('NextGenNews', 136, 600, fn ($f) => $f->filename("$fonts/Inter-Black.ttf")->size(36)->color('#FFFFFF')->align('left', 'center'));
+        $img->text(site_name(), 136, 600, fn ($f) => $f->filename("$fonts/Inter-Black.ttf")->size(36)->color('#FFFFFF')->align('left', 'center'));
 
         $gd = config('services.image.driver') !== 'imagick';
         $prep = fn (string $t) => $hi && $gd ? $this->reorderMatras($t) : $t;
@@ -93,7 +93,7 @@ class ShareImage
 
         // Footer
         $img->drawRectangle(fn ($r) => $r->at(0, self::H - 90)->size(self::W, 90)->background('#F7F7F8'));
-        $host = parse_url(config('app.url'), PHP_URL_HOST) ?: 'nextgennews.in';
+        $host = parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost';
         // The Devanagari font has no Latin letters, so the host name is always drawn in Inter.
         $lead = $hi ? $prep('पूरी ख़बर पढ़ें') : 'Read the full story';
         $leadFont = $hi ? "$fonts/NotoSansDevanagari-Medium.ttf" : "$fonts/Inter-Bold.ttf";
@@ -138,7 +138,7 @@ class ShareImage
             foreach ([[2, 22], [8, 2], [13, 2], [18, 15], [22, 2], [27, 2], [21, 22], [16, 22], [11, 9], [7, 22]] as [$x, $y]) {
                 $p->point(450 + $x * 6, 208 + $y * 6);
             }
-            $p->background('#D7141E');
+            $p->background(site_color());
         });
 
         $center = fn (string $text, int $y, string $font, int $size, string $color) => $img->text($text, 540, $y,
@@ -153,7 +153,7 @@ class ShareImage
         $center($date->format('l, j F Y'), 960, $bold, 32, '#F4C6C9');
 
         $img->drawRectangle(fn ($r) => $r->at(0, self::H - 140)->size(self::W, 140)->background('#3A0508'));
-        $host = parse_url(config('app.url'), PHP_URL_HOST) ?: 'nextgennews.in';
+        $host = parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost';
         $center("Can you beat me? Play at {$host}", self::H - 92, $bold, 32, '#FFFFFF');
 
         return (string) $img->encodeUsingFormat(\Intervention\Image\Format::JPEG, quality: 88);

@@ -21,7 +21,7 @@ class StoryChecks
     private const DAYS = 'Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday';
 
     /** Capitalised words that are fine without a source match (sentence starters, our own names). */
-    private const ALLOWED_NAMES = ['NextGenNews', 'India', 'Indian', 'The', 'This', 'It', 'A', 'An', 'In', 'On', 'At', 'But', 'And', 'He', 'She', 'They', 'Officials', 'Explain'];
+    private const ALLOWED_NAMES = ['India', 'Indian', 'The', 'This', 'It', 'A', 'An', 'In', 'On', 'At', 'But', 'And', 'He', 'She', 'They', 'Officials', 'Explain'];
 
     /**
      * @param  Collection  $sources  FeedItem models
@@ -113,7 +113,7 @@ class StoryChecks
         // Names: runs of 2+ capitalised words (e.g. "Panama Canal Authority")
         preg_match_all('/\b[A-Z][a-zA-Z\-]+(?:\s+[A-Z][a-zA-Z\-]+)+\b/', $draft, $m);
         foreach (array_unique($m[0]) as $name) {
-            $words = array_filter(explode(' ', preg_replace('/\s+/', ' ', $name)), fn ($w) => ! in_array($w, self::ALLOWED_NAMES, true)
+            $words = array_filter(explode(' ', preg_replace('/\s+/', ' ', $name)), fn ($w) => ! in_array($w, [...self::ALLOWED_NAMES, ...explode(' ', site_name())], true)
                 && ! preg_match('/^(?:'.self::MONTHS.'|'.self::DAYS.')$/', $w));
             if (! $words) {
                 continue;

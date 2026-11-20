@@ -197,6 +197,9 @@ select[multiple]{height:auto;background-image:none;padding:4px}
 .toggle input:checked+.tr{background:var(--red)}
 .toggle input:checked+.tr::after{left:16px}
 .toggle input:focus-visible+.tr{outline:2px solid var(--red);outline-offset:2px}
+/* A switch inside a form field: keep the track beside the text (.field>label would make it a block). */
+.field>label.toggle{display:inline-flex;align-items:flex-start;font-weight:400;font-size:inherit;margin-bottom:0}
+.field>label.toggle .tr{margin-top:2px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
 .form-grid .full{grid-column:1/-1}
 .fieldset{border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:16px}

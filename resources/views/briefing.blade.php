@@ -16,7 +16,7 @@
     <div class="mx-auto max-w-[1280px] px-4 pt-5 md:px-6 md:pt-8">
         <h1 class="sr-only">{{ __('Briefing') }}</h1>
 
-        @unless (config('services.audio.enabled'))
+        @unless (feature('morning5'))
         {{-- ===== Top 5 trending (audio is off on the website) ===== --}}
         <section id="top5" class="player-bg overflow-hidden rounded-[28px] p-5 md:rounded-[32px] md:p-9" aria-labelledby="top5-page-title">
             <div class="flex flex-wrap gap-8">
@@ -208,7 +208,8 @@
             </section>
         </div>
 
-        {{-- ===== Polls ===== --}}
+        {{-- ===== Polls (Admin → Settings → Features) ===== --}}
+        @if (feature('polls'))
         <section class="mt-10" aria-labelledby="polls-title">
             <div class="flex items-center justify-between">
                 <h2 id="polls-title" class="text-[22px] font-black tracking-[-0.4px]">{{ __('Polls') }}</h2>
@@ -226,5 +227,6 @@
                 </div>
             @endif
         </section>
+        @endif
     </div>
 </x-layouts.app>

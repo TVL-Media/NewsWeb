@@ -11,7 +11,7 @@
 @endphp
 <x-layouts.app
     :title="$start ? $start->title : __('Reels')"
-    :description="$description ?? __('Short video news from NextGenNews, in Hindi and English.')"
+    :description="$description ?? __('Short video news from :site, in Hindi and English.', ['site' => site_name()])"
     active="reels" immersive
     :canonical="$start ? route('reels.show', $start) : route('reels')"
     :og-image="$start ? $start->thumbnailUrl() : null"
@@ -37,8 +37,8 @@
                 'inLanguage' => $start->language,
                 'publisher' => [
                     '@type' => 'Organization',
-                    'name' => 'NextGenNews',
-                    'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo.svg')],
+                    'name' => site_name(),
+                    'logo' => ['@type' => 'ImageObject', 'url' => site_logo_url() ?? asset('images/logo.svg')],
                 ],
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
         </x-slot:head>
@@ -116,12 +116,14 @@
                             </button>
                             <span class="{{ $count }}" x-text="fmt(r.counts.likes)"></span>
                         </div>
+                        @if (feature('comments'))
                         <div class="flex flex-col items-center">
                             <button type="button" @click="openComments(r)" class="{{ $iconBtn }}" aria-label="{{ __('Comments') }}">
                                 <x-icon name="message-circle" size="23" />
                             </button>
                             <span class="{{ $count }}" x-text="fmt(r.counts.comments)"></span>
                         </div>
+                        @endif
                         <div class="flex flex-col items-center">
                             <button type="button" @click="openShare(r)" class="{{ $iconBtn }}" aria-label="{{ __('Share') }}">
                                 <x-icon name="send" size="21" />

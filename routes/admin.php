@@ -251,6 +251,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:admin', 'admin.active'
     Route::middleware('permission:settings.manage')->group(function () {
         Route::get('settings/{tab?}', [Admin\SettingsController::class, 'show'])->name('settings');
         Route::put('settings/{tab}', [Admin\SettingsController::class, 'update'])->middleware('password.confirmed.inline')->name('settings.update');
+        Route::get('system/update', [Admin\SystemController::class, 'update'])->name('system.update');
+        Route::post('system/update', [Admin\SystemController::class, 'run'])->middleware('password.confirmed.inline')->name('system.update.run');
     });
     Route::middleware('permission:audit.view')->group(function () {
         Route::get('audit', [Admin\AuditLogController::class, 'index'])->name('audit.index');

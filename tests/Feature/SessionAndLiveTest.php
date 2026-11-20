@@ -25,7 +25,7 @@ it('keeps a reader\'s name, topics, saves, likes and comments after logging out 
 
     otpLogin($this, '9123456780');
     $this->post('/onboarding', ['language' => 'en', 'categories' => $topics])->assertRedirect();   // as a new reader would
-    $this->patchJson('/account', ['name' => 'Anjali'])->assertSuccessful();
+    $this->patchJson('/account', ['name' => 'Asha'])->assertSuccessful();
     $this->postJson("/stories/{$story->id}/save")->assertOk();
     $this->postJson("/stories/{$story->id}/like")->assertOk();
     $this->postJson("/stories/{$story->id}/comments", ['body' => 'Keeping this one'])->assertCreated();
@@ -37,7 +37,7 @@ it('keeps a reader\'s name, topics, saves, likes and comments after logging out 
     $user = User::where('phone', '9123456780')->sole();
 
     $this->assertAuthenticatedAs($user);
-    expect($user->name)->toBe('Anjali')
+    expect($user->name)->toBe('Asha')
         ->and($user->categories()->pluck('categories.id')->sort()->values()->all())->toBe(collect($topics)->sort()->values()->all())
         ->and(Save::where(['user_id' => $user->id, 'story_id' => $story->id])->exists())->toBeTrue()
         ->and(Like::where(['user_id' => $user->id, 'likeable_id' => $story->id, 'likeable_type' => Story::class])->exists())->toBeTrue()

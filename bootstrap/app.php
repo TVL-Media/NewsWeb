@@ -12,9 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
+        then: fn () => \Illuminate\Support\Facades\Route::middleware('web')->group(base_path('routes/install.php')),
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Not installed yet: everything goes to /install (runs before sessions, so a bare server works).
+        $middleware->web(prepend: [\App\Http\Middleware\RedirectToInstaller::class]);
+        $middleware->api(prepend: [\App\Http\Middleware\RedirectToInstaller::class]);
         $middleware->web(append: [SetLanguage::class, TrackReader::class, \App\Http\Middleware\EnforceReaderStatus::class]);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias([
@@ -22,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.2fa' => \App\Http\Middleware\EnsureTwoFactor::class,
             'admin.timeout' => \App\Http\Middleware\SessionTimeout::class,
             'password.confirmed.inline' => \App\Http\Middleware\RequirePasswordConfirm::class,
+            'feature' => \App\Http\Middleware\EnsureFeature::class,
+            'installer.open' => \App\Http\Middleware\InstallerOpen::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         ]);

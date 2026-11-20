@@ -29,7 +29,6 @@ class ReelSlides
     // The player's like/comment/share column covers the right edge on phones; text stops before it.
     private const ACTIONS_W = 140;
 
-    private const RED = '#D7141E';
     private const LOGO = [[2, 22], [8, 2], [13, 2], [18, 15], [22, 2], [27, 2], [21, 22], [16, 22], [11, 9], [7, 22]];
 
     private ImageManager $manager;
@@ -88,7 +87,7 @@ class ReelSlides
         $labelFont = $hi && preg_match('/\p{Devanagari}/u', $label) ? "$fonts/NotoSansDevanagari-Bold.ttf" : "$fonts/Inter-Bold.ttf";
         $this->pill($img, self::SAFE_X, $top - 74, $this->prep($label, $hi), $labelFont);
 
-        $img->drawRectangle(fn ($r) => $r->at(self::SAFE_X, $top + 6)->size(8, $blockH - 14)->background(self::RED));
+        $img->drawRectangle(fn ($r) => $r->at(self::SAFE_X, $top + 6)->size(8, $blockH - 14)->background(site_color()));
 
         $y = $top;
         foreach ($lines as $line) {
@@ -116,7 +115,7 @@ class ReelSlides
             foreach (self::LOGO as [$x, $y]) {
                 $p->point((int) (self::W / 2 - 70 + $x * 5), 380 + $y * 5);
             }
-            $p->background(self::RED);
+            $p->background(site_color());
         });
 
         $center = fn (string $text, int $y, string $font, int $size, string $color) => $img->text($text, self::W / 2, $y,
@@ -127,8 +126,8 @@ class ReelSlides
         } else {
             $center('Read the full story on', 596, "$fonts/Inter-Bold.ttf", 38, '#F4C6C9');
         }
-        $center('NextGenNews', 668, "$fonts/Inter-Black.ttf", 70, '#FFFFFF');
-        $img->drawRectangle(fn ($r) => $r->at(self::W / 2 - 36, 776)->size(72, 8)->background(self::RED));
+        $center(site_name(), 668, "$fonts/Inter-Black.ttf", 70, '#FFFFFF');
+        $img->drawRectangle(fn ($r) => $r->at(self::W / 2 - 36, 776)->size(72, 8)->background(site_color()));
         $center($host, 812, "$fonts/Inter-Bold.ttf", 30, '#BDBDBD');
 
         return (string) $img->encodeUsingFormat(Format::PNG);
@@ -179,9 +178,9 @@ class ReelSlides
             foreach (self::LOGO as [$px, $py]) {
                 $p->point((int) round($x + $px * $scale), (int) round($y + $py * $scale));
             }
-            $p->background(self::RED);
+            $p->background(site_color());
         });
-        $img->text('NextGenNews', (int) ($x + 30 * $scale + 8), (int) ($y + 12 * $scale), fn ($f) => $f
+        $img->text(site_name(), (int) ($x + 30 * $scale + 8), (int) ($y + 12 * $scale), fn ($f) => $f
             ->filename(resource_path('fonts/Inter-Black.ttf'))->size(30)->color($light ? '#FFFFFF' : '#111111')->align('left', 'center'));
     }
 
@@ -192,9 +191,9 @@ class ReelSlides
         $h = 46;
         $w = $this->textWidth($text, $font, $size) + 40;
 
-        $img->drawRectangle(fn ($r) => $r->at($x + $h / 2, $y)->size($w - $h, $h)->background(self::RED));
-        $img->drawEllipse(fn ($e) => $e->at($x + $h / 2, $y + $h / 2)->size($h, $h)->background(self::RED));
-        $img->drawEllipse(fn ($e) => $e->at($x + $w - $h / 2, $y + $h / 2)->size($h, $h)->background(self::RED));
+        $img->drawRectangle(fn ($r) => $r->at($x + $h / 2, $y)->size($w - $h, $h)->background(site_color()));
+        $img->drawEllipse(fn ($e) => $e->at($x + $h / 2, $y + $h / 2)->size($h, $h)->background(site_color()));
+        $img->drawEllipse(fn ($e) => $e->at($x + $w - $h / 2, $y + $h / 2)->size($h, $h)->background(site_color()));
         $img->text($text, $x + 20, $y + $h / 2, fn ($f) => $f->filename($font)->size($size)->color('#FFFFFF')->align('left', 'center'));
     }
 

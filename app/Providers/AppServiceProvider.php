@@ -29,9 +29,28 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(TextToSpeech::class, fn () => config('services.tts.driver') === 'google'
-            ? new GoogleTts(config('services.tts.google_key'))
-            : new FakeTts);
+        // Admin → Settings override config before any provider boots (Sentry, filesystems, …).
+        // Skipped while caching config, so decrypted keys are never written to bootstrap/cache.
+        $this->app->booting(function () {
+            // Not installed yet: the installer runs on files only (no database, no Redis) and settings wait.
+            if (! \App\Support\Install\Installer::isInstalled()) {
+                \App\Support\Install\Installer::prepareRuntime();
+
+                return;
+            }
+            if ($this->app->runningInConsole() && in_array($_SERVER['argv'][1] ?? '', ['config:cache', 'optimize'], true)) {
+                return;
+            }
+            \App\Support\Settings::resetBase();
+            \App\Support\Settings::applyToConfig();
+        });
+
+
+        $this->app->bind(TextToSpeech::class, fn () => match (config('services.tts.driver')) {
+            'google' => new GoogleTts(config('services.tts.google_key')),
+            'azure' => new \App\Services\Tts\AzureTts(config('services.tts.azure_key'), config('services.tts.azure_region')),
+            default => new FakeTts,
+        });
 
         $this->app->bind(SmsSender::class, fn () => config('services.sms.driver') === 'msg91'
             ? new Msg91Sender(config('services.msg91.auth_key'), config('services.msg91.template_id'), config('services.msg91.sender_id'))

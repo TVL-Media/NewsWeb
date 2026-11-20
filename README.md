@@ -4,10 +4,14 @@ Inshorts-style Indian news site: 60-word cards with depth, Hindi and English, au
 
 **Status:** Milestones 1 (setup) and 2 (reading) are done. See [Milestones](#milestones).
 
+## Installing
+
+Upload the files, open the site and follow the web installer at `/install` (or run `php artisan nextgennews:install`). Full guide: [documentation/INSTALL.md](documentation/INSTALL.md). Updating: [UPGRADE.md](UPGRADE.md) (Admin → System update). A site that was set up before the installer existed is recognised and locked automatically.
+
 ## ⚠️ Replace before launch
 
-- **Grievance officer** (`resources/views/static/grievance.blade.php`): the name, email (`grievance@nextgennews.in`), phone and Lucknow address are **placeholders**. IT Rules 2021 require real details.
-- **About** (`static/about.blade.php`): uses `hello@nextgennews.in` as a general contact address. It is made up.
+- **Grievance officer** (Admin → Settings → Legal): the default name, email (`grievance@nextgennews.in`), phone and Lucknow address are **placeholders**. IT Rules 2021 require real details.
+- **About** (Admin → Settings → General → Contact email, and Legal → About page): the default `hello@nextgennews.in` is made up.
 - **Privacy / Terms** (`static/privacy.blade.php`, `static/terms.blade.php`): check these against the real setup before publishing:
   - data held outside India by GA4 and Sentry;
   - the "for example, 180 days" log retention;
@@ -50,7 +54,7 @@ Checks: `php artisan test` (Pest, in-memory SQLite) and `npm run build`.
 | Who | Login |
 |---|---|
 | Reader "Riya Sharma" (Lucknow, 12-day streak) | phone `9876543210`, OTP **`123456`**. This is the development OTP from `OTP_DEV_CODE` in `.env`; it is ignored when `APP_ENV=production`. With `OTP_DEV_CODE` empty, the OTP is written to `storage/logs/laravel.log` (look for `[OTP]`). No real SMS is sent until `SMS_DRIVER=msg91` is set. Any other 10-digit number starting 6–9 creates a new account and goes through onboarding. |
-| Newsroom admin / chief / editor | `admin@` / `chief@` / `editor@nextgennews.test`, password `password` at `/admin` (Super Admin / Chief Editor / Editor) |
+| Newsroom admin / chief / editor | `admin@` / `chief@` / `editor@example.test` (created by `db:seed` on a development machine only), password `password` at `/admin` (Super Admin / Chief Editor / Editor) |
 
 ### Local vs production
 

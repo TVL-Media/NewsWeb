@@ -32,10 +32,10 @@
     <div class="mx-auto grid max-w-[1280px] grid-cols-2 gap-x-6 gap-y-8 px-4 py-9 md:grid-cols-[1.3fr_1fr_1fr_0.7fr_0.8fr] md:gap-8 md:px-6">
         {{-- Brand --}}
         <div class="col-span-2 md:col-span-1">
-            <a href="{{ route('home') }}" class="no-underline" aria-label="NextGenNews home">
+            <a href="{{ route('home') }}" class="no-underline" aria-label="{{ __(':site home', ['site' => site_name()]) }}">
                 <x-logo light />
             </a>
-            <p class="mt-3 max-w-[220px] text-[13.5px] leading-relaxed text-white/60">{{ __('Short news with depth, in Hindi and English') }}.</p>
+            <p class="mt-3 max-w-[220px] text-[13.5px] leading-relaxed text-white/60">{{ rtrim(site_tagline(), '.') }}.</p>
             <ul class="mt-4 flex items-center gap-2" aria-label="{{ __('Follow us') }}">
                 @foreach (['instagram' => 'Instagram', 'youtube' => 'YouTube', 'x' => 'X', 'linkedin' => 'LinkedIn'] as $icon => $label)
                     <li>
@@ -91,6 +91,6 @@
     </div>
 
     <div class="border-t border-white/10">
-        <p class="mx-auto max-w-[1280px] px-4 py-4 text-xs text-white/60 md:px-6">© {{ now()->year }} NextGenNews. {{ __('Summaries by our editors, AI-assisted.') }}</p>
+        <p class="mx-auto max-w-[1280px] px-4 py-4 text-xs text-white/60 md:px-6">© {{ now()->year }} {{ site_name() }}. {{ __('Summaries by our editors, AI-assisted.') }}</p>
     </div>
 </footer>
