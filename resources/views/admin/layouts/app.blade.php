@@ -6,12 +6,12 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title', 'Admin') · {{ panel_name() }}</title>
 <link rel="icon" href="{{ site_favicon_url() }}">
-<link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=4">
+<link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=5">
 @stack('head')
 <script defer src="{{ asset('vendor/alpine.min.js') }}"></script>
 <script src="{{ asset('vendor/sortable.min.js') }}"></script>
 <script src="{{ asset('vendor/chart.umd.js') }}"></script>
-<script src="{{ asset('js/admin.js') }}?v=4"></script>
+<script src="{{ asset('js/admin.js') }}?v=5"></script>
 </head>
 <body x-data="{ side:false }">
 @php

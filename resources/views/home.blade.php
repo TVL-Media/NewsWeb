@@ -14,15 +14,19 @@
             <ul class="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 md:mx-0 md:px-0" aria-label="{{ __('Stories') }}">
                 {{-- Every circle opens the story viewer at its group; stories then play on into the next circles. --}}
                 @foreach ($circles as $i => $group)
-                    <li class="shrink-0">
-                        <button type="button" @click="$dispatch('open-stories', { group: {{ $i }} })" class="flex w-[58px] flex-col items-center gap-1 text-ink"
+                    @php $keys = empty($group['empty']) ? collect($group['slides'])->pluck('url')->filter()->values()->all() : []; @endphp
+                    <li class="shrink-0"
+                        x-data="{ keys: @js($keys), seen: false, check() { this.seen = this.keys.length > 0 && this.keys.every(k => window.ngnSeen?.has(k)); } }"
+                        x-init="check()" @story-seen.window="check()">
+                        {{-- No focus outline on the button itself (the scrolling row cut it into two stray lines); keyboard focus rings the circle instead. --}}
+                        <button type="button" @click="$dispatch('open-stories', { group: {{ $i }} })" class="group flex w-[58px] flex-col items-center gap-1 text-ink focus-visible:outline-none"
                                 aria-label="{{ __('Stories') }}: {{ $group['label'] }}">
                             @if ($group['badge'])
                                 {{-- Same ring as the other circles (drawn inside the box, so the scrolling row can't clip it). --}}
-                                <span class="story-ring !h-[54px] !w-[54px] !p-[2px]"><span class="flex h-full w-full items-center justify-center rounded-full bg-brand text-[20px] font-black text-white">{{ $group['badge'] }}</span></span>
+                                <span class="story-ring !h-[54px] !w-[54px] !p-[2px] group-focus-visible:ring-2 group-focus-visible:ring-ink" :class="seen && '!border-line-2'"><span class="flex h-full w-full items-center justify-center rounded-full text-[20px] font-black text-white" :class="seen ? 'bg-muted' : 'bg-brand'">{{ $group['badge'] }}</span></span>
                             @else
-                                {{-- Grey ring: nothing new in this category right now (its card says so). --}}
-                                <span class="story-ring !h-[54px] !w-[54px] !p-[2px] {{ !empty($group['empty']) ? '!border-line-2' : '' }}"><img src="{{ $group['avatar'] }}" alt="" @if ($i > 3) loading="lazy" @endif class="{{ !empty($group['empty']) ? 'opacity-70' : '' }}"></span>
+                                {{-- Grey ring: nothing new in this category right now (its card says so), or every story in it has been watched. --}}
+                                <span class="story-ring !h-[54px] !w-[54px] !p-[2px] group-focus-visible:ring-2 group-focus-visible:ring-ink {{ !empty($group['empty']) ? '!border-line-2' : '' }}" :class="seen && '!border-line-2'"><img src="{{ $group['avatar'] }}" alt="" @if ($i > 3) loading="lazy" @endif class="{{ !empty($group['empty']) ? 'opacity-70' : '' }}"></span>
                             @endif
                             <span class="w-full truncate text-center text-[11px] font-semibold">{{ $group['label'] }}</span>
                         </button>

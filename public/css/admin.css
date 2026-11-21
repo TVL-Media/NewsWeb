@@ -379,3 +379,6 @@ kbd{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line);border
   .auth{grid-template-columns:1fr}.auth-l{display:none}
 }
 @media (max-width:640px){.top .who,.top .btn.primary.sm{display:none}.content{padding:16px}.top{padding:0 12px}.kpis{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.top-search kbd{display:none}}
+/* Back link above the page title */
+.ph-back{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted);text-decoration:none!important;margin-bottom:6px}
+.ph-back:hover{color:var(--ink)}

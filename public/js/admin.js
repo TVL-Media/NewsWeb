@@ -225,4 +225,15 @@
       const b = document.querySelector('[data-save-shortcut]'); if (b) { e.preventDefault(); b.click(); }
     }
   });
+
+  // ---------- Back button (page header) ----------
+  // Go to the previous admin page in this tab; with no such page (opened in a new tab, or came from
+  // outside the admin) the link's own href (the dashboard) is used.
+  document.addEventListener('click', e => {
+    const a = e.target.closest('[data-history-back]');
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+    let fromAdmin = false;
+    try { const r = new URL(document.referrer); fromAdmin = r.origin === location.origin && r.pathname.startsWith('/admin') && r.href !== location.href; } catch (_) {}
+    if (fromAdmin && history.length > 1) { e.preventDefault(); history.back(); }
+  });
 })();

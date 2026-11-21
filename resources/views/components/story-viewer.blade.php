@@ -5,6 +5,26 @@
     $groups: [{ label, avatar|null, badge|null, slides: [{ image, headline, url, ago }] }]
 --}}
 @props(['groups'])
+<script>
+    // Stories this reader has already watched (kept in this browser). A circle turns grey once every
+    // story in it has been seen; a new story in that circle makes it colourful again.
+    window.ngnSeen = window.ngnSeen || (() => {
+        const KEY = 'ngn.seenStories', MAX = 400;
+        let list = [];
+        try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) {}
+        const set = new Set(list);
+        return {
+            has: (k) => set.has(k),
+            add(k) {
+                if (!k || set.has(k)) return;
+                set.add(k); list.push(k);
+                if (list.length > MAX) set.delete(list.shift());
+                try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+                window.dispatchEvent(new CustomEvent('story-seen', { detail: k }));
+            },
+        };
+    })();
+</script>
 <div x-data="{
         groups: @js($groups),
         open: false, g: 0, s: 0, progress: 0, timer: null, startY: null, held: false, downAt: 0,
@@ -15,6 +35,7 @@
         show(i) { this.g = i; this.s = 0; this.open = true; this.play(); },
         play() {
             clearInterval(this.timer); this.progress = 0;
+            if (!this.slide.empty) window.ngnSeen.add(this.slide.url); // seen as soon as it is on screen
             const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             if (reduce) return; // no auto-advance; tap to move
             this.timer = setInterval(() => { if (this.held) return; this.progress += 2; if (this.progress >= 100) this.next(); }, 100);
